@@ -1,0 +1,18 @@
+[PASS] mode=00 threshold=24 pattern=1
+[PASS] mode=01 threshold=24 pattern=0
+[PASS] mode=01 threshold=24 pattern=2
+[PASS] mode=01 threshold=24 pattern=3
+[PASS] mode=01 threshold=1019 pattern=2
+[PASS] mode=01 threshold=1020 pattern=2
+[PASS] mode=01 threshold=1021 pattern=2
+[PASS] mode=10 threshold=24 pattern=0
+[PASS] mode=10 threshold=24 pattern=4
+[PASS] mode=10 threshold=24 pattern=5
+[PASS] mode=11 threshold=24 pattern=0
+[PASS] mode=11 threshold=24 pattern=4
+[PASS] mode=11 threshold=24 pattern=5
+[PASS] 2 frames, 153600 groups/frame, 600 tlast/frame, 1 tuser/frame
+[PASS] early AWB frame marker aligned to first valid algorithm beat
+[PASS] 4x96-bit to 3x128-bit packing order reference
+[PASS] packed tuser/tlast alignment, 115200 output beats/frame
+[RESULT] ALL REFERENCE FUNCTION TESTS PASSED

@@ -1,0 +1,29 @@
+[image_process_stream_96] compile_rc=0
+[image_process_stream_96] sim_rc=0
+[PASS] mode=01 threshold=24
+[PASS] mode=01 threshold=24
+[PASS] mode=01 threshold=1019
+[PASS] mode=01 threshold=1020
+[PASS] mode=01 threshold=1021
+[PASS] mode=10 threshold=24
+[PASS] mode=10 threshold=24
+[PASS] mode=10 threshold=24
+[PASS] mode=11 threshold=24
+[PASS] mode=11 threshold=24
+[PASS] mode=11 threshold=24
+[RESULT] ALL TESTS PASSED
+[data96_128] compile_rc=0
+[data96_128] sim_rc=0
+[RESULT] ALL 96-to-128 PACKER TESTS PASSED
+[mode_selector] compile_rc=0
+[mode_selector] sim_rc=0
+[PASS] button=11 mode=00
+[PASS] button=10 mode=01
+[PASS] button=01 mode=10
+[PASS] button=00 mode=11
+[PASS] button=11 mode=00
+[RESULT] ALL MODE SELECTOR TESTS PASSED
+[stream_pack_integration] compile_rc=0
+[stream_pack_integration] sim_rc=0
+[RESULT] IMAGE STREAM TO PACKER INTEGRATION PASSED
+[RESULT] ALL RTL SIMULATIONS PASSED
