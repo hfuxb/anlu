@@ -123,11 +123,16 @@ module design_top_wrapper (
     wire        S_vi_ddr_wr_en;   
     wire[24:0]  S_vi_ddr_wr_addr; 
     wire[127:0] S_vi_ddr_wr_data;
-    wire        S_vi_ddr_wr_ready;
+    reg         S_vi_ddr_wr_ready;
+    wire        S_vi_ddr_req;
 
     wire        S_vo_ddr_rd_en;   
     wire[24:0]  S_vo_ddr_rd_addr; 
-    wire        S_vo_ddr_rd_ready;
+    reg         S_vo_ddr_ready;
+    wire        S_vo_ddr_req;
+    reg         S_ddr_turn;
+    reg         S_video_in_wr_busy_d;
+    reg         S_video_out_rd_busy_d;
     wire        S_vo_dbg_fifo_rst;
     wire        S_vo_dbg_ddr_rd_valid;
     wire        S_vo_dbg_fifo_rd_en;
@@ -208,6 +213,17 @@ module design_top_wrapper (
     reg [1:0]   S_dbg_mc_cmd_pop_seen_sync;
     wire[3:0]   S_hdmi_debug_status;
     wire        S_lane_error_any;
+    reg         S_mipi_frame_active_src;
+    reg         S_mipi_error_pending_src;
+    reg         S_mipi_error_sent_src;
+    reg         S_mipi_error_hold_src;
+    reg         S_mipi_error_toggle_src;
+    reg         S_mipi_error_toggle_sync1;
+    reg         S_mipi_error_toggle_sync2;
+    reg         S_mipi_error_toggle_seen;
+    reg         S_mipi_error_hold_sync1;
+    reg         S_mipi_error_hold_sync2;
+    reg         S_mipi_rx_error_ddr;
 
 
     assign O_screen_pwm = 1'b1;
@@ -235,6 +251,105 @@ module design_top_wrapper (
 			S_algo_mode_sync_2 <= S_algo_mode_sync_1;
 		end
 	end
+
+    // 在CSI时钟域锁存链路错误，并以帧事件方式发送到DDR时钟域。
+    // 没有收到上一帧结束标记但已经收到下一帧开始标记时，按链路错误处理。
+    always @(posedge S_csi_rx_clk or negedge S_rst_n) begin
+        if(!S_rst_n) begin
+            S_mipi_frame_active_src <= 1'b0;
+            S_mipi_error_pending_src <= 1'b0;
+            S_mipi_error_sent_src <= 1'b0;
+            S_mipi_error_hold_src <= 1'b0;
+            S_mipi_error_toggle_src <= 1'b0;
+        end
+        else if(S_raw10_frame_start) begin
+            if(S_mipi_frame_active_src && !S_mipi_error_sent_src) begin
+                S_mipi_error_hold_src <= 1'b1 | S_mipi_error_pending_src |
+                                         S_lane_error_any;
+                S_mipi_error_toggle_src <= ~S_mipi_error_toggle_src;
+            end
+            S_mipi_frame_active_src <= 1'b1;
+            S_mipi_error_pending_src <= 1'b0;
+            S_mipi_error_sent_src <= 1'b0;
+        end
+        else if(S_raw10_frame_end && S_mipi_frame_active_src) begin
+            S_mipi_error_hold_src <= S_mipi_error_pending_src | S_lane_error_any;
+            S_mipi_error_toggle_src <= ~S_mipi_error_toggle_src;
+            S_mipi_frame_active_src <= 1'b0;
+            S_mipi_error_pending_src <= 1'b0;
+            S_mipi_error_sent_src <= 1'b1;
+        end
+        else if(S_mipi_frame_active_src && S_lane_error_any) begin
+            S_mipi_error_pending_src <= 1'b1;
+        end
+    end
+
+    // 帧错误状态和帧toggle同时经过两级同步，目标域只在toggle变化时采样状态。
+    always @(posedge S_ddr_clk or negedge S_rst_n) begin
+        if(!S_rst_n) begin
+            S_mipi_error_toggle_sync1 <= 1'b0;
+            S_mipi_error_toggle_sync2 <= 1'b0;
+            S_mipi_error_toggle_seen <= 1'b0;
+            S_mipi_error_hold_sync1 <= 1'b0;
+            S_mipi_error_hold_sync2 <= 1'b0;
+            S_mipi_rx_error_ddr <= 1'b0;
+        end
+        else begin
+            S_mipi_error_toggle_sync1 <= S_mipi_error_toggle_src;
+            S_mipi_error_toggle_sync2 <= S_mipi_error_toggle_sync1;
+            S_mipi_error_hold_sync1 <= S_mipi_error_hold_src;
+            S_mipi_error_hold_sync2 <= S_mipi_error_hold_sync1;
+            if(S_mipi_error_toggle_sync2 != S_mipi_error_toggle_seen) begin
+                S_mipi_error_toggle_seen <= S_mipi_error_toggle_sync2;
+                S_mipi_rx_error_ddr <= S_mipi_error_hold_sync2;
+            end
+        end
+    end
+
+    // DDR写读请求采用突发级仲裁，禁止同一拍同时产生写请求和读请求。
+    // turn只在一个突发结束后切换，避免把一个突发拆成逐拍轮询。
+    always @(posedge S_ddr_clk or negedge S_rst_n) begin
+        if(!S_rst_n) begin
+            S_ddr_turn <= 1'b0;
+            S_video_in_wr_busy_d <= 1'b0;
+            S_video_out_rd_busy_d <= 1'b0;
+        end
+        else begin
+            if(S_video_in_wr_busy_d && !S_video_in_wr_busy)
+                S_ddr_turn <= 1'b1;
+            else if(S_video_out_rd_busy_d && !S_video_out_rd_busy)
+                S_ddr_turn <= 1'b0;
+            S_video_in_wr_busy_d <= S_video_in_wr_busy;
+            S_video_out_rd_busy_d <= S_video_out_rd_busy;
+        end
+    end
+
+    always @(*) begin
+        S_vi_ddr_wr_ready = 1'b0;
+        S_vo_ddr_ready = 1'b0;
+        if(S_ddr_user_ready) begin
+            if(S_video_in_wr_busy && !S_video_out_rd_busy)
+                S_vi_ddr_wr_ready = 1'b1;
+            else if(!S_video_in_wr_busy && S_video_out_rd_busy)
+                S_vo_ddr_ready = 1'b1;
+            else if(S_video_in_wr_busy && S_video_out_rd_busy) begin
+                if(S_ddr_turn == 1'b0)
+                    S_vi_ddr_wr_ready = 1'b1;
+                else
+                    S_vo_ddr_ready = 1'b1;
+            end
+            else if(S_vi_ddr_req && S_vo_ddr_req) begin
+                if(S_ddr_turn == 1'b0)
+                    S_vi_ddr_wr_ready = 1'b1;
+                else
+                    S_vo_ddr_ready = 1'b1;
+            end
+            else if(S_vi_ddr_req)
+                S_vi_ddr_wr_ready = 1'b1;
+            else if(S_vo_ddr_req)
+                S_vo_ddr_ready = 1'b1;
+        end
+    end
 
     always @(posedge S_csi_rx_clk or negedge S_rst_n) begin
         if(!S_rst_n)
@@ -659,7 +774,7 @@ isp_top u_isp_top (
         .I_camera_frame_start ( S_ISP_O_tuser  ),
         .I_camera_valid       ( S_ISP_O_tvalid ),
         .I_camera_data        ( S_ISP_O_tdata  ),
-        .I_mipi_rx_error      ( 1'b0			      ),
+        .I_mipi_rx_error      ( S_mipi_rx_error_ddr ),
 
         .I_ddr_clk            ( S_ddr_clk             ),
 		.I_display_pause      ( 1'b0                  ),
@@ -670,7 +785,8 @@ isp_top u_isp_top (
         .O_ddr_user_wr_en     ( S_vi_ddr_wr_en        ),
         .O_ddr_user_addr      ( S_vi_ddr_wr_addr      ),
         .O_ddr_user_wr_data   ( S_vi_ddr_wr_data      ),
-        .I_ddr_user_ready     ( S_ddr_user_ready      )
+        .I_ddr_user_ready     ( S_vi_ddr_wr_ready      ),
+        .O_ddr_user_req       ( S_vi_ddr_req           )
     );
 
 
@@ -697,7 +813,8 @@ isp_top u_isp_top (
  
         .O_ddr_user_rd_en    ( S_vo_ddr_rd_en       ),
         .O_ddr_user_addr     ( S_vo_ddr_rd_addr     ),
-        .I_ddr_user_ready    ( S_ddr_user_ready     ),
+        .I_ddr_user_ready    ( S_vo_ddr_ready       ),
+        .O_ddr_user_req      ( S_vo_ddr_req         ),
         .I_ddr_user_rd_valid ( S_ddr_user_rd_valid  ),
         .I_ddr_user_rd_data  ( S_ddr_user_rd_data   ),
 

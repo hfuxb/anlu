@@ -8,25 +8,25 @@ IO Statistics
   #inout                   35
 
 Gate Statistics
-#Basic gates            63194
-  #and                  22344
+#Basic gates            81097
+  #and                  29063
   #nand                     0
-  #or                     793
+  #or                    6626
   #nor                      0
-  #xor                     95
+  #xor                     99
   #xnor                     0
   #buf                      0
-  #not                  18061
+  #not                  18090
   #bufif1                   1
-  #MX21                  4093
+  #MX21                  4453
   #FADD                     0
-  #DFF                  17807
+  #DFF                  22765
   #LATCH                    0
-#MACRO_ADD                476
-#MACRO_EQ                 295
-#MACRO_MULT                21
-#MACRO_MUX               8449
-#MACRO_OTHERS              15
+#MACRO_ADD                621
+#MACRO_EQ                 371
+#MACRO_MULT                19
+#MACRO_MUX               9568
+#MACRO_OTHERS              36
 
 LUT Statistics
 #Total_luts              4530
@@ -40,14 +40,15 @@ Report Hierarchy Area:
 +-----------------------------------------------------------------------------------------------------------------------------------------+
 |Instance                                                         |Module                                         |gates  |seq    |macros |
 +-----------------------------------------------------------------------------------------------------------------------------------------+
-|top                                                              |design_top_wrapper                             |45387  |17807  |807    |
+|top                                                              |design_top_wrapper                             |58332  |22765  |1047   |
 |  u_PLL                                                          |PLL                                            |0      |0      |1      |
 |    ph1p_phy_pll_wrapper_25a56e5ce2f9_Inst                       |ph1p_phy_pll_wrapper_25a56e5ce2f9              |0      |0      |0      |
 |  u_ae_set                                                       |ae_set                                         |0      |1      |0      |
+|  u_cnn_result_cdc                                               |cnn_result_cdc                                 |3      |30     |0      |
 |  u_csi_unpacket                                                 |csi_unpacket_2lane                             |10     |88     |6      |
-|  u_hdmi_mixer                                                   |hdmi_mixer                                     |38962  |174    |69     |
-|    u_anlogic_logo_rom                                           |anlogic_logo_rom                               |38639  |0      |0      |
-|    u_osd_char_lib                                               |osd_char_lib                                   |95     |0      |0      |
+|  u_hdmi_mixer                                                   |hdmi_mixer                                     |38814  |181    |82     |
+|    u_anlogic_logo_rom                                           |anlogic_logo_rom                               |38478  |0      |0      |
+|    u_osd_char_lib                                               |osd_char_lib                                   |59     |0      |0      |
 |  u_hdmi_tx                                                      |hdmi_tx                                        |387    |1288   |151    |
 |    u_hdmi2phy_wrapper                                           |hdmi_phy_wrapper                               |2      |54     |4      |
 |      u0_lane_lvds_8_1                                           |lane_lvds_10_1                                 |2      |18     |1      |
@@ -73,14 +74,38 @@ Report Hierarchy Area:
 |          u_w24_d1024_fifo                                       |w24_d1024_fifo                                 |0      |0      |1      |
 |  u_hdmi_vtc                                                     |uivtc                                          |14     |33     |9      |
 |  u_image_correction                                             |image_correction                               |26     |71     |9      |
-|  u_isp_top                                                      |isp_top                                        |381    |11127  |133    |
+|  u_isp_top                                                      |isp_top                                        |13424  |16029  |359    |
 |    u_awb                                                        |awb                                            |110    |8828   |29     |
 |      div_gen_G_R_r1                                             |divider                                        |0      |4346   |0      |
 |      divide_G_B_r1                                              |divider                                        |0      |3768   |0      |
 |      signal_delay_d                                             |signal_delay                                   |22     |152    |15     |
 |        blk_mem_gen_awb_delay_signal_d                           |blk_mem_gen_awb_delay_signal                   |2      |0      |1      |
 |          ram_f84573da5ab5_Inst                                  |ram_f84573da5ab5                               |0      |0      |1      |
-|    u_data_96bit_to_128bit                                       |data_96bit_to_128bit                           |136    |228    |1      |
+|    u_cnn_core                                                   |cnn_core                                       |12941  |3537   |162    |
+|      u_cnn_feat_bram_a                                          |cnn_feat_bram                                  |0      |0      |1      |
+|      u_cnn_feat_bram_b                                          |cnn_feat_bram                                  |0      |0      |1      |
+|      u_cnn_weight_rom                                           |cnn_weight_rom                                 |19     |0      |35     |
+|        u_bank0                                                  |cnn_weight_bank                                |0      |0      |1      |
+|        u_bank1                                                  |cnn_weight_bank                                |0      |0      |1      |
+|        u_bank10                                                 |cnn_weight_bank                                |0      |0      |1      |
+|        u_bank11                                                 |cnn_weight_bank                                |0      |0      |1      |
+|        u_bank12                                                 |cnn_weight_bank                                |0      |0      |1      |
+|        u_bank13                                                 |cnn_weight_bank                                |0      |0      |1      |
+|        u_bank14                                                 |cnn_weight_bank                                |0      |0      |1      |
+|        u_bank15                                                 |cnn_weight_bank                                |0      |0      |1      |
+|        u_bank16                                                 |cnn_weight_bank                                |0      |0      |1      |
+|        u_bank2                                                  |cnn_weight_bank                                |0      |0      |1      |
+|        u_bank3                                                  |cnn_weight_bank                                |0      |0      |1      |
+|        u_bank4                                                  |cnn_weight_bank                                |0      |0      |1      |
+|        u_bank5                                                  |cnn_weight_bank                                |0      |0      |1      |
+|        u_bank6                                                  |cnn_weight_bank                                |0      |0      |1      |
+|        u_bank7                                                  |cnn_weight_bank                                |0      |0      |1      |
+|        u_bank8                                                  |cnn_weight_bank                                |0      |0      |1      |
+|        u_bank9                                                  |cnn_weight_bank                                |0      |0      |1      |
+|    u_cnn_input_sampler_96                                       |cnn_input_sampler_96                           |95     |1285   |44     |
+|      u_cnn_input_bank0                                          |cnn_input_bram                                 |0      |0      |1      |
+|      u_cnn_input_bank1                                          |cnn_input_bram                                 |0      |0      |1      |
+|    u_data_96bit_to_128bit                                       |data_96bit_to_128bit                           |140    |229    |1      |
 |    u_demosaic                                                   |demosaic                                       |68     |1150   |57     |
 |      bilinear_interpolation_d                                   |bilinear_interpolation                         |0      |609    |24     |
 |      raw_matrix_3x3_buffer_d                                    |raw_matrix_3x3_buffer                          |68     |541    |33     |
@@ -94,21 +119,21 @@ Report Hierarchy Area:
 |        zhenghe_d                                                |zhenghe                                        |41     |127    |18     |
 |          blk_mem_gen_zhenghe_d1                                 |blk_mem_gen_zhenghe                            |0      |0      |1      |
 |            ram_d32970204f32_Inst                                |ram_d32970204f32                               |0      |0      |1      |
-|    u_image_process_stream_96                                    |image_process_stream_96                        |63     |920    |46     |
+|    u_image_process_stream_96                                    |image_process_stream_96                        |65     |998    |66     |
 |  u_mc_to_user_interface                                         |mc_to_user_interface                           |12     |181    |7      |
 |    U_w155_d512_fifo                                             |w155_d512_fifo                                 |6      |181    |7      |
 |      soft_fifo_al_f58e8b3e1f3d_Inst                             |soft_fifo_al_f58e8b3e1f3d                      |6      |181    |7      |
 |        ram_inst                                                 |ram_infer_f58e8b3e1f3d                         |0      |152    |0      |
-|  u_mipi_dphy_rx_ph1p_mipiio_wrapper                             |mipi_dphy_rx_ph1p_mipiio_wrapper               |113    |342    |33     |
-|    u_byte_aligner_wrapper                                       |byte_aligner_wrapper                           |87     |114    |18     |
-|      BYTE_ALIGNER_GEN[0]$u_byte_aligner                         |byte_aligner                                   |45     |58     |9      |
-|      BYTE_ALIGNER_GEN[1]$u_byte_aligner                         |byte_aligner                                   |42     |56     |9      |
+|  u_mipi_dphy_rx_ph1p_mipiio_wrapper                             |mipi_dphy_rx_ph1p_mipiio_wrapper               |119    |346    |33     |
+|    u_byte_aligner_wrapper                                       |byte_aligner_wrapper                           |93     |118    |18     |
+|      BYTE_ALIGNER_GEN[0]$u_byte_aligner                         |byte_aligner                                   |48     |60     |9      |
+|      BYTE_ALIGNER_GEN[1]$u_byte_aligner                         |byte_aligner                                   |45     |58     |9      |
 |    u_channel_aligner_wrapper                                    |channel_aligner_wrapper                        |17     |81     |0      |
 |      ALIGNER_CHANNEL_GEN[0]$u_channel_aligner                   |channel_aligner                                |9      |41     |0      |
 |      ALIGNER_CHANNEL_GEN[1]$u_channel_aligner                   |channel_aligner                                |7      |40     |0      |
 |    u_ph1p_mipiio_rx_wrapper                                     |ph1p_mipiio_rx_wrapper                         |8      |147    |15     |
 |      u_lane0_hs_detect                                          |hs_detect                                      |4      |12     |3      |
-|  u_mode_selector                                                |mode_selector                                  |5      |25     |3      |
+|  u_mode_selector                                                |mode_selector                                  |3      |25     |3      |
 |  u_ph1p35_324_ddr_wrapper                                       |ph1p35_324_ddr_wrapper                         |4573   |3636   |327    |
 |    u_ddr2                                                       |ddr2                                           |4573   |3636   |327    |
 |      ph1p_ddrmc_wrapper                                         |ph1p_ddrmc_wrapper_63f4ac254419                |4573   |3636   |327    |
@@ -181,19 +206,19 @@ Report Hierarchy Area:
 |          u_phy2mc_fifo                                          |alc_phy2mc_fifo_ctrl                           |14     |157    |11     |
 |            byteIdx_1[0]$u_wfifo_sync                            |ph1p_ddr_fifo_dram_sync                        |6      |15     |6      |
 |            byteIdx_1[1]$u_wfifo_sync                            |ph1p_ddr_fifo_dram_sync                        |5      |11     |5      |
-|  u_raw10_unpacket                                               |raw10_unpacket_2lane                           |98     |144    |4      |
-|  u_uial2axis                                                    |uial2axis                                      |17     |28     |8      |
+|  u_raw10_unpacket                                               |raw10_unpacket_2lane                           |98     |145    |4      |
+|  u_uial2axis                                                    |uial2axis                                      |18     |28     |8      |
 |  u_uicfgcs500                                                   |uicfgcs500                                     |289    |81     |16     |
 |    uics500regAE_inst                                            |uics500regAE                                   |6      |0      |0      |
 |    uics500reg_inst                                              |uics500reg                                     |156    |0      |0      |
 |    uii2c_inst                                                   |uii2c                                          |53     |33     |13     |
-|  u_video_in                                                     |video_in                                       |59     |268    |13     |
+|  u_video_in                                                     |video_in                                       |70     |268    |13     |
 |    U_w128_d512_fifo                                             |w128_d512_fifo                                 |38     |222    |6      |
 |      soft_fifo_al_4057d6b76aa6_Inst                             |soft_fifo_al_4057d6b76aa6                      |38     |222    |6      |
 |        ram_inst                                                 |ram_infer_4057d6b76aa6                         |0      |128    |0      |
 |        rd_to_wr_cross_inst                                      |fifo_cross_domain_addr_process_al_4057d6b76aa6 |16     |36     |0      |
 |        wr_to_rd_cross_inst                                      |fifo_cross_domain_addr_process_al_4057d6b76aa6 |16     |36     |0      |
-|  u_video_out                                                    |video_out                                      |384    |316    |16     |
+|  u_video_out                                                    |video_out                                      |385    |316    |16     |
 |    U_w128_d512_fifo                                             |w128_d512_fifo                                 |38     |222    |6      |
 |      soft_fifo_al_4057d6b76aa6_Inst                             |soft_fifo_al_4057d6b76aa6                      |38     |222    |6      |
 |        ram_inst                                                 |ram_infer_4057d6b76aa6                         |0      |128    |0      |

@@ -15,6 +15,7 @@ module cnn_result_cdc (
 );
 
     reg [7:0] src_ascii_hold;
+    reg       src_toggle_seen;
     reg       dst_toggle_sync1;
     reg       dst_toggle_sync2;
     reg       dst_toggle_seen;
@@ -26,9 +27,14 @@ module cnn_result_cdc (
     always @(posedge I_src_clk or negedge I_src_rst_n) begin
         if (!I_src_rst_n) begin
             src_ascii_hold <= "A";
+            src_toggle_seen <= 1'b0;
         end
         else begin
-            src_ascii_hold <= I_src_ascii;
+            // 只在结果toggle变化时更新总线，保证目标域同步期间数据稳定。
+            if (I_src_toggle != src_toggle_seen) begin
+                src_ascii_hold <= I_src_ascii;
+                src_toggle_seen <= I_src_toggle;
+            end
         end
     end
 

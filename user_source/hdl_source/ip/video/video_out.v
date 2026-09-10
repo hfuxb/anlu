@@ -11,6 +11,7 @@ module video_out (
     output wire       O_ddr_user_rd_en,
     output reg[24:0]  O_ddr_user_addr,
     input wire        I_ddr_user_ready,
+    output wire       O_ddr_user_req,
     input wire        I_ddr_user_rd_valid,
     input wire[127:0] I_ddr_user_rd_data,
 
@@ -31,6 +32,7 @@ module video_out (
     wire        S_video_frame_start;   
     wire        S_ddr_rd_trig;       
     reg         S_ddr_rd_valid;      
+    wire        S_ddr_rd_start_req;
     reg[9:0]    S_ddr_rd_cnt;        
     reg[3:0]    S_fifo_rd_cnt;       
     reg         S_video_rd_en_1d;
@@ -79,7 +81,11 @@ module video_out (
         这里需要注意fifo的剩余空间一定要大于将要写入的长度，因为ddr读出的时候会有至少40个时钟周期的延时，
         例如每次从ddr读出240个长度的数据，那么fifo的剩余空间最少要设为280，否则会引起fifo写满丢失数据。
     */
-    assign S_ddr_rd_trig = (('d511 - S_fifo_wr_num) >= 'd300) && (!I_video_in_wr_busy) && (!S_ddr_rd_valid) && (!S_fifo_rst) && I_rst_n ? 1'b1 : 1'b0;
+    assign S_ddr_rd_start_req = (('d511 - S_fifo_wr_num) >= 'd300) &&
+                                (!S_ddr_rd_valid) && (!S_fifo_rst) && I_rst_n;
+    assign S_ddr_rd_trig = S_ddr_rd_start_req &&
+                           (!I_video_in_wr_busy) && I_ddr_user_ready;
+    assign O_ddr_user_req = S_ddr_rd_valid | S_ddr_rd_start_req;
 
     /*
         fifo的深度是512，实际的深度是510，因此需要注意每次读出的长度避免为256，否则连续两次写入会引起fifo写满，丢失数据
@@ -131,7 +137,8 @@ module video_out (
     end
 
     
-    assign O_video_out_rd_busy = S_ddr_rd_trig | S_ddr_rd_valid;
+    // 只把已经启动的读突发报告为busy，避免ready仲裁和预启动条件形成组合环路。
+    assign O_video_out_rd_busy = S_ddr_rd_valid;
 
 
     w128_d512_fifo U_w128_d512_fifo(

@@ -1,11 +1,11 @@
 Created by          : Tang Dynasty v6.2.168116
                     : Copyright (c) 2012-2025 Anlogic Inc.
-Generated           : Wed Sep  2 13:17:58 2026
+Generated           : Thu Sep 10 17:01:06 2026
 
 Top Model           : design_top_wrapper
 Device              : PH1P35MDG324
 Speed               : 3
-STA coverage        : 95.94%
+STA coverage        : 95.21%
 Constraint File     : D:/anlu/rtl/td_project/camera_to_dsi_display.sdc;
 Confidence          : Routed
 Check Corner        : Both (Slow and Fast)

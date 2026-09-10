@@ -126,7 +126,7 @@ module image_process_stream_96 #(
 	//********************************************************************//
 	//*************************** Pipeline Stage 0 **********************//
 	//********************************************************************//
-	// 第一流水级只完成RGB加权乘法，并锁存输入控制信息。
+	// 第一流水级只完成RGB加权，并锁存输入控制信息。
 	reg        stage0_valid;
 	reg        stage0_user;
 	reg        stage0_last;
@@ -149,7 +149,36 @@ module image_process_stream_96 #(
 	reg [15:0] stage0_gray_b_3;
 
 	// 灰度公式为gray=(77*R+150*G+29*B)>>8。
-	// 每个乘法的输入显式扩展到16位，避免表达式宽度导致乘积截断。
+	// 用移位加法替代三个常数乘法。中间结果保留17位，避免移位和减法截断。
+	function [15:0] F_gray_red;
+		input [7:0] I_value;
+		reg [16:0] value_ext;
+		begin
+			value_ext = {9'd0, I_value};
+			F_gray_red = (value_ext << 6) + (value_ext << 3) +
+						 (value_ext << 2) + value_ext;
+		end
+	endfunction
+
+	function [15:0] F_gray_green;
+		input [7:0] I_value;
+		reg [16:0] value_ext;
+		begin
+			value_ext = {9'd0, I_value};
+			F_gray_green = (value_ext << 7) + (value_ext << 4) +
+						   (value_ext << 2) + (value_ext << 1);
+		end
+	endfunction
+
+	function [15:0] F_gray_blue;
+		input [7:0] I_value;
+		reg [16:0] value_ext;
+		begin
+			value_ext = {9'd0, I_value};
+			F_gray_blue = (value_ext << 5) - (value_ext << 1) - value_ext;
+		end
+	endfunction
+
 	wire [15:0] input_gray_r_0;
 	wire [15:0] input_gray_g_0;
 	wire [15:0] input_gray_b_0;
@@ -163,18 +192,18 @@ module image_process_stream_96 #(
 	wire [15:0] input_gray_g_3;
 	wire [15:0] input_gray_b_3;
 
-	assign input_gray_r_0 = ({8'd0, I_tdata[23:16]} * 16'd77);
-	assign input_gray_g_0 = ({8'd0, I_tdata[15:8]}  * 16'd150);
-	assign input_gray_b_0 = ({8'd0, I_tdata[7:0]}   * 16'd29);
-	assign input_gray_r_1 = ({8'd0, I_tdata[47:40]} * 16'd77);
-	assign input_gray_g_1 = ({8'd0, I_tdata[39:32]} * 16'd150);
-	assign input_gray_b_1 = ({8'd0, I_tdata[31:24]} * 16'd29);
-	assign input_gray_r_2 = ({8'd0, I_tdata[71:64]} * 16'd77);
-	assign input_gray_g_2 = ({8'd0, I_tdata[63:56]} * 16'd150);
-	assign input_gray_b_2 = ({8'd0, I_tdata[55:48]} * 16'd29);
-	assign input_gray_r_3 = ({8'd0, I_tdata[95:88]} * 16'd77);
-	assign input_gray_g_3 = ({8'd0, I_tdata[87:80]} * 16'd150);
-	assign input_gray_b_3 = ({8'd0, I_tdata[79:72]} * 16'd29);
+	assign input_gray_r_0 = F_gray_red  (I_tdata[23:16]);
+	assign input_gray_g_0 = F_gray_green(I_tdata[15:8]);
+	assign input_gray_b_0 = F_gray_blue (I_tdata[7:0]);
+	assign input_gray_r_1 = F_gray_red  (I_tdata[47:40]);
+	assign input_gray_g_1 = F_gray_green(I_tdata[39:32]);
+	assign input_gray_b_1 = F_gray_blue (I_tdata[31:24]);
+	assign input_gray_r_2 = F_gray_red  (I_tdata[71:64]);
+	assign input_gray_g_2 = F_gray_green(I_tdata[63:56]);
+	assign input_gray_b_2 = F_gray_blue (I_tdata[55:48]);
+	assign input_gray_r_3 = F_gray_red  (I_tdata[95:88]);
+	assign input_gray_g_3 = F_gray_green(I_tdata[87:80]);
+	assign input_gray_b_3 = F_gray_blue (I_tdata[79:72]);
 
 	//********************************************************************//
 	//*************************** Pipeline Stage 1 **********************//

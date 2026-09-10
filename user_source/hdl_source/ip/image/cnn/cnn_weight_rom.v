@@ -52,6 +52,7 @@ module cnn_weight_bank #(
     parameter integer DEPTH = CNN_WEIGHT_BANK_DEPTH
 ) (
     input  wire        clka,
+    input  wire        ena,
     input  wire [9:0]  addra,
     output wire [63:0] doa
 );
@@ -68,7 +69,7 @@ module cnn_weight_bank #(
     end
 
     always @(*) begin
-        doa_reg = (addra < DEPTH) ? mem[addra] : 64'd0;
+        doa_reg = ena && (addra < DEPTH) ? mem[addra] : 64'd0;
     end
 
     assign doa = doa_reg;
@@ -88,7 +89,7 @@ module cnn_weight_bank #(
     ) u_cnn_weight_bank (
         .dia(64'd0), .dib(64'd0),
         .addra(addra), .addrb(10'd0),
-        .cea(1'b1), .ceb(1'b0), .ocea(1'b0), .oceb(1'b0),
+        .cea(ena), .ceb(1'b0), .ocea(1'b0), .oceb(1'b0),
         .clka(clka), .clkb(1'b0), .wea(1'b0), .web(1'b0),
         .bea(1'b0), .beb(1'b0), .rsta(1'b0), .rstb(1'b0),
         .doa(doa), .dob(), .ecc_sbiterr(), .ecc_dbiterr(),
@@ -114,6 +115,23 @@ module cnn_weight_rom #(
     wire [4:0]  bank_select = addr[14:10];
     wire [9:0]  bank_addr = addr[9:0];
     wire [9:0]  bias_bank_addr = CNN_BIAS_PAIR_BASE + {3'd0, bias_addr[7:1]};
+    wire        bank_enable0 = !bias_read && (bank_select == 5'd0);
+    wire        bank_enable1 = !bias_read && (bank_select == 5'd1);
+    wire        bank_enable2 = !bias_read && (bank_select == 5'd2);
+    wire        bank_enable3 = !bias_read && (bank_select == 5'd3);
+    wire        bank_enable4 = !bias_read && (bank_select == 5'd4);
+    wire        bank_enable5 = !bias_read && (bank_select == 5'd5);
+    wire        bank_enable6 = !bias_read && (bank_select == 5'd6);
+    wire        bank_enable7 = !bias_read && (bank_select == 5'd7);
+    wire        bank_enable8 = !bias_read && (bank_select == 5'd8);
+    wire        bank_enable9 = !bias_read && (bank_select == 5'd9);
+    wire        bank_enable10 = !bias_read && (bank_select == 5'd10);
+    wire        bank_enable11 = !bias_read && (bank_select == 5'd11);
+    wire        bank_enable12 = !bias_read && (bank_select == 5'd12);
+    wire        bank_enable13 = !bias_read && (bank_select == 5'd13);
+    wire        bank_enable14 = !bias_read && (bank_select == 5'd14);
+    wire        bank_enable15 = !bias_read && (bank_select == 5'd15);
+    wire        bank_enable16 = bias_read || (bank_select == 5'd16);
     wire [63:0] bank_data0;
     wire [63:0] bank_data1;
     wire [63:0] bank_data2;
@@ -133,39 +151,39 @@ module cnn_weight_rom #(
     wire [63:0] bank_data16;
 
     cnn_weight_bank #(.INIT_FILE(`CNN_WEIGHT_BANK0_INIT)) u_bank0 (
-        .clka(clk), .addra(bank_addr), .doa(bank_data0));
+        .clka(clk), .ena(bank_enable0), .addra(bank_addr), .doa(bank_data0));
     cnn_weight_bank #(.INIT_FILE(`CNN_WEIGHT_BANK1_INIT)) u_bank1 (
-        .clka(clk), .addra(bank_addr), .doa(bank_data1));
+        .clka(clk), .ena(bank_enable1), .addra(bank_addr), .doa(bank_data1));
     cnn_weight_bank #(.INIT_FILE(`CNN_WEIGHT_BANK2_INIT)) u_bank2 (
-        .clka(clk), .addra(bank_addr), .doa(bank_data2));
+        .clka(clk), .ena(bank_enable2), .addra(bank_addr), .doa(bank_data2));
     cnn_weight_bank #(.INIT_FILE(`CNN_WEIGHT_BANK3_INIT)) u_bank3 (
-        .clka(clk), .addra(bank_addr), .doa(bank_data3));
+        .clka(clk), .ena(bank_enable3), .addra(bank_addr), .doa(bank_data3));
     cnn_weight_bank #(.INIT_FILE(`CNN_WEIGHT_BANK4_INIT)) u_bank4 (
-        .clka(clk), .addra(bank_addr), .doa(bank_data4));
+        .clka(clk), .ena(bank_enable4), .addra(bank_addr), .doa(bank_data4));
     cnn_weight_bank #(.INIT_FILE(`CNN_WEIGHT_BANK5_INIT)) u_bank5 (
-        .clka(clk), .addra(bank_addr), .doa(bank_data5));
+        .clka(clk), .ena(bank_enable5), .addra(bank_addr), .doa(bank_data5));
     cnn_weight_bank #(.INIT_FILE(`CNN_WEIGHT_BANK6_INIT)) u_bank6 (
-        .clka(clk), .addra(bank_addr), .doa(bank_data6));
+        .clka(clk), .ena(bank_enable6), .addra(bank_addr), .doa(bank_data6));
     cnn_weight_bank #(.INIT_FILE(`CNN_WEIGHT_BANK7_INIT)) u_bank7 (
-        .clka(clk), .addra(bank_addr), .doa(bank_data7));
+        .clka(clk), .ena(bank_enable7), .addra(bank_addr), .doa(bank_data7));
     cnn_weight_bank #(.INIT_FILE(`CNN_WEIGHT_BANK8_INIT)) u_bank8 (
-        .clka(clk), .addra(bank_addr), .doa(bank_data8));
+        .clka(clk), .ena(bank_enable8), .addra(bank_addr), .doa(bank_data8));
     cnn_weight_bank #(.INIT_FILE(`CNN_WEIGHT_BANK9_INIT)) u_bank9 (
-        .clka(clk), .addra(bank_addr), .doa(bank_data9));
+        .clka(clk), .ena(bank_enable9), .addra(bank_addr), .doa(bank_data9));
     cnn_weight_bank #(.INIT_FILE(`CNN_WEIGHT_BANK10_INIT)) u_bank10 (
-        .clka(clk), .addra(bank_addr), .doa(bank_data10));
+        .clka(clk), .ena(bank_enable10), .addra(bank_addr), .doa(bank_data10));
     cnn_weight_bank #(.INIT_FILE(`CNN_WEIGHT_BANK11_INIT)) u_bank11 (
-        .clka(clk), .addra(bank_addr), .doa(bank_data11));
+        .clka(clk), .ena(bank_enable11), .addra(bank_addr), .doa(bank_data11));
     cnn_weight_bank #(.INIT_FILE(`CNN_WEIGHT_BANK12_INIT)) u_bank12 (
-        .clka(clk), .addra(bank_addr), .doa(bank_data12));
+        .clka(clk), .ena(bank_enable12), .addra(bank_addr), .doa(bank_data12));
     cnn_weight_bank #(.INIT_FILE(`CNN_WEIGHT_BANK13_INIT)) u_bank13 (
-        .clka(clk), .addra(bank_addr), .doa(bank_data13));
+        .clka(clk), .ena(bank_enable13), .addra(bank_addr), .doa(bank_data13));
     cnn_weight_bank #(.INIT_FILE(`CNN_WEIGHT_BANK14_INIT)) u_bank14 (
-        .clka(clk), .addra(bank_addr), .doa(bank_data14));
+        .clka(clk), .ena(bank_enable14), .addra(bank_addr), .doa(bank_data14));
     cnn_weight_bank #(.INIT_FILE(`CNN_WEIGHT_BANK15_INIT)) u_bank15 (
-        .clka(clk), .addra(bank_addr), .doa(bank_data15));
+        .clka(clk), .ena(bank_enable15), .addra(bank_addr), .doa(bank_data15));
     cnn_weight_bank #(.INIT_FILE(`CNN_WEIGHT_BANK16_INIT)) u_bank16 (
-        .clka(clk), .addra(bias_read ? bias_bank_addr : bank_addr),
+        .clka(clk), .ena(bank_enable16), .addra(bias_read ? bias_bank_addr : bank_addr),
         .doa(bank_data16));
 
     assign dout = (bank_select == 5'd0)  ? bank_data0  :

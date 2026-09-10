@@ -19,7 +19,8 @@ module video_in (
     output reg         O_ddr_user_wr_en,
     output reg[24:0]   O_ddr_user_addr,
     output wire[127:0] O_ddr_user_wr_data,
-    input wire         I_ddr_user_ready
+    input wire         I_ddr_user_ready,
+    output wire        O_ddr_user_req
 );
 
     wire        S_fifo_rst;
@@ -36,6 +37,7 @@ module video_in (
     wire[127:0] S_fifo_rd_data; 
     reg         S_ddr_wr_valid;
     reg[9:0]    S_ddr_wr_cnt;
+    wire        S_ddr_wr_start_req;
 
     localparam IMAGE_BASE_ADDR_0 = 25'd0;
     localparam IMAGE_BASE_ADDR_1 = 25'd7000000;
@@ -46,6 +48,10 @@ module video_in (
     assign S_fifo_rst = S_camera_frame_start_extend_3d;
 
     assign O_video_in_wr_busy = S_ddr_wr_valid | O_ddr_user_wr_en;
+    assign S_ddr_wr_start_req = (S_fifo_rd_num >= 'd240) &&
+                                (!S_ddr_wr_valid) && (!S_fifo_rst);
+    assign O_ddr_user_req = S_ddr_wr_valid | O_ddr_user_wr_en |
+                            S_ddr_wr_start_req;
 
     w128_d512_fifo U_w128_d512_fifo(
         .rst        ( S_fifo_rst         ),   
@@ -145,7 +151,8 @@ module video_in (
         else
             if(S_ddr_wr_valid && I_ddr_user_ready && S_ddr_wr_cnt == 'd239)
                 S_ddr_wr_valid <= 1'b0;
-            else if(S_fifo_rd_num >= 'd240 && (!I_video_out_rd_busy) && (!S_fifo_rst))
+            else if(S_ddr_wr_start_req && (!I_video_out_rd_busy) &&
+                    I_ddr_user_ready)
                 S_ddr_wr_valid <= 1'b1;
             else
                 S_ddr_wr_valid <= S_ddr_wr_valid;
