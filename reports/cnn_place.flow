@@ -1,0 +1,23 @@
+Location         : D:\anlu\rtl\td_project
+Running with     : Tang Dynasty v6.2.168116
+                   Copyright (c) 2012-2025 Anlogic Inc.
+Top Model        : design_top_wrapper
+Device           : PH1P35MDG324
+Speed            : 3
+
+Timing Mode      : manhattan
+Setup            : WNS   518ps  TNS        0ps  NUM_FEPS     0
+Hold             : WNS  -244ps  TNS   -69272ps  NUM_FEPS   544
+
+Flow Statistics  :
+---------------------------------------------------------------------------------------------------
+     command     |  #calls  |  wall time   |  cpu time(s)  |  used memory(mb)  |  peak memory(mb)  
+---------------------------------------------------------------------------------------------------
+      place      |    1     |  3m33s(98%)  |   261(99%)    |       2012        |       2014        
+    import_db    |    1     |    2s(0%)    |     0(0%)     |        806        |        806        
+  import_device  |    1     |    1s(0%)    |     1(0%)     |        324        |        324        
+    read_adc     |    1     |    1s(0%)    |     1(0%)     |        762        |        807        
+    read_sdc     |    3     |    0s(0%)    |     0(0%)     |        762        |        807        
+---------------------------------------------------------------------------------------------------
+      total      |    7     |    3m37s     |      263      |       2012        |       2014        
+---------------------------------------------------------------------------------------------------

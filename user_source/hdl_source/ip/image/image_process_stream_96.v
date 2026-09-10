@@ -10,7 +10,7 @@
 // Description:     Four-pixel RGB888 streaming grayscale, Sobel and morphology.
 // Simulations:     sim/tb_image_process_stream_96.sv (Icarus PASS)
 //
-// Referrences:     PH1P35_image_processing_migration_report.pdf and reviewed algorithm contract.
+// Referrences:     PH1P35_image_processing_migration_report.pdf.
 // Dependencies:    None
 //
 // Version:         V1.1
@@ -26,9 +26,9 @@
 // 创建日期:        2026年09月01日
 // 设计名称:        image_process_stream_96
 // 模块名称:        image_process_stream_96
-// 模块说明:        96位四像素流灰度、Sobel、腐蚀和膨胀处理。
+// 模块说明:        96位四像素流灰度、Sobel、腐蚀和膨胀处理，并输出对齐灰度旁路。
 // 仿真工程:        sim/tb_image_process_stream_96.sv（Icarus 已通过）
-// 参考资料:        PH1P35_image_processing_migration_report.pdf及已复核的算法约定。
+// 参考资料:        PH1P35_image_processing_migration_report.pdf。
 // 依赖文件:        无
 //
 // 当前版本:        V1.1
@@ -60,17 +60,24 @@ module image_process_stream_96 #(
 	output reg         O_tuser,
 	output reg         O_tlast,
 	output reg         O_tvalid,
-	output reg  [95:0] O_tdata
+	output reg  [95:0] O_tdata,
+
+	// 与输出视频完全同拍的灰度旁路，供CNN输入采样器复用灰度计算。
+	output reg         O_gray_tuser,
+	output reg         O_gray_tlast,
+	output reg         O_gray_tvalid,
+	output reg  [31:0] O_gray_data,
+	output reg  [1:0]  O_gray_mode
 );
 
 	// 每个输入拍包含4个像素，因此横向处理坐标按4像素折算。
 	localparam integer GROUP_WIDTH = IMG_WIDTH / 4;
 
-	// 算法选择编码：00为原图，01为Sobel，10为腐蚀，11为膨胀。
-	localparam [1:0] MODE_RAW      = 2'b00;
-	localparam [1:0] MODE_SOBEL    = 2'b01;
+	// 算法选择编码：11为原图，10为腐蚀，01为膨胀，00为CNN原图旁路。
+	localparam [1:0] MODE_CNN      = 2'b00;
+	localparam [1:0] MODE_DILATION = 2'b01;
 	localparam [1:0] MODE_EROSION  = 2'b10;
-	localparam [1:0] MODE_DILATION = 2'b11;
+	localparam [1:0] MODE_RAW      = 2'b11;
 
 	//********************************************************************//
 	//****************** Parameter and Internal Signal *******************//
@@ -217,6 +224,11 @@ module image_process_stream_96 #(
 	reg [7:0]  stage2_gray_cur_2;
 	reg [7:0]  stage2_gray_cur_1;
 	reg [7:0]  stage2_gray_cur_current;
+	// 保留四个像素的独立灰度，供CNN采样器计算精确单元平均值。
+	reg [7:0]  stage2_gray_pixel_0;
+	reg [7:0]  stage2_gray_pixel_1;
+	reg [7:0]  stage2_gray_pixel_2;
+	reg [7:0]  stage2_gray_pixel_3;
 
 	wire [9:0] stage1_gray_group_sum;
 	wire [7:0] stage1_gray_group;
@@ -242,6 +254,11 @@ module image_process_stream_96 #(
 	reg [7:0]  stage3_x;
 	reg [9:0]  stage3_y;
 	reg [1:0]  stage3_mode;
+	reg [7:0]  stage3_gray_group;
+	reg [7:0]  stage3_gray_pixel_0;
+	reg [7:0]  stage3_gray_pixel_1;
+	reg [7:0]  stage3_gray_pixel_2;
+	reg [7:0]  stage3_gray_pixel_3;
 	reg        stage3_sobel_bit;
 	reg        stage3_bin_top_2;
 	reg        stage3_bin_top_1;
@@ -414,6 +431,10 @@ module image_process_stream_96 #(
 			stage2_gray_cur_2       <= 8'd0;
 			stage2_gray_cur_1       <= 8'd0;
 			stage2_gray_cur_current <= 8'd0;
+			stage2_gray_pixel_0     <= 8'd0;
+			stage2_gray_pixel_1     <= 8'd0;
+			stage2_gray_pixel_2     <= 8'd0;
+			stage2_gray_pixel_3     <= 8'd0;
 
 			stage3_valid             <= 1'b0;
 			stage3_user              <= 1'b0;
@@ -422,6 +443,11 @@ module image_process_stream_96 #(
 			stage3_x                 <= 8'd0;
 			stage3_y                 <= 10'd0;
 			stage3_mode              <= MODE_RAW;
+			stage3_gray_group        <= 8'd0;
+			stage3_gray_pixel_0      <= 8'd0;
+			stage3_gray_pixel_1      <= 8'd0;
+			stage3_gray_pixel_2      <= 8'd0;
+			stage3_gray_pixel_3      <= 8'd0;
 			stage3_sobel_bit         <= 1'b0;
 			stage3_bin_top_2         <= 1'b0;
 			stage3_bin_top_1         <= 1'b0;
@@ -437,6 +463,11 @@ module image_process_stream_96 #(
 			O_tlast                  <= 1'b0;
 			O_tvalid                 <= 1'b0;
 			O_tdata                  <= 96'd0;
+			O_gray_tuser             <= 1'b0;
+			O_gray_tlast             <= 1'b0;
+			O_gray_tvalid            <= 1'b0;
+			O_gray_data              <= 32'd0;
+			O_gray_mode              <= MODE_RAW;
 		end
 		else begin
 			// 输出级：模式、数据和标志均来自同一个stage3处理组。
@@ -444,13 +475,23 @@ module image_process_stream_96 #(
 			O_tlast  <= 1'b0;
 			O_tvalid <= stage3_valid;
 			O_tdata  <= 96'd0;
+			O_gray_tuser  <= 1'b0;
+			O_gray_tlast  <= 1'b0;
+			O_gray_tvalid <= stage3_valid;
+			O_gray_data   <= 32'd0;
+			O_gray_mode   <= MODE_RAW;
 			if (stage3_valid) begin
 				O_tuser <= stage3_user;
 				O_tlast <= stage3_last;
+				O_gray_tuser <= stage3_user;
+				O_gray_tlast <= stage3_last;
+				O_gray_data  <= {stage3_gray_pixel_3, stage3_gray_pixel_2,
+				                 stage3_gray_pixel_1, stage3_gray_pixel_0};
+				O_gray_mode  <= stage3_mode;
 				case (stage3_mode)
-					MODE_SOBEL:    O_tdata <= stage3_sobel_word;
 					MODE_EROSION:  O_tdata <= stage3_erosion_word;
 					MODE_DILATION: O_tdata <= stage3_dilation_word;
+					MODE_CNN:      O_tdata <= stage3_raw_data;
 					default:       O_tdata <= stage3_raw_data;
 				endcase
 			end
@@ -464,6 +505,11 @@ module image_process_stream_96 #(
 				stage3_x               <= stage2_x;
 				stage3_y               <= stage2_y;
 				stage3_mode            <= stage2_mode;
+				stage3_gray_group      <= stage2_gray_cur_current;
+				stage3_gray_pixel_0    <= stage2_gray_pixel_0;
+				stage3_gray_pixel_1    <= stage2_gray_pixel_1;
+				stage3_gray_pixel_2    <= stage2_gray_pixel_2;
+				stage3_gray_pixel_3    <= stage2_gray_pixel_3;
 				stage3_sobel_bit       <= stage2_sobel_bit;
 				stage3_bin_top_2       <= bin_top_delay_2;
 				stage3_bin_top_1       <= bin_top_delay_1;
@@ -520,6 +566,10 @@ module image_process_stream_96 #(
 				stage2_gray_cur_2       <= gray_cur_delay_2;
 				stage2_gray_cur_1       <= gray_cur_delay_1;
 				stage2_gray_cur_current <= stage1_gray_group;
+				stage2_gray_pixel_0     <= stage1_gray_0;
+				stage2_gray_pixel_1     <= stage1_gray_1;
+				stage2_gray_pixel_2     <= stage1_gray_2;
+				stage2_gray_pixel_3     <= stage1_gray_3;
 
 				if (stage1_y == 10'd0) begin
 					gray_line_a[stage1_x] <= stage1_gray_group;

@@ -7,10 +7,10 @@ module tb_image_process_stream_96;
     localparam integer GROUP_WIDTH = IMG_WIDTH / 4;
     localparam integer STREAM_LATENCY = 4;
 
-    localparam [1:0] MODE_RAW      = 2'b00;
-    localparam [1:0] MODE_SOBEL    = 2'b01;
+    localparam [1:0] MODE_CNN      = 2'b00;
+    localparam [1:0] MODE_DILATION = 2'b01;
     localparam [1:0] MODE_EROSION  = 2'b10;
-    localparam [1:0] MODE_DILATION = 2'b11;
+    localparam [1:0] MODE_RAW      = 2'b11;
 
     reg clk;
     reg rst_n;
@@ -211,10 +211,6 @@ module tb_image_process_stream_96;
         reg binary_value;
         begin
             case (mode)
-                MODE_SOBEL: begin
-                    binary_value = model_sobel[y][x];
-                    expected_word = binary_value ? {96{1'b1}} : 96'd0;
-                end
                 MODE_EROSION: begin
                     binary_value = model_morphology_bit(x, y, 0);
                     expected_word = binary_value ? {96{1'b1}} : 96'd0;
@@ -365,18 +361,18 @@ module tb_image_process_stream_96;
         rst_n = 1'b1;
 
         check_frame(MODE_RAW, 24, 1);
-        check_frame(MODE_SOBEL, 24, 0);
-        check_frame(MODE_SOBEL, 24, 2);
-        check_frame(MODE_SOBEL, 24, 3);
-        check_frame(MODE_SOBEL, 1019, 2);
-        check_frame(MODE_SOBEL, 1020, 2);
-        check_frame(MODE_SOBEL, 1021, 2);
+        check_frame(MODE_CNN, 24, 1);
         check_frame(MODE_EROSION, 24, 0);
         check_frame(MODE_EROSION, 24, 4);
         check_frame(MODE_EROSION, 24, 5);
         check_frame(MODE_DILATION, 24, 0);
+        check_frame(MODE_DILATION, 24, 2);
+        check_frame(MODE_DILATION, 24, 3);
         check_frame(MODE_DILATION, 24, 4);
         check_frame(MODE_DILATION, 24, 5);
+        check_frame(MODE_EROSION, 1019, 2);
+        check_frame(MODE_EROSION, 1020, 2);
+        check_frame(MODE_EROSION, 1021, 2);
 
         if (error_count == 0)
             $display("[RESULT] ALL TESTS PASSED");

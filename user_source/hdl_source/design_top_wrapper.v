@@ -88,6 +88,13 @@ module design_top_wrapper (
 	wire [1:0]		S_algo_mode_24m;
 	reg [1:0]		S_algo_mode_sync_1;
 	reg [1:0]		S_algo_mode_sync_2;
+	wire        S_cnn_busy;
+	wire        S_cnn_done;
+	wire        S_cnn_result_valid;
+	wire [4:0]  S_cnn_result_class;
+	wire [7:0]  S_cnn_result_ascii;
+	wire        S_cnn_result_toggle;
+	wire        S_cnn_frame_drop;
 	
 
     wire        S_ddr_clk;
@@ -156,7 +163,10 @@ module design_top_wrapper (
     wire        S_hdmi_out_de;
     wire[23:0]  S_hdmi_out_data;
 
-    wire[23:0]  S_video_rd_data;
+     wire[23:0]  S_video_rd_data;
+	 wire        S_cnn_hdmi_toggle;
+	 wire [7:0]  S_cnn_hdmi_ascii;
+	 wire        S_cnn_hdmi_result_valid;
     reg         S_dbg_raw_seen;
     reg         S_dbg_isp_seen;
     reg         S_dbg_ddr_wr_seen;
@@ -217,8 +227,8 @@ module design_top_wrapper (
 
 	always @(posedge S_csi_rx_clk or negedge S_rst_n) begin
 		if(!S_rst_n) begin
-			S_algo_mode_sync_1 <= 2'b00;
-			S_algo_mode_sync_2 <= 2'b00;
+			S_algo_mode_sync_1 <= 2'b11;
+			S_algo_mode_sync_2 <= 2'b11;
 		end
 		else begin
 			S_algo_mode_sync_1 <= S_algo_mode_24m;
@@ -631,7 +641,14 @@ isp_top u_isp_top (
 .O_tdata         (S_ISP_O_tdata ),
 .O_tlast         (S_ISP_O_tlast ),
 .O_tuser         (S_ISP_O_tuser ),
-.O_tvalid        (S_ISP_O_tvalid)
+.O_tvalid        (S_ISP_O_tvalid),
+.O_cnn_busy      (S_cnn_busy),
+.O_cnn_done      (S_cnn_done),
+.O_cnn_result_valid(S_cnn_result_valid),
+.O_cnn_result_class(S_cnn_result_class),
+.O_cnn_result_ascii(S_cnn_result_ascii),
+.O_cnn_result_toggle(S_cnn_result_toggle),
+.O_cnn_frame_drop(S_cnn_frame_drop)
   );
 
 
@@ -776,6 +793,18 @@ isp_top u_isp_top (
         .O_vtc_last    ( S_hdmi_last      )
     );
 
+    cnn_result_cdc u_cnn_result_cdc (
+        .I_src_clk    ( S_csi_rx_clk        ),
+        .I_src_rst_n  ( S_rst_n             ),
+        .I_src_toggle ( S_cnn_result_toggle ),
+        .I_src_ascii  ( S_cnn_result_ascii  ),
+        .I_dst_clk    ( S_hdmi_pixel_clk    ),
+        .I_dst_rst_n  ( S_hdmi_rst_n        ),
+        .O_dst_toggle ( S_cnn_hdmi_toggle   ),
+        .O_dst_ascii  ( S_cnn_hdmi_ascii    ),
+        .O_dst_valid  ( S_cnn_hdmi_result_valid )
+    );
+
     hdmi_mixer #(
         .H_OFFSET   ( 0    ),
         .V_OFFSET   ( 0    ),
@@ -791,6 +820,10 @@ isp_top u_isp_top (
         .I_video_user    ( S_hdmi_user        ),
         .I_video_last    ( S_hdmi_last        ),
         .I_debug_status  ( S_hdmi_debug_status),
+        .I_cnn_mode      ( S_algo_mode_sync_2[1:0] == 2'b00 ),
+        .I_cnn_busy      ( S_cnn_busy        ),
+        .I_cnn_result_toggle( S_cnn_hdmi_toggle ),
+        .I_cnn_result_ascii( S_cnn_hdmi_ascii  ),
         .O_video_rd_en   ( S_hdmi_window_rd_en),
         .I_video_rd_data ( S_video_rd_data    ),
         .O_hdmi_vsync    ( S_hdmi_out_vsync   ),

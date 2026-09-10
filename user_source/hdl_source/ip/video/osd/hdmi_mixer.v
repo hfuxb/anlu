@@ -16,6 +16,12 @@ module hdmi_mixer #(
 
     input wire[3:0]   I_debug_status,
 
+    // CNN状态来自摄像头时钟域，结果toggle和ASCII由顶层CDC模块提供。
+    input wire        I_cnn_mode,
+    input wire        I_cnn_busy,
+    input wire        I_cnn_result_toggle,
+    input wire [7:0]  I_cnn_result_ascii,
+
     output wire       O_video_rd_en,
     input wire[23:0]  I_video_rd_data,
 
@@ -64,7 +70,6 @@ module hdmi_mixer #(
     reg [2:0]  S_dyn_col;
     reg [2:0]  S_dyn_row;
     reg [4:0]  S_dyn_bits;
-    reg        S_dyn_on;
     reg [3:0]  S_dyn_digit_idx;
     reg [11:0] S_dyn_digit_x;
     reg [6:0]  S_dyn_seg;
@@ -97,6 +102,13 @@ module hdmi_mixer #(
     reg        S_pf_on;
     reg [9:0]  S_pf_scale_x;
     reg [9:0]  S_pf_scale_y;
+    reg        S_cnn_mode_sync1;
+    reg        S_cnn_mode_sync2;
+    reg        S_cnn_mode_frame;
+    reg        S_cnn_toggle_sync1;
+    reg        S_cnn_toggle_sync2;
+    reg        S_cnn_toggle_seen;
+    reg        S_cnn_result_ready;
 
     localparam LOGO_X = 12'd0;
     localparam LOGO_Y = 12'd0;
@@ -481,6 +493,31 @@ module hdmi_mixer #(
         .O_row_bits ( S_pf_row_bits )
     );
 
+    // HDMI像素时钟域同步模式、运行状态和结果通知。
+    always @(posedge I_clk or negedge I_rst_n) begin
+        if(!I_rst_n) begin
+            S_cnn_mode_sync1  <= 1'b0;
+            S_cnn_mode_sync2  <= 1'b0;
+            S_cnn_mode_frame   <= 1'b0;
+            S_cnn_toggle_sync1 <= 1'b0;
+            S_cnn_toggle_sync2 <= 1'b0;
+            S_cnn_toggle_seen  <= 1'b0;
+            S_cnn_result_ready <= 1'b0;
+        end
+        else begin
+            S_cnn_mode_sync1   <= I_cnn_mode;
+            S_cnn_mode_sync2   <= S_cnn_mode_sync1;
+            if(I_video_user)
+                S_cnn_mode_frame <= S_cnn_mode_sync2;
+            S_cnn_toggle_sync1 <= I_cnn_result_toggle;
+            S_cnn_toggle_sync2 <= S_cnn_toggle_sync1;
+            if(S_cnn_toggle_sync2 != S_cnn_toggle_seen) begin
+                S_cnn_toggle_seen   <= S_cnn_toggle_sync2;
+                S_cnn_result_ready  <= 1'b1;
+            end
+        end
+    end
+
     always @(posedge I_clk or negedge I_rst_n) begin
         if(!I_rst_n) begin
             S_x <= 12'd0;
@@ -584,7 +621,6 @@ module hdmi_mixer #(
         S_dyn_col = 3'd0;
         S_dyn_row = 3'd0;
         S_dyn_bits = 5'd0;
-        S_dyn_on = 1'b0;
         S_dyn_digit_idx = 4'd0;
         S_dyn_digit_x = 12'd0;
         S_dyn_seg = 7'd0;
@@ -623,8 +659,7 @@ module hdmi_mixer #(
                 end
             end
 
-            if((!S_osd_hit) &&
-               (S_x_2d >= DYN_OSD_X) && (S_x_2d < (DYN_OSD_X + DYN_OSD_W)) &&
+            if((S_x_2d >= DYN_OSD_X) && (S_x_2d < (DYN_OSD_X + DYN_OSD_W)) &&
                (S_y_2d >= DYN_OSD_Y) && (S_y_2d < (DYN_OSD_Y + DYN_OSD_H))) begin
                 S_dyn_x = S_x_2d - DYN_OSD_X;
                 S_dyn_y = S_y_2d - DYN_OSD_Y;
@@ -737,8 +772,6 @@ module hdmi_mixer #(
                         endcase
                     end
 
-                    if(S_pf_on)
-                        S_dyn_on = 1'b1;
                 end
 
                 // Decimal 6 digits starts at x=110. Each digit is 15x24.
@@ -803,14 +836,57 @@ module hdmi_mixer #(
                             4'd15: S_pf_on = S_pf_row_bits[0];
                             default: S_pf_on = 1'b0;
                         endcase
-                        if(S_pf_on)
-                            S_dyn_on = 1'b1;
                     end
                 end
 
-                if(S_dyn_on) begin
+                // 动态OSD只使用当前字符像素作为命中条件，避免在同一组合块内
+                // 读回自赋值的中间信号，防止综合器推断组合反馈环。
+                if(S_pf_on) begin
                     S_osd_hit = 1'b1;
                     S_osd_color = COLOR_DYN_TEXT;
+                end
+            end
+
+            // CNN模式显示CNN:<字母>；结果尚未完成时显示CNN:WAIT。
+            if(S_cnn_mode_frame &&
+               (S_x_2d >= 12'd375) && (S_x_2d < 12'd503) &&
+               (S_y_2d >= 12'd150) && (S_y_2d < 12'd174)) begin
+                S_dyn_x = S_x_2d - 12'd375;
+                S_dyn_y = S_y_2d - 12'd150;
+                if((S_dyn_y >= 12'd4) && (S_dyn_y < 12'd20)) begin
+                    S_pf_local_y = S_dyn_y - 12'd4;
+                    S_pf_row = S_pf_local_y[3:0];
+                    S_pf_local_x = S_dyn_x[4:0];
+                    if(S_dyn_x < 12'd16)
+                        S_pf_char = CHAR_C;
+                    else if(S_dyn_x < 12'd32)
+                        S_pf_char = CHAR_N;
+                    else if(S_dyn_x < 12'd48)
+                        S_pf_char = CHAR_N;
+                    else if(S_dyn_x < 12'd64)
+                        S_pf_char = CHAR_COLON;
+                    // ASCII已由前级CDC模块稳定保持，HDMI域同步toggle后直接读取。
+                    else if(S_cnn_result_ready && (S_dyn_x < 12'd80))
+                        S_pf_char = I_cnn_result_ascii;
+                    else if(!S_cnn_result_ready && (S_dyn_x < 12'd80))
+                        S_pf_char = 8'h57;
+                    else if(!S_cnn_result_ready && (S_dyn_x < 12'd96))
+                        S_pf_char = 8'h41;
+                    else if(!S_cnn_result_ready && (S_dyn_x < 12'd112))
+                        S_pf_char = 8'h49;
+                    else if(!S_cnn_result_ready && (S_dyn_x < 12'd128))
+                        S_pf_char = 8'h54;
+                    else
+                        S_pf_char = 8'd0;
+
+                    if(S_dyn_x < 12'd128) begin
+                        S_pf_col = S_dyn_x[3:0];
+                        S_pf_on = S_pf_row_bits[15 - S_pf_col];
+                        if(S_pf_on) begin
+                            S_osd_hit = 1'b1;
+                            S_osd_color = COLOR_DYN_TEXT;
+                        end
+                    end
                 end
             end
         end

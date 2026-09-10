@@ -21,7 +21,16 @@ module isp_top #(
     output 			O_tlast			,
     output 			O_tuser			,
     output 			O_tvalid		,
-    output 			I_tready
+    output 			I_tready,
+
+    // CNN状态仅在工程内部使用，不增加design_top_wrapper物理端口。
+    output wire        O_cnn_busy,
+    output wire        O_cnn_done,
+    output wire        O_cnn_result_valid,
+    output wire [4:0]  O_cnn_result_class,
+    output wire [7:0]  O_cnn_result_ascii,
+    output wire        O_cnn_result_toggle,
+    output wire        O_cnn_frame_drop
 );
  
 //********************************************************************//
@@ -50,23 +59,50 @@ wire         m_aixs_tvalid;  //synthesis keep
   wire         process_O_tuser;
   wire [95:0]  process_O_tdata;
   wire         process_O_tvalid;
+  wire         process_O_gray_tuser;
+  wire         process_O_gray_tlast;
+  wire         process_O_gray_tvalid;
+  wire [31:0]  process_O_gray_data;
+  wire [1:0]   process_O_gray_mode;
   // AWB帧首标记可能早于有效数据，pending用于等待首个有效拍。
   wire         process_I_tuser;
   reg          awb_frame_pending;
-  // 算法输出行结束标记延迟一拍，对齐96位到128位打包输出。
-  reg          process_O_tlast_d;
+
+  // CNN采样器和核心的单时钟域握手信号。
+  wire         cnn_start;
+  wire         cnn_start_bank;
+  wire         cnn_frame_ready;
+  wire         cnn_busy;
+  wire         cnn_done;
+  wire         cnn_result_valid;
+  wire [4:0]   cnn_result_class;
+  wire [7:0]   cnn_result_ascii;
+  wire         cnn_input_rd_bank;
+  wire [11:0]  cnn_input_rd_addr;
+  wire [7:0]   cnn_input_rd_data;
+  reg          cnn_result_toggle;
+  wire         cnn_frame_drop;
 
   // 打包器输出的官方视频流标志和数据。
   wire         awb_O_tuser_128;  //synthesis keep 
   wire         awb_O_tvalid_128;  //synthesis keep 
+  wire         awb_O_tlast_128;  //synthesis keep 
   wire [127:0] awb_O_tdata_128;  //synthesis keep 
 
   // 固定速率链路由顶层提供ready，当前工程不暂停视频流。
   assign awb_O_tready = O_tready;
   assign O_tdata  = awb_O_tdata_128;
-  assign O_tlast  = process_O_tlast_d & awb_O_tvalid_128;
+  assign O_tlast  = awb_O_tlast_128;
   assign O_tuser  = awb_O_tuser_128    ;
   assign O_tvalid = awb_O_tvalid_128   ;
+
+  assign O_cnn_busy          = cnn_busy;
+  assign O_cnn_done          = cnn_done;
+  assign O_cnn_result_valid  = cnn_result_valid;
+  assign O_cnn_result_class  = cnn_result_class;
+  assign O_cnn_result_ascii  = cnn_result_ascii;
+  assign O_cnn_result_toggle  = cnn_result_toggle;
+  assign O_cnn_frame_drop    = cnn_frame_drop;
 
   // AWB保留官方提前帧标记，但RGB数据有效可能延后。
   // 将标记保持到第一个有效AWB输出拍，再交给图像处理模块锁存配置。
@@ -158,15 +194,61 @@ image_process_stream_96 #(
     .O_tuser         (process_O_tuser),
     .O_tlast         (process_O_tlast),
     .O_tvalid        (process_O_tvalid),
-    .O_tdata         (process_O_tdata)
+    .O_tdata         (process_O_tdata),
+    .O_gray_tuser    (process_O_gray_tuser),
+    .O_gray_tlast    (process_O_gray_tlast),
+    .O_gray_tvalid   (process_O_gray_tvalid),
+    .O_gray_data     (process_O_gray_data),
+    .O_gray_mode     (process_O_gray_mode)
 );
 
-// 算法行结束标记随算法输出寄存，供下游128位流边界对齐。
+// 灰度旁路进入CNN全画面采样器；双缓冲状态保证推理期间输入不被覆盖。
+cnn_input_sampler_96 #(
+    .IMG_WIDTH (1024),
+    .IMG_HEIGHT(600),
+    .CNN_SIZE  (64)
+) u_cnn_input_sampler_96 (
+    .I_clk                   (axi4s_video_aclk),
+    .I_rst_n                 (I_rst_n),
+    .I_tuser                 (process_O_gray_tuser),
+    .I_tlast                 (process_O_gray_tlast),
+    .I_tvalid                (process_O_gray_tvalid),
+    .I_gray_data             (process_O_gray_data),
+    .I_core_busy             (cnn_busy),
+    .I_core_done             (cnn_done),
+    .I_core_bank             (cnn_input_rd_bank),
+    .O_core_start            (cnn_start),
+    .O_core_input_bank       (cnn_start_bank),
+    .O_core_input_frame_ready(cnn_frame_ready),
+    .I_core_rd_bank          (cnn_input_rd_bank),
+    .I_core_rd_addr          (cnn_input_rd_addr),
+    .O_core_rd_data          (cnn_input_rd_data),
+    .O_frame_drop            (cnn_frame_drop),
+    .O_capture_active        ()
+);
+
+cnn_core u_cnn_core (
+    .aclk              (axi4s_video_aclk),
+    .aresetn           (I_rst_n),
+    .start             (cnn_start),
+    .input_frame_ready (cnn_frame_ready),
+    .input_bank_select (cnn_start_bank),
+    .input_rd_bank     (cnn_input_rd_bank),
+    .input_rd_addr     (cnn_input_rd_addr),
+    .input_rd_data     (cnn_input_rd_data),
+    .busy              (cnn_busy),
+    .done              (cnn_done),
+    .result_valid      (cnn_result_valid),
+    .result_class      (cnn_result_class),
+    .result_ascii      (cnn_result_ascii)
+);
+
+// 结果数据在核心时钟域稳定保持，toggle用于通知HDMI时钟域捕获新结果。
 always @(posedge axi4s_video_aclk or negedge I_rst_n) begin
-    if(!I_rst_n)
-        process_O_tlast_d <= 1'b0;
-    else
-        process_O_tlast_d <= process_O_tlast;
+    if (!I_rst_n)
+        cnn_result_toggle <= 1'b0;
+    else if (cnn_done)
+        cnn_result_toggle <= ~cnn_result_toggle;
 end
 
 // 官方数据格式转换：四拍96位数据拼接为三拍128位数据。
@@ -176,11 +258,13 @@ end
         .I_rst_n            ( I_rst_n           ),
 	
         .I_96b_frame_start  ( process_O_tuser   ),
+        .I_96b_last         ( process_O_tlast   ),
         .I_96b_valid        ( process_O_tvalid  ),
 		.I_96b_data         ( process_O_tdata    ),
 	
         .O_128b_frame_start ( awb_O_tuser_128  	),
-        .O_128b_valid       ( awb_O_tvalid_128 	),
+		.O_128b_last       ( awb_O_tlast_128    ),
+		.O_128b_valid       ( awb_O_tvalid_128 	),
         .O_128b_data        ( awb_O_tdata_128  	)
     );
 

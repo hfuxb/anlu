@@ -46,11 +46,11 @@ module tb_mode_selector;
         repeat (3) @(posedge clk);
         rst_n = 1'b1;
 
-        check_mode(2'b11, 2'b00);
-        check_mode(2'b10, 2'b01);
-        check_mode(2'b01, 2'b10);
-        check_mode(2'b00, 2'b11);
-        check_mode(2'b11, 2'b00);
+        check_mode(2'b11, 2'b11);
+        check_mode(2'b10, 2'b10);
+        check_mode(2'b01, 2'b01);
+        check_mode(2'b00, 2'b00);
+        check_mode(2'b11, 2'b11);
 
         if (error_count == 0)
             $display("[RESULT] ALL MODE SELECTOR TESTS PASSED");

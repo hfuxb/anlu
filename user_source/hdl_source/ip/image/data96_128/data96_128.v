@@ -7,7 +7,7 @@
 // Create Date:     2026/09/01 22:00:00
 // Design Name:     data_96bit_to_128bit
 // Module Name:     data_96bit_to_128bit
-// Description:     Pack four 96-bit stream beats into three 128-bit beats.
+// Description:     Pack four 96-bit stream beats into three 128-bit beats and align line end.
 // Simulations:     sim/tb_data96_128.sv (Icarus PASS)
 //
 // Referrences:     Official lab_hd_3_osd data path.
@@ -26,7 +26,7 @@
 // 创建日期:        2026年09月01日
 // 设计名称:        data_96bit_to_128bit
 // 模块名称:        data_96bit_to_128bit
-// 模块说明:        将4拍96位流数据打包为3拍128位流数据。
+// 模块说明:        将4拍96位流数据打包为3拍128位流数据，并对齐行结束标记。
 // 仿真工程:        sim/tb_data96_128.sv（Icarus 已通过）
 // 参考资料:        官方lab_hd_3_osd数据链路。
 // 依赖文件:        无
@@ -44,11 +44,13 @@ module data_96bit_to_128bit (
 
 	// 96位输入流：帧首标记只在首个有效拍使用。
 	input wire         I_96b_frame_start,
+	input wire         I_96b_last,
 	input wire         I_96b_valid,
 	input wire [95:0] I_96b_data,
 
 	// 128位输出流：帧首标记沿用官方提前通知协议。
 	output reg         O_128b_frame_start,
+	output reg         O_128b_last,
 	output reg         O_128b_valid,
 	output reg [127:0] O_128b_data
 );
@@ -80,7 +82,7 @@ module data_96bit_to_128bit (
 		else if(I_96b_frame_start)
 			S_cnt <= I_96b_valid ? 2'd1 : 2'd0;
 		else if(I_96b_valid)
-			S_cnt <= S_cnt + 2'd1;
+			S_cnt <= I_96b_last ? 2'd0 : S_cnt + 2'd1;
 	end
 
 
@@ -90,10 +92,12 @@ module data_96bit_to_128bit (
 		if(!I_rst_n) begin
 			O_128b_valid <= 1'b0;
 			O_128b_data  <= 128'd0;
+			O_128b_last  <= 1'b0;
 		end
 		else if(I_96b_frame_start) begin
 			O_128b_valid <= 1'b0;
 			O_128b_data  <= 128'd0;
+			O_128b_last  <= 1'b0;
 		end
 			else if(I_96b_valid)
 				begin
@@ -103,29 +107,34 @@ module data_96bit_to_128bit (
 								// 第一拍只缓存，不足128位不能输出。
 								O_128b_valid <= 1'b0;
 							O_128b_data  <= 128'd0;
+							O_128b_last  <= 1'b0;
 						end
 						2'd1 :
 							begin
 								// 第二拍拼出第一个128位输出。
 								O_128b_valid <= 1'b1;
 							O_128b_data  <= {S_96b_data_1d,I_96b_data[95:64]};
+								O_128b_last  <= 1'b0;
 						end
 						2'd2 :
 							begin
 								// 第三拍拼出第二个128位输出。
 								O_128b_valid <= 1'b1;
 							O_128b_data  <= {S_96b_data_1d[63:0],I_96b_data[95:32]};
+								O_128b_last  <= 1'b0;
 						end
 						2'd3 :
 							begin
 								// 第四拍拼出第三个128位输出并回到下一组。
 								O_128b_valid <= 1'b1;
 							O_128b_data  <= {S_96b_data_1d[31:0],I_96b_data};
+								O_128b_last  <= I_96b_last;
 						end
 					default:
 						begin
 							O_128b_valid <= 1'b0;
 							O_128b_data  <= 128'd0;
+							O_128b_last  <= 1'b0;
 						end
 				endcase
 			end
@@ -133,12 +142,10 @@ module data_96bit_to_128bit (
 			begin
 				O_128b_valid <= 1'b0;
 				O_128b_data  <= 128'd0;
+				O_128b_last  <= 1'b0;
 			end
 	end
 
 
 
 endmodule
-
-
-

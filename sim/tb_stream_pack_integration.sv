@@ -23,7 +23,6 @@ module tb_stream_pack_integration;
     wire        packed_frame_start;
     wire        packed_valid;
     wire [127:0] packed_data;
-    reg         process_tlast_d;
     wire        packed_tlast;
 
     integer error_count;
@@ -58,23 +57,16 @@ module tb_stream_pack_integration;
         .I_clk              (clk),
         .I_rst_n            (rst_n),
         .I_96b_frame_start  (process_tuser),
+        .I_96b_last         (process_tlast),
         .I_96b_valid        (process_tvalid),
         .I_96b_data         (process_tdata),
         .O_128b_frame_start (packed_frame_start),
+        .O_128b_last        (packed_tlast),
         .O_128b_valid       (packed_valid),
         .O_128b_data        (packed_data)
     );
 
-    assign packed_tlast = process_tlast_d && packed_valid;
-
     always #5 clk = ~clk;
-
-    always @(posedge clk or negedge rst_n) begin
-        if (!rst_n)
-            process_tlast_d <= 1'b0;
-        else
-            process_tlast_d <= process_tlast;
-    end
 
     task sample_outputs;
         begin
@@ -144,7 +136,6 @@ module tb_stream_pack_integration;
         i_tlast = 1'b0;
         i_tvalid = 1'b0;
         i_tdata = 96'd0;
-        process_tlast_d = 1'b0;
         error_count = 0;
         packed_count = 0;
         packed_tlast_count = 0;

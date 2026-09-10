@@ -53,10 +53,10 @@ module mode_selector #(
 	reg [1:0] candidate_mode;
 	reg [16:0] stable_count;
 
-	// 低有效按键取反后得到算法编码：00原图、01 Sobel、10腐蚀、11膨胀。
+// 低有效按键直接得到算法编码：11原图、10腐蚀、01膨胀、00 CNN。
 	wire [1:0] sampled_mode;
 
-	assign sampled_mode = ~button_sync_2;
+	assign sampled_mode = button_sync_2;
 
 	// 两级同步、候选值检测和稳定计数均在同一时钟域完成。
 	always @(posedge I_clk or negedge I_rst_n) begin
@@ -64,9 +64,9 @@ module mode_selector #(
 			// 复位时按键默认为释放状态，输出原图模式。
 			button_sync_1 <= 2'b11;
 			button_sync_2 <= 2'b11;
-			candidate_mode <= 2'b00;
+			candidate_mode <= 2'b11;
 			stable_count <= 17'd0;
-			O_mode <= 2'b00;
+			O_mode <= 2'b11;
 		end
 		else begin
 			// 先同步外部按键，再使用同步后的值参与去抖。
