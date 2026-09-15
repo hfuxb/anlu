@@ -1,0 +1,23 @@
+-----------------------------------------------------------
+| QoR metrics               |         value               |
+-----------------------------------------------------------
+| Timing                    |                             |
+|     Setup WNS             |          174                |
+|     Setup TNS             |            0                |
+|     Num of violated S-EP  |            0                |
+|     Hold WNS              |           20                |
+|     Hold TNS              |            0                |
+|     Num of violated H-EP  |            0                |
+-----------------------------------------------------------
+| Routing Resource          |                             |
+|     Wire length           |      3893744                |
+-----------------------------------------------------------
+| Utilization               |                             |
+|     #slices               |        16588                |
+|     slices percentage     |       78.19%                |
+|     #RAMs                 |           30                |
+|     #DSPs                 |           21                |
+|     #DRAMHARDCON          |           77                |
+-----------------------------------------------------------
+Report route stage QoR done.
+

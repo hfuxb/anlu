@@ -1,0 +1,13 @@
+#-----------------------------------------------------------
+# Webtalk v2019.2.1 (64-bit)
+# SW Build 2729669 on Thu Dec  5 04:49:17 MST 2019
+# IP Build 2729494 on Thu Dec  5 07:38:25 MST 2019
+# Start of session at: Mon Sep 14 21:14:45 2026
+# Process ID: 34304
+# Current directory: D:/anlu/rtl/work/tmp/detector_result_stage
+# Command line: wbtcv.exe -mode batch -source D:/anlu/rtl/work/tmp/detector_result_stage/xsim.dir/detector_result_stage_sim/webtalk/xsim_webtalk.tcl -notrace
+# Log file: D:/anlu/rtl/work/tmp/detector_result_stage/webtalk.log
+# Journal file: D:/anlu/rtl/work/tmp/detector_result_stage\webtalk.jou
+#-----------------------------------------------------------
+source D:/anlu/rtl/work/tmp/detector_result_stage/xsim.dir/detector_result_stage_sim/webtalk/xsim_webtalk.tcl -notrace
+INFO: [Common 17-206] Exiting Webtalk at Mon Sep 14 21:14:46 2026...

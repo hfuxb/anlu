@@ -1,0 +1,7 @@
+Running: xsim.dir/detector_result_stage_sim/xsimk.exe -runall -simmode gui -wdb detector_result_stage_sim.wdb -simrunnum 0 -socket 58599
+Design successfully loaded
+Design Loading Memory Usage: 8684 KB (Peak: 8684 KB)
+Design Loading CPU Usage: 15 ms
+Simulation completed
+Simulation Memory Usage: 9308 KB (Peak: 9308 KB)
+Simulation CPU Usage: 15 ms

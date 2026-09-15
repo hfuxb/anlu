@@ -1,0 +1,4 @@
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "D:/anlu/rtl/traffic_sign_td/user_source/image/traffic_sign/traffic_sign_detector_96.v" into library work
+INFO: [VRFC 10-311] analyzing module traffic_sign_detector_96
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "D:/anlu/rtl/sim/tb_traffic_sign_detector_96.sv" into library work
+INFO: [VRFC 10-311] analyzing module tb_traffic_sign_detector_96

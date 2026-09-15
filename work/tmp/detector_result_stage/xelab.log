@@ -1,0 +1,13 @@
+Vivado Simulator 2019.2
+Copyright 1986-1999, 2001-2019 Xilinx, Inc. All Rights Reserved.
+Running: D:/Xilinx/Vivado/2019.2/bin/unwrapped/win64.o/xelab.exe tb_traffic_sign_detector_96 -s detector_result_stage_sim 
+Multi-threading is on. Using 30 slave threads.
+Starting static elaboration
+Pass Through NonSizing Optimizer
+Completed static elaboration
+Starting simulation data flow analysis
+Completed simulation data flow analysis
+Time Resolution for simulation is 1ps
+Compiling module work.traffic_sign_detector_96(IMG_WID...
+Compiling module work.tb_traffic_sign_detector_96
+Built simulation snapshot detector_result_stage_sim
