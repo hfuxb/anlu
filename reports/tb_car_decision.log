@@ -1,0 +1,20 @@
+#-----------------------------------------------------------
+# xsim v2019.2.1 (64-bit)
+# SW Build 2729669 on Thu Dec  5 04:49:17 MST 2019
+# IP Build 2729494 on Thu Dec  5 07:38:25 MST 2019
+# Start of session at: Fri Oct  9 17:33:16 2026
+# Process ID: 25068
+# Current directory: D:/anlu/rtl/sim/work_repro/tb_car_decision
+# Command line: xsim.exe -log run.log -mode tcl -source {xsim.dir/tb_car_decision_snapshot/xsim_script.tcl}
+# Log file: D:/anlu/rtl/sim/work_repro/tb_car_decision/run.log
+# Journal file: D:/anlu/rtl/sim/work_repro/tb_car_decision\xsim.jou
+#-----------------------------------------------------------
+source xsim.dir/tb_car_decision_snapshot/xsim_script.tcl
+# xsim {tb_car_decision_snapshot} -autoloadwcfg -runall
+Vivado Simulator 2019.2
+Time resolution is 1 ps
+run -all
+PASS tb_car_decision (8038 checks)
+$finish called at time : 2112400 us : File "D:/anlu/rtl/sim/tb_car_decision.sv" Line 106
+exit
+INFO: [Common 17-206] Exiting xsim at Fri Oct  9 17:33:18 2026...

@@ -8,10 +8,13 @@ $tests=@(
  @{Name='tb_osd_question';Files=@("$hdl\osd_char_lib.v");Marker='PASS OSD QUESTION GLYPH'},
  @{Name='tb_image_process_stream_96_full';Files=@("$source\image\stream\image_process_stream_96.v");Marker='FULL FRAME STREAM TEST PASSED'},
  @{Name='tb_traffic_sign_detector_96';Files=@("$source\image\traffic_sign\traffic_sign_detector_96.v");Marker='PASS traffic sign detector'},
+ @{Name='tb_traffic_sign_result_cdc';Files=@("$source\image\traffic_sign\traffic_sign_result_cdc.v");Marker='PASS traffic sign result CDC'},
  @{Name='tb_hdmi_720p';Files=@("$hdl\vtc\uivtc.v","$hdl\hdmi_mixer.v","$hdl\anlogic_logo_rom.v","$hdl\osd_char_lib.v");Marker='PASS HDMI 1280x720'},
  @{Name='tb_hdmi_black_camera';Files=@("$hdl\vtc\uivtc.v","$hdl\hdmi_mixer.v","$hdl\anlogic_logo_rom.v","$hdl\osd_char_lib.v");Marker='PASS HDMI BLACK CAMERA'}
 )
 $summary=@()
+# 报告目录不属于仿真工作目录；首次运行时先创建，便于保存逐项日志。
+New-Item -ItemType Directory -Force -Path (Join-Path $taskRoot 'reports') | Out-Null
 foreach($test in $tests){
  if($Only.Count -gt 0 -and $test.Name -notin $Only){
   $previous=Get-Content -LiteralPath (Join-Path $taskRoot ('reports\'+$test.Name+'_720p.log')) -Raw

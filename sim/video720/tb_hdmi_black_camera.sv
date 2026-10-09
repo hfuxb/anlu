@@ -9,7 +9,10 @@ uivtc #(.H_ActiveSize(1280),.H_FrameSize(1650),.H_SyncStart(1390),.H_SyncEnd(143
  .I_vtc_rstn(rst_n),.I_vtc_clk(clk),.O_vtc_vs(vs),.O_vtc_hs(hs),.O_vtc_de_valid(de),.O_vtc_user(user),.O_vtc_last(last));
 hdmi_mixer #(.H_OFFSET(0),.V_OFFSET(0),.IMG_WIDTH(1280),.IMG_HEIGHT(720)) mixer(
  .I_clk(clk),.I_rst_n(rst_n),.I_video_vsync(vs),.I_video_hsync(hs),.I_video_de(de),.I_video_user(user),.I_video_last(last),
- .I_debug_status(4'b0),.I_image_mode(2'b11),.I_traffic_sign_mode(1'b0),.I_traffic_sign_busy(1'b0),.I_traffic_sign_result_toggle(1'b0),.I_traffic_sign_result_ascii(8'h3f),
+ .I_debug_status(4'b0),.I_image_mode(2'b11),.I_traffic_sign_mode(1'b0),.I_traffic_sign_busy(1'b0),
+ .I_traffic_sign_result_toggle(1'b0),.I_traffic_sign_result_ascii(8'h3f),
+ .I_traffic_sign_bbox_valid(1'b0),.I_traffic_sign_x_min(11'd0),.I_traffic_sign_x_max(11'd0),
+ .I_traffic_sign_y_min(10'd0),.I_traffic_sign_y_max(10'd0),
  .O_video_rd_en(rd),.I_video_rd_data(24'h000000),.O_hdmi_vsync(ovs),.O_hdmi_hsync(ohs),.O_hdmi_de(ode),.O_hdmi_data(rgb));
 integer cycles=0,pixels=0,lines=0,line_pixels=0,reads=0,frames=0;
 reg counting=0;

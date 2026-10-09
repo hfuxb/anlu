@@ -1,6 +1,6 @@
 `timescale 1ns/1ps
 // Conservative four-wheel differential demo policy. STM32 owns wheel PI loops.
-// The current teammate detector exports L, R and ? only; ? is unknown/no target.
+// The detector exports S, L, R and ?; only L/R can start a timed turn.
 // Turns are timed, not angle-controlled. Obstacles come from an external input.
 module car_decision #(
     parameter integer CLK_HZ = 50000000,
@@ -78,7 +78,8 @@ module car_decision #(
             if (result_valid) begin
                 if (turn_locked) begin
                     vote_count <= 0;
-                    if (result_ascii == "?") begin
+                    // S是确认直行；连续S和连续?都可释放已完成的转向锁。
+                    if (result_ascii == "?" || result_ascii == "S") begin
                         if (clear_count >= CLEAR_FRAMES - 1) begin
                             turn_locked <= 0; clear_count <= 0;
                         end else clear_count <= clear_count + 1'b1;

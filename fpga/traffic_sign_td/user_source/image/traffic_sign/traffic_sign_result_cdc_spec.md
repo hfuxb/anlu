@@ -2,35 +2,30 @@
 
 ## 功能
 
-此模块将路牌识别器的稳定 ASCII 结果和事件翻转信号从源时钟域传送到 HDMI 时钟域。它不执行 CNN 推理。
+模块将分类ASCII、框有效位和四个边界坐标作为一个稳定负载，从摄像头时钟域传到HDMI像素时钟域。它不执行图像分类。
+
+源域只在toggle变化时锁存负载。目标域两级同步toggle和51位负载，再等待一个目标时钟后一次输出全部字段，保证类别与框属于同一帧。
 
 ## 接口
 
 | 端口 | 方向 | 时钟域 | 说明 |
 |---|---|---|---|
-| `I_src_clk` | 输入 | 源域 | 路牌识别结果时钟。 |
+| `I_src_clk` | 输入 | 源域 | 路牌结果时钟。 |
 | `I_src_rst_n` | 输入 | 源域 | 低有效异步复位。 |
-| `I_src_toggle` | 输入 | 源域 | 新结果时翻转。 |
-| `I_src_ascii[7:0]` | 输入 | 源域 | 稳定的识别结果。 |
-| `I_dst_clk` | 输入 | 目标域 | HDMI 像素时钟。 |
+| `I_src_toggle` | 输入 | 源域 | 新结果到来时翻转。 |
+| `I_src_ascii[7:0]` | 输入 | 源域 | `?`、`L`、`R`或`S`。 |
+| `I_src_bbox_valid` | 输入 | 源域 | 框有效标志。 |
+| `I_src_x_min/max[10:0]` | 输入 | 源域 | 框水平边界。 |
+| `I_src_y_min/max[9:0]` | 输入 | 源域 | 框垂直边界。 |
+| `I_dst_clk` | 输入 | 目标域 | HDMI像素时钟。 |
 | `I_dst_rst_n` | 输入 | 目标域 | 低有效异步复位。 |
-| `O_dst_toggle` | 输出 | 目标域 | 已接收的结果翻转值。 |
-| `O_dst_ascii[7:0]` | 输出 | 目标域 | 已同步的 ASCII 结果。 |
-| `O_dst_valid` | 输出 | 目标域 | 新结果有效脉冲，持续一个目标时钟。 |
-
-## 时序
-
-源域在 `I_src_toggle` 改变时锁存 `I_src_ascii`。目标域使用两级同步检测翻转，再等待一个目标时钟后输出稳定数据。
-
-```wavedrom
-{signal:[
-  {name:'I_src_toggle',wave:'0..1....'},
-  {name:'I_src_ascii',wave:'x..3....',data:['L']},
-  {name:'O_dst_valid',wave:'0.....10'},
-  {name:'O_dst_ascii',wave:'x......3',data:['L']}
-]}
-```
+| `O_dst_toggle` | 输出 | 目标域 | 已接收的toggle值。 |
+| `O_dst_ascii[7:0]` | 输出 | 目标域 | 已同步的类别。 |
+| `O_dst_bbox_valid` | 输出 | 目标域 | 已同步的框有效标志。 |
+| `O_dst_x_min/max[10:0]` | 输出 | 目标域 | 已同步的水平边界。 |
+| `O_dst_y_min/max[9:0]` | 输出 | 目标域 | 已同步的垂直边界。 |
+| `O_dst_valid` | 输出 | 目标域 | 新负载有效脉冲，持续一个目标时钟。 |
 
 ## 验证
 
-`D:/anlu/rtl/sim/traffic_sign/tb_traffic_sign_result_cdc.sv` 发送两个翻转事件，并检查目标域的 ASCII、翻转值和有效脉冲。
+`D:/anlu/rtl/sim/video720/tb_traffic_sign_result_cdc.sv` 使用不同源/目标时钟，检查L、S和未知结果的坐标原子传输、无toggle时的数据保持及单周期有效脉冲。

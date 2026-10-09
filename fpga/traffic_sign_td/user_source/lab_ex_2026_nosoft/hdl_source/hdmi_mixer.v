@@ -17,12 +17,16 @@ module hdmi_mixer #(
     input wire[3:0]   I_debug_status,
     input wire [1:0]  I_image_mode,
 
-// 路牌识别状态来自摄像头时钟域，结果toggle和ASCII由顶层CDC模块提供。
-// OSD只显示单字符：L、R或?；接口名保留 traffic_sign_* 以兼容成员3的顶层连接。
+// 路牌识别状态和框坐标由顶层CDC作为稳定结果负载提供。
     input wire        I_traffic_sign_mode,
     input wire        I_traffic_sign_busy,
     input wire        I_traffic_sign_result_toggle,
     input wire [7:0]  I_traffic_sign_result_ascii,
+    input wire        I_traffic_sign_bbox_valid,
+    input wire [10:0] I_traffic_sign_x_min,
+    input wire [10:0] I_traffic_sign_x_max,
+    input wire [9:0]  I_traffic_sign_y_min,
+    input wire [9:0]  I_traffic_sign_y_max,
 
     output wire       O_video_rd_en,
     input wire[23:0]  I_video_rd_data,
@@ -113,7 +117,18 @@ module hdmi_mixer #(
     reg        S_traffic_sign_toggle_sync1;
     reg        S_traffic_sign_toggle_sync2;
     reg        S_traffic_sign_toggle_seen;
-    reg        S_traffic_sign_result_ready;
+    reg [7:0]  S_traffic_sign_ascii_display;
+    reg        S_traffic_sign_bbox_valid_display;
+    reg [10:0] S_traffic_sign_x_min_display;
+    reg [10:0] S_traffic_sign_x_max_display;
+    reg [9:0]  S_traffic_sign_y_min_display;
+    reg [9:0]  S_traffic_sign_y_max_display;
+    reg [7:0]  S_traffic_sign_ascii_frame;
+    reg        S_traffic_sign_bbox_valid_frame;
+    reg [10:0] S_traffic_sign_x_min_frame;
+    reg [10:0] S_traffic_sign_x_max_frame;
+    reg [9:0]  S_traffic_sign_y_min_frame;
+    reg [9:0]  S_traffic_sign_y_max_frame;
 
     localparam LOGO_X = 12'd0;
     localparam LOGO_Y = 12'd0;
@@ -510,22 +525,67 @@ module hdmi_mixer #(
             S_traffic_sign_toggle_sync1 <= 1'b0;
             S_traffic_sign_toggle_sync2 <= 1'b0;
             S_traffic_sign_toggle_seen  <= 1'b0;
-            S_traffic_sign_result_ready <= 1'b0;
+            S_traffic_sign_ascii_display <= "?";
+            S_traffic_sign_bbox_valid_display <= 1'b0;
+            S_traffic_sign_x_min_display <= 11'd0;
+            S_traffic_sign_x_max_display <= 11'd0;
+            S_traffic_sign_y_min_display <= 10'd0;
+            S_traffic_sign_y_max_display <= 10'd0;
+            S_traffic_sign_ascii_frame <= "?";
+            S_traffic_sign_bbox_valid_frame <= 1'b0;
+            S_traffic_sign_x_min_frame <= 11'd0;
+            S_traffic_sign_x_max_frame <= 11'd0;
+            S_traffic_sign_y_min_frame <= 10'd0;
+            S_traffic_sign_y_max_frame <= 10'd0;
         end
         else begin
             S_traffic_sign_mode_sync1   <= I_traffic_sign_mode;
             S_traffic_sign_mode_sync2   <= S_traffic_sign_mode_sync1;
             S_image_mode_sync1 <= I_image_mode;
             S_image_mode_sync2 <= S_image_mode_sync1;
-            if(I_video_user)
+            if(I_video_user) begin
                 S_traffic_sign_mode_frame <= S_traffic_sign_mode_sync2;
+                // 结果和框在帧首一起锁存，显示期间不会出现类别与坐标错帧。
+                if(S_traffic_sign_mode_sync2) begin
+                    S_traffic_sign_ascii_frame <= S_traffic_sign_ascii_display;
+                    S_traffic_sign_bbox_valid_frame <= S_traffic_sign_bbox_valid_display;
+                    S_traffic_sign_x_min_frame <= S_traffic_sign_x_min_display;
+                    S_traffic_sign_x_max_frame <= S_traffic_sign_x_max_display;
+                    S_traffic_sign_y_min_frame <= S_traffic_sign_y_min_display;
+                    S_traffic_sign_y_max_frame <= S_traffic_sign_y_max_display;
+                end
+                else begin
+                    S_traffic_sign_ascii_frame <= "?";
+                    S_traffic_sign_bbox_valid_frame <= 1'b0;
+                    S_traffic_sign_x_min_frame <= 11'd0;
+                    S_traffic_sign_x_max_frame <= 11'd0;
+                    S_traffic_sign_y_min_frame <= 10'd0;
+                    S_traffic_sign_y_max_frame <= 10'd0;
+                end
+            end
             if(I_video_user)
                 S_image_mode_frame <= S_image_mode_sync2;
             S_traffic_sign_toggle_sync1 <= I_traffic_sign_result_toggle;
             S_traffic_sign_toggle_sync2 <= S_traffic_sign_toggle_sync1;
             if(S_traffic_sign_toggle_sync2 != S_traffic_sign_toggle_seen) begin
-                S_traffic_sign_toggle_seen   <= S_traffic_sign_toggle_sync2;
-                S_traffic_sign_result_ready  <= 1'b1;
+                S_traffic_sign_toggle_seen <= S_traffic_sign_toggle_sync2;
+                if(S_traffic_sign_mode_sync2) begin
+                    S_traffic_sign_ascii_display <= I_traffic_sign_result_ascii;
+                    S_traffic_sign_bbox_valid_display <= I_traffic_sign_bbox_valid;
+                    S_traffic_sign_x_min_display <= I_traffic_sign_x_min;
+                    S_traffic_sign_x_max_display <= I_traffic_sign_x_max;
+                    S_traffic_sign_y_min_display <= I_traffic_sign_y_min;
+                    S_traffic_sign_y_max_display <= I_traffic_sign_y_max;
+                end
+            end
+            // 离开SIG模式立即丢弃旧框，重新进入时等待新分类结果。
+            if(!S_traffic_sign_mode_sync2) begin
+                S_traffic_sign_ascii_display <= "?";
+                S_traffic_sign_bbox_valid_display <= 1'b0;
+                S_traffic_sign_x_min_display <= 11'd0;
+                S_traffic_sign_x_max_display <= 11'd0;
+                S_traffic_sign_y_min_display <= 10'd0;
+                S_traffic_sign_y_max_display <= 10'd0;
             end
         end
     end
@@ -859,7 +919,7 @@ module hdmi_mixer #(
                 end
             end
 
-            // 识别模式显示DIR:<字母>；结果尚未完成时显示DIR:WAIT。
+            // 识别模式显示DIR:S/L/R/?；未知结果不保留上一次的方向框。
             if(S_traffic_sign_mode_frame &&
                (S_x_2d >= 12'd375) && (S_x_2d < 12'd503) &&
                (S_y_2d >= 12'd150) && (S_y_2d < 12'd174)) begin
@@ -877,17 +937,8 @@ module hdmi_mixer #(
                         S_pf_char = 8'h52; // R
                     else if(S_dyn_x < 12'd64)
                         S_pf_char = CHAR_COLON;
-                    // ASCII已由前级CDC模块稳定保持，HDMI域同步toggle后直接读取。
-                    else if(S_traffic_sign_result_ready && (S_dyn_x < 12'd80))
-                        S_pf_char = I_traffic_sign_result_ascii;
-                    else if(!S_traffic_sign_result_ready && (S_dyn_x < 12'd80))
-                        S_pf_char = 8'h57;
-                    else if(!S_traffic_sign_result_ready && (S_dyn_x < 12'd96))
-                        S_pf_char = 8'h41;
-                    else if(!S_traffic_sign_result_ready && (S_dyn_x < 12'd112))
-                        S_pf_char = 8'h49;
-                    else if(!S_traffic_sign_result_ready && (S_dyn_x < 12'd128))
-                        S_pf_char = 8'h54;
+                    else if(S_dyn_x < 12'd80)
+                        S_pf_char = S_traffic_sign_ascii_frame;
                     else
                         S_pf_char = 8'd0;
 
@@ -945,6 +996,20 @@ module hdmi_mixer #(
                         S_osd_color = COLOR_DYN_TEXT;
                     end
                 end
+            end
+
+            // 绿色细框只在SIG模式绘制；bbox无效时不会显示上一帧的旧框。
+            if(S_traffic_sign_mode_frame && S_traffic_sign_bbox_valid_frame &&
+               (S_x_2d >= S_traffic_sign_x_min_frame) &&
+               (S_x_2d <= S_traffic_sign_x_max_frame) &&
+               (S_y_2d >= S_traffic_sign_y_min_frame) &&
+               (S_y_2d <= S_traffic_sign_y_max_frame) &&
+               ((S_x_2d == S_traffic_sign_x_min_frame) ||
+                (S_x_2d == S_traffic_sign_x_max_frame) ||
+                (S_y_2d == S_traffic_sign_y_min_frame) ||
+                (S_y_2d == S_traffic_sign_y_max_frame))) begin
+                S_osd_hit = 1'b1;
+                S_osd_color = 24'h00ff00;
             end
         end
     end

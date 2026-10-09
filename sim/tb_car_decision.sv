@@ -48,6 +48,7 @@ module tb_car_decision;
         link_ok=1; flag_stop=1; arm(); check(!armed,"STM32 disabled cannot arm");
         flag_stop=0; arm(); check(armed && vx==100,"healthy manual ARM begins low speed forward");
 
+        fresh("S"); check(state==1 && vx==100 && wz==0,"straight sign keeps forward motion and never turns");
         fresh("L"); fresh("L"); fresh("R"); fresh("L"); fresh("?"); fresh("L"); fresh("L");
         check(state==1 && wz==0,"mixed and unknown frames reset consecutive voting");
         fresh("L"); check(state==2 && vx==50 && wz==250,"third consecutive L enters left turn");
@@ -65,6 +66,19 @@ module tb_car_decision;
         fresh("?"); fresh("?"); fresh("?");
         fresh("R"); fresh("R"); check(state==1,"right vote also needs three frames");
         fresh("R"); check(state==3 && wz==-250,"right turn has negative yaw");
+
+        // 直行结果必须连续三帧才解除已完成转向的锁。
+        for(i=1;i<=TURN_TICKS;i=i+1) begin
+            // 持续送入当前方向结果，保持视觉结果未超时；转向锁不应重启计时。
+            result_valid=(i%100==0); result_ascii="R";
+            tick(1); @(negedge clk);
+        end
+        result_valid=0;
+        check(state==1 && wz==0,"right turn ends before straight results clear its lock");
+        fresh("S"); fresh("S"); check(state==1,"two straight frames cannot clear the turn lock");
+        fresh("S"); check(state==1,"third straight frame clears the turn lock without turning");
+        fresh("L"); fresh("L"); check(state==1,"left vote starts only after straight cleared the lock");
+        fresh("L"); check(state==2 && wz==250,"three left frames still trigger a left turn");
 
         estop=1; #1; check(vx==0 && vy==0 && wz==0 && force_zero,"ESTOP gates commands without waiting for FSM");
         tick(1); check(!armed && state==0,"ESTOP latches disarm during turn");

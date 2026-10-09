@@ -1,0 +1,23 @@
+Location         : D:\anlu\rtl\fpga\traffic_sign_td\td_project\traffic_sign_td_Runs\phy_1
+Running with     : Tang Dynasty v6.2.168116
+                   Copyright (c) 2012-2025 Anlogic Inc.
+Top Model        : design_top_wrapper
+Device           : PH1P35MDG324
+Speed            : 3
+
+Timing Mode      : final
+Setup            : WNS   102ps  TNS        0ps  NUM_FEPS     0
+Hold             : WNS    20ps  TNS        0ps  NUM_FEPS     0
+
+Flow Statistics  :
+---------------------------------------------------------------------------------------------------
+     command     |  #calls  |  wall time   |  cpu time(s)  |  used memory(mb)  |  peak memory(mb)  
+---------------------------------------------------------------------------------------------------
+      route      |    1     |  8m51s(61%)  |   714(65%)    |       2463        |       2463        
+      place      |    1     |  5m7s(35%)   |   360(32%)    |       1646        |       1647        
+    fix_hold     |    1     |   19s(2%)    |    19(1%)     |       2462        |       2463        
+    import_db    |    1     |    1s(0%)    |     0(0%)     |        647        |        647        
+  import_device  |    1     |    1s(0%)    |     1(0%)     |        324        |        324        
+---------------------------------------------------------------------------------------------------
+      total      |    5     |    14m19s    |     1094      |       2463        |       2463        
+---------------------------------------------------------------------------------------------------

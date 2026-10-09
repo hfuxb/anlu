@@ -1,0 +1,20 @@
+#-----------------------------------------------------------
+# xsim v2019.2.1 (64-bit)
+# SW Build 2729669 on Thu Dec  5 04:49:17 MST 2019
+# IP Build 2729494 on Thu Dec  5 07:38:25 MST 2019
+# Start of session at: Fri Oct  9 17:09:28 2026
+# Process ID: 39920
+# Current directory: D:/anlu/rtl/sim/video720/work/tb_board_mode_selector
+# Command line: xsim.exe -log run.log -mode tcl -source {xsim.dir/snapshot/xsim_script.tcl}
+# Log file: D:/anlu/rtl/sim/video720/work/tb_board_mode_selector/run.log
+# Journal file: D:/anlu/rtl/sim/video720/work/tb_board_mode_selector\xsim.jou
+#-----------------------------------------------------------
+source xsim.dir/snapshot/xsim_script.tcl
+# xsim {snapshot} -autoloadwcfg -runall
+Vivado Simulator 2019.2
+Time resolution is 1 ps
+run -all
+PASS BOARD KEY4 MODE SELECTOR
+$finish called at time : 2225 ns : File "D:/anlu/rtl/sim/video720/tb_board_mode_selector.sv" Line 36
+exit
+INFO: [Common 17-206] Exiting xsim at Fri Oct  9 17:09:30 2026...

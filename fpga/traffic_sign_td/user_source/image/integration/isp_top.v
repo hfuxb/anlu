@@ -31,6 +31,11 @@ module isp_top #(
     output wire        O_traffic_sign_result_valid,
     output wire [4:0]  O_traffic_sign_result_class,
     output wire [7:0]  O_traffic_sign_result_ascii,
+    output wire        O_traffic_sign_bbox_valid,
+    output wire [10:0] O_traffic_sign_x_min,
+    output wire [10:0] O_traffic_sign_x_max,
+    output wire [9:0]  O_traffic_sign_y_min,
+    output wire [9:0]  O_traffic_sign_y_max,
     output wire        O_traffic_sign_result_toggle,
     output wire        O_traffic_sign_frame_drop
 );
@@ -82,11 +87,16 @@ wire         m_aixs_tvalid;  //synthesis keep
   // 保留 traffic_sign_* 内部别名，避免改变 design_top_wrapper 和 HDMI OSD 端口。
   wire         traffic_sign_busy;
   wire         traffic_sign_done;
-  wire         traffic_sign_result_valid;
-  wire [4:0]   traffic_sign_result_class;
-  wire [7:0]   traffic_sign_result_ascii;
-  reg          traffic_sign_result_toggle;
-  wire         traffic_sign_frame_drop;
+wire         traffic_sign_result_valid;
+wire [4:0]   traffic_sign_result_class;
+wire [7:0]   traffic_sign_result_ascii;
+wire         traffic_sign_bbox_valid;
+wire [10:0]  traffic_sign_x_min;
+wire [10:0]  traffic_sign_x_max;
+wire [9:0]   traffic_sign_y_min;
+wire [9:0]   traffic_sign_y_max;
+reg          traffic_sign_result_toggle;
+wire         traffic_sign_frame_drop;
 
   // 打包器输出的官方视频流标志和数据。
   wire         awb_O_tuser_128;  //synthesis keep 
@@ -103,10 +113,15 @@ wire         m_aixs_tvalid;  //synthesis keep
 
   assign O_traffic_sign_busy          = traffic_sign_busy;
   assign O_traffic_sign_done          = traffic_sign_done;
-  assign O_traffic_sign_result_valid  = traffic_sign_result_valid;
-  assign O_traffic_sign_result_class  = traffic_sign_result_class;
-  assign O_traffic_sign_result_ascii  = traffic_sign_result_ascii;
-  assign O_traffic_sign_result_toggle  = traffic_sign_result_toggle;
+assign O_traffic_sign_result_valid  = traffic_sign_result_valid;
+assign O_traffic_sign_result_class  = traffic_sign_result_class;
+assign O_traffic_sign_result_ascii  = traffic_sign_result_ascii;
+assign O_traffic_sign_bbox_valid    = traffic_sign_bbox_valid;
+assign O_traffic_sign_x_min         = traffic_sign_x_min;
+assign O_traffic_sign_x_max         = traffic_sign_x_max;
+assign O_traffic_sign_y_min         = traffic_sign_y_min;
+assign O_traffic_sign_y_max         = traffic_sign_y_max;
+assign O_traffic_sign_result_toggle  = traffic_sign_result_toggle;
   assign O_traffic_sign_frame_drop    = traffic_sign_frame_drop;
 
   // AWB保留官方提前帧标记，但RGB数据有效可能延后。
@@ -224,7 +239,7 @@ image_process_stream_96 #(
     .O_gray_mode     (process_O_gray_mode)
 );
 
-// 传统 FPGA 路牌识别：蓝色分割、形态学、连通域和下一帧箭头投票。
+// 蓝色候选区域先按近圆形和蓝色覆盖率筛选，再用下一帧白色箭头形状分类。
 traffic_sign_detector_96 #(
     .IMG_WIDTH (IMG_WIDTH),
     .IMG_HEIGHT(IMG_HEIGHT)
@@ -240,6 +255,11 @@ traffic_sign_detector_96 #(
     .O_result_valid (traffic_sign_result_valid),
     .O_result_class (traffic_sign_result_class),
     .O_result_ascii (traffic_sign_result_ascii),
+    .O_bbox_valid   (traffic_sign_bbox_valid),
+    .O_x_min        (traffic_sign_x_min),
+    .O_x_max        (traffic_sign_x_max),
+    .O_y_min        (traffic_sign_y_min),
+    .O_y_max        (traffic_sign_y_max),
     .O_frame_drop   (traffic_sign_frame_drop)
 );
 

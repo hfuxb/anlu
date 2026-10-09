@@ -101,10 +101,15 @@ module design_top_wrapper (
 	reg [1:0]		S_algo_mode_sync_2;
 	wire        S_traffic_sign_busy;
 	wire        S_traffic_sign_done;
-	wire        S_traffic_sign_result_valid;
-	wire [4:0]  S_traffic_sign_result_class;
-	wire [7:0]  S_traffic_sign_result_ascii;
-	wire        S_traffic_sign_result_toggle;
+    wire        S_traffic_sign_result_valid;
+    wire [4:0]  S_traffic_sign_result_class;
+    wire [7:0]  S_traffic_sign_result_ascii;
+    wire        S_traffic_sign_bbox_valid;
+    wire [10:0] S_traffic_sign_x_min;
+    wire [10:0] S_traffic_sign_x_max;
+    wire [9:0]  S_traffic_sign_y_min;
+    wire [9:0]  S_traffic_sign_y_max;
+    wire        S_traffic_sign_result_toggle;
 	wire        S_traffic_sign_frame_drop;
 	
 
@@ -183,6 +188,11 @@ module design_top_wrapper (
 	 wire        S_traffic_sign_hdmi_toggle;
 	 wire [7:0]  S_traffic_sign_hdmi_ascii;
 	 wire        S_traffic_sign_hdmi_result_valid;
+     wire        S_traffic_sign_hdmi_bbox_valid;
+     wire [10:0] S_traffic_sign_hdmi_x_min;
+     wire [10:0] S_traffic_sign_hdmi_x_max;
+     wire [9:0]  S_traffic_sign_hdmi_y_min;
+     wire [9:0]  S_traffic_sign_hdmi_y_max;
     reg         S_dbg_raw_seen;
     reg         S_dbg_isp_seen;
     reg         S_dbg_ddr_wr_seen;
@@ -791,6 +801,11 @@ isp_top #(
 .O_traffic_sign_result_valid(S_traffic_sign_result_valid),
 .O_traffic_sign_result_class(S_traffic_sign_result_class),
 .O_traffic_sign_result_ascii(S_traffic_sign_result_ascii),
+.O_traffic_sign_bbox_valid (S_traffic_sign_bbox_valid),
+.O_traffic_sign_x_min      (S_traffic_sign_x_min),
+.O_traffic_sign_x_max      (S_traffic_sign_x_max),
+.O_traffic_sign_y_min      (S_traffic_sign_y_min),
+.O_traffic_sign_y_max      (S_traffic_sign_y_max),
 .O_traffic_sign_result_toggle(S_traffic_sign_result_toggle),
 .O_traffic_sign_frame_drop(S_traffic_sign_frame_drop)
   );
@@ -944,10 +959,20 @@ isp_top #(
         .I_src_rst_n  ( S_rst_n             ),
         .I_src_toggle ( S_traffic_sign_result_toggle ),
         .I_src_ascii  ( S_traffic_sign_result_ascii  ),
+        .I_src_bbox_valid ( S_traffic_sign_bbox_valid ),
+        .I_src_x_min  ( S_traffic_sign_x_min ),
+        .I_src_x_max  ( S_traffic_sign_x_max ),
+        .I_src_y_min  ( S_traffic_sign_y_min ),
+        .I_src_y_max  ( S_traffic_sign_y_max ),
         .I_dst_clk    ( S_hdmi_pixel_clk    ),
         .I_dst_rst_n  ( S_hdmi_rst_n        ),
         .O_dst_toggle ( S_traffic_sign_hdmi_toggle   ),
         .O_dst_ascii  ( S_traffic_sign_hdmi_ascii    ),
+        .O_dst_bbox_valid ( S_traffic_sign_hdmi_bbox_valid ),
+        .O_dst_x_min ( S_traffic_sign_hdmi_x_min ),
+        .O_dst_x_max ( S_traffic_sign_hdmi_x_max ),
+        .O_dst_y_min ( S_traffic_sign_hdmi_y_min ),
+        .O_dst_y_max ( S_traffic_sign_hdmi_y_max ),
         .O_dst_valid  ( S_traffic_sign_hdmi_result_valid )
     );
 
@@ -971,6 +996,11 @@ isp_top #(
         .I_traffic_sign_busy      ( S_traffic_sign_busy        ),
         .I_traffic_sign_result_toggle( S_traffic_sign_hdmi_toggle ),
         .I_traffic_sign_result_ascii( S_traffic_sign_hdmi_ascii  ),
+        .I_traffic_sign_bbox_valid ( S_traffic_sign_hdmi_bbox_valid ),
+        .I_traffic_sign_x_min ( S_traffic_sign_hdmi_x_min ),
+        .I_traffic_sign_x_max ( S_traffic_sign_hdmi_x_max ),
+        .I_traffic_sign_y_min ( S_traffic_sign_hdmi_y_min ),
+        .I_traffic_sign_y_max ( S_traffic_sign_hdmi_y_max ),
         .O_video_rd_en   ( S_hdmi_window_rd_en),
         .I_video_rd_data ( S_video_rd_data    ),
         .O_hdmi_vsync    ( S_hdmi_out_vsync   ),
