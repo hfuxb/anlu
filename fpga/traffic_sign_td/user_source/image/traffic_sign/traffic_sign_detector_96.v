@@ -42,8 +42,8 @@ module traffic_sign_detector_96 #(
     localparam [4:0] CLASS_RIGHT   = 5'd2;
     localparam [4:0] CLASS_STRAIGHT= 5'd3;
     localparam [15:0] MASK_STRAIGHT = 16'h6666;
-    localparam [15:0] MASK_LEFT     = 16'hCEF2;
-    localparam [15:0] MASK_RIGHT    = 16'h37F4;
+    localparam [15:0] MASK_LEFT     = 16'h4472;
+    localparam [15:0] MASK_RIGHT    = 16'h22E4;
 
     // 四个候选槽代替全帧单一外接框；槽满时可替换面积不超过64像素的槽。
     reg [CANDIDATE_SLOTS-1:0] candidate_valid;
@@ -202,7 +202,7 @@ module traffic_sign_detector_96 #(
         end
     endfunction
 
-    // 模板来自蓝底白色直行、左转和右转箭头的归一化占位。
+    // 左右转模板取自实物路牌图，旧模板要求八格命中，会拒绝六格宽的弯箭头。
     // 忽略圆牌外接框四角，并要求模板外白块少、方向模板有明显优势。
     function [1:0] F_classify_arrow;
         input [15:0] white_mask;
@@ -236,18 +236,18 @@ module traffic_sign_detector_96 #(
 
             if (white_total < MIN_WHITE_TOTAL)
                 F_classify_arrow = 2'd0;
+            else if ((left_hits >= 5) && (left_extra <= 1) &&
+                     (left_hits >= straight_hits) &&
+                     (left_hits >= right_hits + 2))
+                F_classify_arrow = 2'd1;
+            else if ((right_hits >= 5) && (right_extra <= 1) &&
+                     (right_hits >= straight_hits) &&
+                     (right_hits >= left_hits + 2))
+                F_classify_arrow = 2'd2;
             else if ((straight_hits >= 5) && (straight_extra <= 2) &&
                      (straight_hits >= left_hits) &&
                      (straight_hits >= right_hits))
                 F_classify_arrow = 2'd3;
-            else if ((left_hits >= 8) && (left_extra <= 2) &&
-                     (left_hits >= straight_hits + 2) &&
-                     (left_hits >= right_hits + 2))
-                F_classify_arrow = 2'd1;
-            else if ((right_hits >= 8) && (right_extra <= 2) &&
-                     (right_hits >= straight_hits + 2) &&
-                     (right_hits >= left_hits + 2))
-                F_classify_arrow = 2'd2;
             else
                 F_classify_arrow = 2'd0;
         end

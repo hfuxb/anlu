@@ -1,37 +1,37 @@
-﻿[
-    {
-        "Passed":  true,
-        "Marker":  "PASS BOARD KEY4 MODE SELECTOR",
-        "Test":  "tb_board_mode_selector"
-    },
-    {
-        "Passed":  true,
-        "Marker":  "PASS OSD QUESTION GLYPH",
-        "Test":  "tb_osd_question"
-    },
-    {
-        "Passed":  true,
-        "Marker":  "FULL FRAME STREAM TEST PASSED",
-        "Test":  "tb_image_process_stream_96_full"
-    },
-    {
-        "Passed":  true,
-        "Marker":  "PASS traffic sign detector",
-        "Test":  "tb_traffic_sign_detector_96"
-    },
-    {
-        "Passed":  true,
-        "Marker":  "PASS traffic sign result CDC",
-        "Test":  "tb_traffic_sign_result_cdc"
-    },
-    {
-        "Passed":  true,
-        "Marker":  "PASS HDMI 1280x720",
-        "Test":  "tb_hdmi_720p"
-    },
-    {
-        "Passed":  true,
-        "Marker":  "PASS HDMI BLACK CAMERA",
-        "Test":  "tb_hdmi_black_camera"
-    }
+[
+  {
+    "Test": "tb_board_mode_selector",
+    "Marker": "PASS BOARD KEY4 MODE SELECTOR",
+    "Passed": true
+  },
+  {
+    "Test": "tb_osd_question",
+    "Marker": "PASS OSD QUESTION GLYPH",
+    "Passed": true
+  },
+  {
+    "Test": "tb_image_process_stream_96_full",
+    "Marker": "FULL FRAME STREAM TEST PASSED",
+    "Passed": true
+  },
+  {
+    "Test": "tb_traffic_sign_detector_96",
+    "Marker": "PASS traffic sign detector",
+    "Passed": true
+  },
+  {
+    "Test": "tb_traffic_sign_result_cdc",
+    "Marker": "PASS traffic sign result CDC",
+    "Passed": true
+  },
+  {
+    "Test": "tb_hdmi_720p",
+    "Marker": "PASS HDMI 1280x720",
+    "Passed": true
+  },
+  {
+    "Test": "tb_hdmi_black_camera",
+    "Marker": "PASS HDMI BLACK CAMERA",
+    "Passed": true
+  }
 ]

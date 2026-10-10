@@ -80,16 +80,21 @@ module tb_traffic_sign_detector_96;
                 10: direction = 1; // 左转箭头缺少一个模板格
                 11: direction = 1; // 真路牌旁有较小的蓝色干扰圆
                 12: direction = 0; // 圆形蓝底但没有白色箭头
+                14: direction = 2; // 右转图像模糊时少一个白格
+                15: direction = 3; // 直行原图缩小后的白格分布
                 default: direction = 0;
             endcase
 
+            // 左右转掩码取自用户路牌图片的蓝色外接框，经4x4白像素量化得到。
             case (direction)
-                1: arrow_mask = 16'hCEF2;
-                2: arrow_mask = 16'h37F4;
+                1: arrow_mask = 16'h4472;
+                2: arrow_mask = 16'h22E4;
                 3: arrow_mask = 16'h6666;
                 4: arrow_mask = 16'h0FF0;
                 default: arrow_mask = 16'd0;
             endcase
+            if (scene == 14) arrow_mask = 16'h2264;
+            if (scene == 15) arrow_mask = 16'h6466;
 
             for (y = 0; y < IMG_HEIGHT; y = y + 1) begin
                 for (group = 0; group < GROUPS; group = group + 1) begin
@@ -142,7 +147,7 @@ module tb_traffic_sign_detector_96;
                         if ((scene == 1) || (scene == 2) || (scene == 3) ||
                             (scene == 6) || (scene == 7) || (scene == 8) ||
                             (scene == 9) || (scene == 10) || (scene == 11) ||
-                            (scene == 12)) begin
+                            (scene == 12) || (scene == 14) || (scene == 15)) begin
                             if (dx * dx + dy * dy <= radius * radius) begin
                                 red = 8'd20;
                                 green = 8'd50;
@@ -236,6 +241,8 @@ module tb_traffic_sign_detector_96;
         check_scene(11, "L", 1088, 1152, 608, 672, 1'b1);
         check_scene(12, "?", 0, 0, 0, 0, 1'b0);
         check_scene(13, "?", 0, 0, 0, 0, 1'b0);
+        check_scene(14, "R", 1088, 1152, 608, 672, 1'b1);
+        check_scene(15, "S", 1088, 1152, 608, 672, 1'b1);
         check_scene(0, "?", 0, 0, 0, 0, 1'b0);
 
         if (frame_drop !== 1'b0)
