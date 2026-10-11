@@ -1,0 +1,22 @@
+#-----------------------------------------------------------
+# xsim v2019.2.1 (64-bit)
+# SW Build 2729669 on Thu Dec  5 04:49:17 MST 2019
+# IP Build 2729494 on Thu Dec  5 07:38:25 MST 2019
+# Start of session at: Sat Oct 10 10:37:08 2026
+# Process ID: 33416
+# Current directory: D:/anlu/rtl/sim/video720/work/tb_hdmi_720p
+# Command line: xsim.exe -log run.log -mode tcl -source {xsim.dir/snapshot/xsim_script.tcl}
+# Log file: D:/anlu/rtl/sim/video720/work/tb_hdmi_720p/run.log
+# Journal file: D:/anlu/rtl/sim/video720/work/tb_hdmi_720p\xsim.jou
+#-----------------------------------------------------------
+source xsim.dir/snapshot/xsim_script.tcl
+# xsim {snapshot} -autoloadwcfg -runall
+Vivado Simulator 2019.2
+Time resolution is 1 ps
+run -all
+Fatal: diagnostic bits remained after leaving SIG mode
+Time: 61875110 ns  Iteration: 0  Process: /tb_hdmi_720p/Always24_14  File: D:/anlu/rtl/sim/video720/tb_hdmi_720p.sv
+$finish called at time : 61875110 ns
+run: Time (s): cpu = 00:00:00 ; elapsed = 00:00:28 . Memory (MB): peak = 224.867 ; gain = 0.000
+exit
+INFO: [Common 17-206] Exiting xsim at Sat Oct 10 10:37:38 2026...

@@ -1,0 +1,1 @@
+"tb_hdmi_720p" -s "snapshot" -log "elaborate.log" 

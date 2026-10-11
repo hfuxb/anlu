@@ -1,0 +1,1487 @@
+{
+  "boundary": "固定96像素取样框，牌面水平和垂直偏移各±4像素；未模拟候选扫描",
+  "samples": {
+    "left": {
+      "fixture_sha256": "f94aa555c7556b899531dc0aec5bcb720ee6f4382f704866951283d5c25bebeb",
+      "baseline_correct": 59,
+      "joint_correct": 81,
+      "joint_wrong": 0,
+      "poses": [
+        {
+          "dx": -4,
+          "dy": -4,
+          "baseline": "L",
+          "joint": "L"
+        },
+        {
+          "dx": -3,
+          "dy": -4,
+          "baseline": "L",
+          "joint": "L"
+        },
+        {
+          "dx": -2,
+          "dy": -4,
+          "baseline": "L",
+          "joint": "L"
+        },
+        {
+          "dx": -1,
+          "dy": -4,
+          "baseline": "L",
+          "joint": "L"
+        },
+        {
+          "dx": 0,
+          "dy": -4,
+          "baseline": "L",
+          "joint": "L"
+        },
+        {
+          "dx": 1,
+          "dy": -4,
+          "baseline": "?",
+          "joint": "L"
+        },
+        {
+          "dx": 2,
+          "dy": -4,
+          "baseline": "?",
+          "joint": "L"
+        },
+        {
+          "dx": 3,
+          "dy": -4,
+          "baseline": "?",
+          "joint": "L"
+        },
+        {
+          "dx": 4,
+          "dy": -4,
+          "baseline": "?",
+          "joint": "L"
+        },
+        {
+          "dx": -4,
+          "dy": -3,
+          "baseline": "L",
+          "joint": "L"
+        },
+        {
+          "dx": -3,
+          "dy": -3,
+          "baseline": "L",
+          "joint": "L"
+        },
+        {
+          "dx": -2,
+          "dy": -3,
+          "baseline": "L",
+          "joint": "L"
+        },
+        {
+          "dx": -1,
+          "dy": -3,
+          "baseline": "L",
+          "joint": "L"
+        },
+        {
+          "dx": 0,
+          "dy": -3,
+          "baseline": "L",
+          "joint": "L"
+        },
+        {
+          "dx": 1,
+          "dy": -3,
+          "baseline": "?",
+          "joint": "L"
+        },
+        {
+          "dx": 2,
+          "dy": -3,
+          "baseline": "?",
+          "joint": "L"
+        },
+        {
+          "dx": 3,
+          "dy": -3,
+          "baseline": "?",
+          "joint": "L"
+        },
+        {
+          "dx": 4,
+          "dy": -3,
+          "baseline": "?",
+          "joint": "L"
+        },
+        {
+          "dx": -4,
+          "dy": -2,
+          "baseline": "L",
+          "joint": "L"
+        },
+        {
+          "dx": -3,
+          "dy": -2,
+          "baseline": "L",
+          "joint": "L"
+        },
+        {
+          "dx": -2,
+          "dy": -2,
+          "baseline": "L",
+          "joint": "L"
+        },
+        {
+          "dx": -1,
+          "dy": -2,
+          "baseline": "L",
+          "joint": "L"
+        },
+        {
+          "dx": 0,
+          "dy": -2,
+          "baseline": "L",
+          "joint": "L"
+        },
+        {
+          "dx": 1,
+          "dy": -2,
+          "baseline": "L",
+          "joint": "L"
+        },
+        {
+          "dx": 2,
+          "dy": -2,
+          "baseline": "?",
+          "joint": "L"
+        },
+        {
+          "dx": 3,
+          "dy": -2,
+          "baseline": "?",
+          "joint": "L"
+        },
+        {
+          "dx": 4,
+          "dy": -2,
+          "baseline": "?",
+          "joint": "L"
+        },
+        {
+          "dx": -4,
+          "dy": -1,
+          "baseline": "L",
+          "joint": "L"
+        },
+        {
+          "dx": -3,
+          "dy": -1,
+          "baseline": "L",
+          "joint": "L"
+        },
+        {
+          "dx": -2,
+          "dy": -1,
+          "baseline": "L",
+          "joint": "L"
+        },
+        {
+          "dx": -1,
+          "dy": -1,
+          "baseline": "L",
+          "joint": "L"
+        },
+        {
+          "dx": 0,
+          "dy": -1,
+          "baseline": "L",
+          "joint": "L"
+        },
+        {
+          "dx": 1,
+          "dy": -1,
+          "baseline": "L",
+          "joint": "L"
+        },
+        {
+          "dx": 2,
+          "dy": -1,
+          "baseline": "?",
+          "joint": "L"
+        },
+        {
+          "dx": 3,
+          "dy": -1,
+          "baseline": "?",
+          "joint": "L"
+        },
+        {
+          "dx": 4,
+          "dy": -1,
+          "baseline": "?",
+          "joint": "L"
+        },
+        {
+          "dx": -4,
+          "dy": 0,
+          "baseline": "L",
+          "joint": "L"
+        },
+        {
+          "dx": -3,
+          "dy": 0,
+          "baseline": "L",
+          "joint": "L"
+        },
+        {
+          "dx": -2,
+          "dy": 0,
+          "baseline": "L",
+          "joint": "L"
+        },
+        {
+          "dx": -1,
+          "dy": 0,
+          "baseline": "L",
+          "joint": "L"
+        },
+        {
+          "dx": 0,
+          "dy": 0,
+          "baseline": "L",
+          "joint": "L"
+        },
+        {
+          "dx": 1,
+          "dy": 0,
+          "baseline": "L",
+          "joint": "L"
+        },
+        {
+          "dx": 2,
+          "dy": 0,
+          "baseline": "L",
+          "joint": "L"
+        },
+        {
+          "dx": 3,
+          "dy": 0,
+          "baseline": "?",
+          "joint": "L"
+        },
+        {
+          "dx": 4,
+          "dy": 0,
+          "baseline": "?",
+          "joint": "L"
+        },
+        {
+          "dx": -4,
+          "dy": 1,
+          "baseline": "L",
+          "joint": "L"
+        },
+        {
+          "dx": -3,
+          "dy": 1,
+          "baseline": "L",
+          "joint": "L"
+        },
+        {
+          "dx": -2,
+          "dy": 1,
+          "baseline": "L",
+          "joint": "L"
+        },
+        {
+          "dx": -1,
+          "dy": 1,
+          "baseline": "L",
+          "joint": "L"
+        },
+        {
+          "dx": 0,
+          "dy": 1,
+          "baseline": "L",
+          "joint": "L"
+        },
+        {
+          "dx": 1,
+          "dy": 1,
+          "baseline": "L",
+          "joint": "L"
+        },
+        {
+          "dx": 2,
+          "dy": 1,
+          "baseline": "L",
+          "joint": "L"
+        },
+        {
+          "dx": 3,
+          "dy": 1,
+          "baseline": "?",
+          "joint": "L"
+        },
+        {
+          "dx": 4,
+          "dy": 1,
+          "baseline": "?",
+          "joint": "L"
+        },
+        {
+          "dx": -4,
+          "dy": 2,
+          "baseline": "L",
+          "joint": "L"
+        },
+        {
+          "dx": -3,
+          "dy": 2,
+          "baseline": "L",
+          "joint": "L"
+        },
+        {
+          "dx": -2,
+          "dy": 2,
+          "baseline": "L",
+          "joint": "L"
+        },
+        {
+          "dx": -1,
+          "dy": 2,
+          "baseline": "L",
+          "joint": "L"
+        },
+        {
+          "dx": 0,
+          "dy": 2,
+          "baseline": "L",
+          "joint": "L"
+        },
+        {
+          "dx": 1,
+          "dy": 2,
+          "baseline": "L",
+          "joint": "L"
+        },
+        {
+          "dx": 2,
+          "dy": 2,
+          "baseline": "L",
+          "joint": "L"
+        },
+        {
+          "dx": 3,
+          "dy": 2,
+          "baseline": "S",
+          "joint": "L"
+        },
+        {
+          "dx": 4,
+          "dy": 2,
+          "baseline": "S",
+          "joint": "L"
+        },
+        {
+          "dx": -4,
+          "dy": 3,
+          "baseline": "L",
+          "joint": "L"
+        },
+        {
+          "dx": -3,
+          "dy": 3,
+          "baseline": "L",
+          "joint": "L"
+        },
+        {
+          "dx": -2,
+          "dy": 3,
+          "baseline": "L",
+          "joint": "L"
+        },
+        {
+          "dx": -1,
+          "dy": 3,
+          "baseline": "L",
+          "joint": "L"
+        },
+        {
+          "dx": 0,
+          "dy": 3,
+          "baseline": "L",
+          "joint": "L"
+        },
+        {
+          "dx": 1,
+          "dy": 3,
+          "baseline": "L",
+          "joint": "L"
+        },
+        {
+          "dx": 2,
+          "dy": 3,
+          "baseline": "L",
+          "joint": "L"
+        },
+        {
+          "dx": 3,
+          "dy": 3,
+          "baseline": "L",
+          "joint": "L"
+        },
+        {
+          "dx": 4,
+          "dy": 3,
+          "baseline": "S",
+          "joint": "L"
+        },
+        {
+          "dx": -4,
+          "dy": 4,
+          "baseline": "L",
+          "joint": "L"
+        },
+        {
+          "dx": -3,
+          "dy": 4,
+          "baseline": "L",
+          "joint": "L"
+        },
+        {
+          "dx": -2,
+          "dy": 4,
+          "baseline": "L",
+          "joint": "L"
+        },
+        {
+          "dx": -1,
+          "dy": 4,
+          "baseline": "L",
+          "joint": "L"
+        },
+        {
+          "dx": 0,
+          "dy": 4,
+          "baseline": "L",
+          "joint": "L"
+        },
+        {
+          "dx": 1,
+          "dy": 4,
+          "baseline": "L",
+          "joint": "L"
+        },
+        {
+          "dx": 2,
+          "dy": 4,
+          "baseline": "L",
+          "joint": "L"
+        },
+        {
+          "dx": 3,
+          "dy": 4,
+          "baseline": "L",
+          "joint": "L"
+        },
+        {
+          "dx": 4,
+          "dy": 4,
+          "baseline": "?",
+          "joint": "L"
+        }
+      ]
+    },
+    "right": {
+      "fixture_sha256": "6fd40c8a738a14382f6c21c786c89f703568492dce382f8a1efb871c96943a07",
+      "baseline_correct": 59,
+      "joint_correct": 81,
+      "joint_wrong": 0,
+      "poses": [
+        {
+          "dx": -4,
+          "dy": -4,
+          "baseline": "?",
+          "joint": "R"
+        },
+        {
+          "dx": -3,
+          "dy": -4,
+          "baseline": "?",
+          "joint": "R"
+        },
+        {
+          "dx": -2,
+          "dy": -4,
+          "baseline": "?",
+          "joint": "R"
+        },
+        {
+          "dx": -1,
+          "dy": -4,
+          "baseline": "?",
+          "joint": "R"
+        },
+        {
+          "dx": 0,
+          "dy": -4,
+          "baseline": "R",
+          "joint": "R"
+        },
+        {
+          "dx": 1,
+          "dy": -4,
+          "baseline": "R",
+          "joint": "R"
+        },
+        {
+          "dx": 2,
+          "dy": -4,
+          "baseline": "R",
+          "joint": "R"
+        },
+        {
+          "dx": 3,
+          "dy": -4,
+          "baseline": "R",
+          "joint": "R"
+        },
+        {
+          "dx": 4,
+          "dy": -4,
+          "baseline": "R",
+          "joint": "R"
+        },
+        {
+          "dx": -4,
+          "dy": -3,
+          "baseline": "?",
+          "joint": "R"
+        },
+        {
+          "dx": -3,
+          "dy": -3,
+          "baseline": "?",
+          "joint": "R"
+        },
+        {
+          "dx": -2,
+          "dy": -3,
+          "baseline": "?",
+          "joint": "R"
+        },
+        {
+          "dx": -1,
+          "dy": -3,
+          "baseline": "?",
+          "joint": "R"
+        },
+        {
+          "dx": 0,
+          "dy": -3,
+          "baseline": "R",
+          "joint": "R"
+        },
+        {
+          "dx": 1,
+          "dy": -3,
+          "baseline": "R",
+          "joint": "R"
+        },
+        {
+          "dx": 2,
+          "dy": -3,
+          "baseline": "R",
+          "joint": "R"
+        },
+        {
+          "dx": 3,
+          "dy": -3,
+          "baseline": "R",
+          "joint": "R"
+        },
+        {
+          "dx": 4,
+          "dy": -3,
+          "baseline": "R",
+          "joint": "R"
+        },
+        {
+          "dx": -4,
+          "dy": -2,
+          "baseline": "?",
+          "joint": "R"
+        },
+        {
+          "dx": -3,
+          "dy": -2,
+          "baseline": "?",
+          "joint": "R"
+        },
+        {
+          "dx": -2,
+          "dy": -2,
+          "baseline": "?",
+          "joint": "R"
+        },
+        {
+          "dx": -1,
+          "dy": -2,
+          "baseline": "R",
+          "joint": "R"
+        },
+        {
+          "dx": 0,
+          "dy": -2,
+          "baseline": "R",
+          "joint": "R"
+        },
+        {
+          "dx": 1,
+          "dy": -2,
+          "baseline": "R",
+          "joint": "R"
+        },
+        {
+          "dx": 2,
+          "dy": -2,
+          "baseline": "R",
+          "joint": "R"
+        },
+        {
+          "dx": 3,
+          "dy": -2,
+          "baseline": "R",
+          "joint": "R"
+        },
+        {
+          "dx": 4,
+          "dy": -2,
+          "baseline": "R",
+          "joint": "R"
+        },
+        {
+          "dx": -4,
+          "dy": -1,
+          "baseline": "?",
+          "joint": "R"
+        },
+        {
+          "dx": -3,
+          "dy": -1,
+          "baseline": "?",
+          "joint": "R"
+        },
+        {
+          "dx": -2,
+          "dy": -1,
+          "baseline": "?",
+          "joint": "R"
+        },
+        {
+          "dx": -1,
+          "dy": -1,
+          "baseline": "R",
+          "joint": "R"
+        },
+        {
+          "dx": 0,
+          "dy": -1,
+          "baseline": "R",
+          "joint": "R"
+        },
+        {
+          "dx": 1,
+          "dy": -1,
+          "baseline": "R",
+          "joint": "R"
+        },
+        {
+          "dx": 2,
+          "dy": -1,
+          "baseline": "R",
+          "joint": "R"
+        },
+        {
+          "dx": 3,
+          "dy": -1,
+          "baseline": "R",
+          "joint": "R"
+        },
+        {
+          "dx": 4,
+          "dy": -1,
+          "baseline": "R",
+          "joint": "R"
+        },
+        {
+          "dx": -4,
+          "dy": 0,
+          "baseline": "?",
+          "joint": "R"
+        },
+        {
+          "dx": -3,
+          "dy": 0,
+          "baseline": "?",
+          "joint": "R"
+        },
+        {
+          "dx": -2,
+          "dy": 0,
+          "baseline": "R",
+          "joint": "R"
+        },
+        {
+          "dx": -1,
+          "dy": 0,
+          "baseline": "R",
+          "joint": "R"
+        },
+        {
+          "dx": 0,
+          "dy": 0,
+          "baseline": "R",
+          "joint": "R"
+        },
+        {
+          "dx": 1,
+          "dy": 0,
+          "baseline": "R",
+          "joint": "R"
+        },
+        {
+          "dx": 2,
+          "dy": 0,
+          "baseline": "R",
+          "joint": "R"
+        },
+        {
+          "dx": 3,
+          "dy": 0,
+          "baseline": "R",
+          "joint": "R"
+        },
+        {
+          "dx": 4,
+          "dy": 0,
+          "baseline": "R",
+          "joint": "R"
+        },
+        {
+          "dx": -4,
+          "dy": 1,
+          "baseline": "?",
+          "joint": "R"
+        },
+        {
+          "dx": -3,
+          "dy": 1,
+          "baseline": "?",
+          "joint": "R"
+        },
+        {
+          "dx": -2,
+          "dy": 1,
+          "baseline": "R",
+          "joint": "R"
+        },
+        {
+          "dx": -1,
+          "dy": 1,
+          "baseline": "R",
+          "joint": "R"
+        },
+        {
+          "dx": 0,
+          "dy": 1,
+          "baseline": "R",
+          "joint": "R"
+        },
+        {
+          "dx": 1,
+          "dy": 1,
+          "baseline": "R",
+          "joint": "R"
+        },
+        {
+          "dx": 2,
+          "dy": 1,
+          "baseline": "R",
+          "joint": "R"
+        },
+        {
+          "dx": 3,
+          "dy": 1,
+          "baseline": "R",
+          "joint": "R"
+        },
+        {
+          "dx": 4,
+          "dy": 1,
+          "baseline": "R",
+          "joint": "R"
+        },
+        {
+          "dx": -4,
+          "dy": 2,
+          "baseline": "S",
+          "joint": "R"
+        },
+        {
+          "dx": -3,
+          "dy": 2,
+          "baseline": "S",
+          "joint": "R"
+        },
+        {
+          "dx": -2,
+          "dy": 2,
+          "baseline": "R",
+          "joint": "R"
+        },
+        {
+          "dx": -1,
+          "dy": 2,
+          "baseline": "R",
+          "joint": "R"
+        },
+        {
+          "dx": 0,
+          "dy": 2,
+          "baseline": "R",
+          "joint": "R"
+        },
+        {
+          "dx": 1,
+          "dy": 2,
+          "baseline": "R",
+          "joint": "R"
+        },
+        {
+          "dx": 2,
+          "dy": 2,
+          "baseline": "R",
+          "joint": "R"
+        },
+        {
+          "dx": 3,
+          "dy": 2,
+          "baseline": "R",
+          "joint": "R"
+        },
+        {
+          "dx": 4,
+          "dy": 2,
+          "baseline": "R",
+          "joint": "R"
+        },
+        {
+          "dx": -4,
+          "dy": 3,
+          "baseline": "S",
+          "joint": "R"
+        },
+        {
+          "dx": -3,
+          "dy": 3,
+          "baseline": "R",
+          "joint": "R"
+        },
+        {
+          "dx": -2,
+          "dy": 3,
+          "baseline": "R",
+          "joint": "R"
+        },
+        {
+          "dx": -1,
+          "dy": 3,
+          "baseline": "R",
+          "joint": "R"
+        },
+        {
+          "dx": 0,
+          "dy": 3,
+          "baseline": "R",
+          "joint": "R"
+        },
+        {
+          "dx": 1,
+          "dy": 3,
+          "baseline": "R",
+          "joint": "R"
+        },
+        {
+          "dx": 2,
+          "dy": 3,
+          "baseline": "R",
+          "joint": "R"
+        },
+        {
+          "dx": 3,
+          "dy": 3,
+          "baseline": "R",
+          "joint": "R"
+        },
+        {
+          "dx": 4,
+          "dy": 3,
+          "baseline": "R",
+          "joint": "R"
+        },
+        {
+          "dx": -4,
+          "dy": 4,
+          "baseline": "?",
+          "joint": "R"
+        },
+        {
+          "dx": -3,
+          "dy": 4,
+          "baseline": "R",
+          "joint": "R"
+        },
+        {
+          "dx": -2,
+          "dy": 4,
+          "baseline": "R",
+          "joint": "R"
+        },
+        {
+          "dx": -1,
+          "dy": 4,
+          "baseline": "R",
+          "joint": "R"
+        },
+        {
+          "dx": 0,
+          "dy": 4,
+          "baseline": "R",
+          "joint": "R"
+        },
+        {
+          "dx": 1,
+          "dy": 4,
+          "baseline": "R",
+          "joint": "R"
+        },
+        {
+          "dx": 2,
+          "dy": 4,
+          "baseline": "R",
+          "joint": "R"
+        },
+        {
+          "dx": 3,
+          "dy": 4,
+          "baseline": "R",
+          "joint": "R"
+        },
+        {
+          "dx": 4,
+          "dy": 4,
+          "baseline": "R",
+          "joint": "R"
+        }
+      ]
+    },
+    "straight": {
+      "fixture_sha256": "a8abf0a15252fc7d131396e36b203172a2e842b6ecd65e8ec333d48894b829de",
+      "baseline_correct": 80,
+      "joint_correct": 80,
+      "joint_wrong": 0,
+      "poses": [
+        {
+          "dx": -4,
+          "dy": -4,
+          "baseline": "S",
+          "joint": "S"
+        },
+        {
+          "dx": -3,
+          "dy": -4,
+          "baseline": "S",
+          "joint": "S"
+        },
+        {
+          "dx": -2,
+          "dy": -4,
+          "baseline": "S",
+          "joint": "S"
+        },
+        {
+          "dx": -1,
+          "dy": -4,
+          "baseline": "S",
+          "joint": "S"
+        },
+        {
+          "dx": 0,
+          "dy": -4,
+          "baseline": "S",
+          "joint": "S"
+        },
+        {
+          "dx": 1,
+          "dy": -4,
+          "baseline": "S",
+          "joint": "S"
+        },
+        {
+          "dx": 2,
+          "dy": -4,
+          "baseline": "S",
+          "joint": "S"
+        },
+        {
+          "dx": 3,
+          "dy": -4,
+          "baseline": "S",
+          "joint": "S"
+        },
+        {
+          "dx": 4,
+          "dy": -4,
+          "baseline": "S",
+          "joint": "S"
+        },
+        {
+          "dx": -4,
+          "dy": -3,
+          "baseline": "S",
+          "joint": "S"
+        },
+        {
+          "dx": -3,
+          "dy": -3,
+          "baseline": "S",
+          "joint": "S"
+        },
+        {
+          "dx": -2,
+          "dy": -3,
+          "baseline": "S",
+          "joint": "S"
+        },
+        {
+          "dx": -1,
+          "dy": -3,
+          "baseline": "S",
+          "joint": "S"
+        },
+        {
+          "dx": 0,
+          "dy": -3,
+          "baseline": "S",
+          "joint": "S"
+        },
+        {
+          "dx": 1,
+          "dy": -3,
+          "baseline": "S",
+          "joint": "S"
+        },
+        {
+          "dx": 2,
+          "dy": -3,
+          "baseline": "S",
+          "joint": "S"
+        },
+        {
+          "dx": 3,
+          "dy": -3,
+          "baseline": "S",
+          "joint": "S"
+        },
+        {
+          "dx": 4,
+          "dy": -3,
+          "baseline": "S",
+          "joint": "S"
+        },
+        {
+          "dx": -4,
+          "dy": -2,
+          "baseline": "S",
+          "joint": "S"
+        },
+        {
+          "dx": -3,
+          "dy": -2,
+          "baseline": "S",
+          "joint": "S"
+        },
+        {
+          "dx": -2,
+          "dy": -2,
+          "baseline": "S",
+          "joint": "S"
+        },
+        {
+          "dx": -1,
+          "dy": -2,
+          "baseline": "S",
+          "joint": "S"
+        },
+        {
+          "dx": 0,
+          "dy": -2,
+          "baseline": "S",
+          "joint": "S"
+        },
+        {
+          "dx": 1,
+          "dy": -2,
+          "baseline": "S",
+          "joint": "S"
+        },
+        {
+          "dx": 2,
+          "dy": -2,
+          "baseline": "S",
+          "joint": "S"
+        },
+        {
+          "dx": 3,
+          "dy": -2,
+          "baseline": "S",
+          "joint": "S"
+        },
+        {
+          "dx": 4,
+          "dy": -2,
+          "baseline": "S",
+          "joint": "S"
+        },
+        {
+          "dx": -4,
+          "dy": -1,
+          "baseline": "S",
+          "joint": "S"
+        },
+        {
+          "dx": -3,
+          "dy": -1,
+          "baseline": "S",
+          "joint": "S"
+        },
+        {
+          "dx": -2,
+          "dy": -1,
+          "baseline": "S",
+          "joint": "S"
+        },
+        {
+          "dx": -1,
+          "dy": -1,
+          "baseline": "S",
+          "joint": "S"
+        },
+        {
+          "dx": 0,
+          "dy": -1,
+          "baseline": "S",
+          "joint": "S"
+        },
+        {
+          "dx": 1,
+          "dy": -1,
+          "baseline": "S",
+          "joint": "S"
+        },
+        {
+          "dx": 2,
+          "dy": -1,
+          "baseline": "S",
+          "joint": "S"
+        },
+        {
+          "dx": 3,
+          "dy": -1,
+          "baseline": "S",
+          "joint": "S"
+        },
+        {
+          "dx": 4,
+          "dy": -1,
+          "baseline": "S",
+          "joint": "S"
+        },
+        {
+          "dx": -4,
+          "dy": 0,
+          "baseline": "S",
+          "joint": "S"
+        },
+        {
+          "dx": -3,
+          "dy": 0,
+          "baseline": "S",
+          "joint": "S"
+        },
+        {
+          "dx": -2,
+          "dy": 0,
+          "baseline": "S",
+          "joint": "S"
+        },
+        {
+          "dx": -1,
+          "dy": 0,
+          "baseline": "S",
+          "joint": "S"
+        },
+        {
+          "dx": 0,
+          "dy": 0,
+          "baseline": "S",
+          "joint": "S"
+        },
+        {
+          "dx": 1,
+          "dy": 0,
+          "baseline": "S",
+          "joint": "S"
+        },
+        {
+          "dx": 2,
+          "dy": 0,
+          "baseline": "S",
+          "joint": "S"
+        },
+        {
+          "dx": 3,
+          "dy": 0,
+          "baseline": "S",
+          "joint": "S"
+        },
+        {
+          "dx": 4,
+          "dy": 0,
+          "baseline": "S",
+          "joint": "S"
+        },
+        {
+          "dx": -4,
+          "dy": 1,
+          "baseline": "S",
+          "joint": "S"
+        },
+        {
+          "dx": -3,
+          "dy": 1,
+          "baseline": "S",
+          "joint": "S"
+        },
+        {
+          "dx": -2,
+          "dy": 1,
+          "baseline": "S",
+          "joint": "S"
+        },
+        {
+          "dx": -1,
+          "dy": 1,
+          "baseline": "S",
+          "joint": "S"
+        },
+        {
+          "dx": 0,
+          "dy": 1,
+          "baseline": "S",
+          "joint": "S"
+        },
+        {
+          "dx": 1,
+          "dy": 1,
+          "baseline": "S",
+          "joint": "S"
+        },
+        {
+          "dx": 2,
+          "dy": 1,
+          "baseline": "S",
+          "joint": "S"
+        },
+        {
+          "dx": 3,
+          "dy": 1,
+          "baseline": "S",
+          "joint": "S"
+        },
+        {
+          "dx": 4,
+          "dy": 1,
+          "baseline": "S",
+          "joint": "S"
+        },
+        {
+          "dx": -4,
+          "dy": 2,
+          "baseline": "S",
+          "joint": "S"
+        },
+        {
+          "dx": -3,
+          "dy": 2,
+          "baseline": "S",
+          "joint": "S"
+        },
+        {
+          "dx": -2,
+          "dy": 2,
+          "baseline": "S",
+          "joint": "S"
+        },
+        {
+          "dx": -1,
+          "dy": 2,
+          "baseline": "S",
+          "joint": "S"
+        },
+        {
+          "dx": 0,
+          "dy": 2,
+          "baseline": "S",
+          "joint": "S"
+        },
+        {
+          "dx": 1,
+          "dy": 2,
+          "baseline": "S",
+          "joint": "S"
+        },
+        {
+          "dx": 2,
+          "dy": 2,
+          "baseline": "S",
+          "joint": "S"
+        },
+        {
+          "dx": 3,
+          "dy": 2,
+          "baseline": "S",
+          "joint": "S"
+        },
+        {
+          "dx": 4,
+          "dy": 2,
+          "baseline": "S",
+          "joint": "S"
+        },
+        {
+          "dx": -4,
+          "dy": 3,
+          "baseline": "S",
+          "joint": "S"
+        },
+        {
+          "dx": -3,
+          "dy": 3,
+          "baseline": "S",
+          "joint": "S"
+        },
+        {
+          "dx": -2,
+          "dy": 3,
+          "baseline": "S",
+          "joint": "S"
+        },
+        {
+          "dx": -1,
+          "dy": 3,
+          "baseline": "S",
+          "joint": "S"
+        },
+        {
+          "dx": 0,
+          "dy": 3,
+          "baseline": "S",
+          "joint": "S"
+        },
+        {
+          "dx": 1,
+          "dy": 3,
+          "baseline": "S",
+          "joint": "S"
+        },
+        {
+          "dx": 2,
+          "dy": 3,
+          "baseline": "S",
+          "joint": "S"
+        },
+        {
+          "dx": 3,
+          "dy": 3,
+          "baseline": "S",
+          "joint": "S"
+        },
+        {
+          "dx": 4,
+          "dy": 3,
+          "baseline": "S",
+          "joint": "S"
+        },
+        {
+          "dx": -4,
+          "dy": 4,
+          "baseline": "S",
+          "joint": "S"
+        },
+        {
+          "dx": -3,
+          "dy": 4,
+          "baseline": "S",
+          "joint": "S"
+        },
+        {
+          "dx": -2,
+          "dy": 4,
+          "baseline": "?",
+          "joint": "?"
+        },
+        {
+          "dx": -1,
+          "dy": 4,
+          "baseline": "S",
+          "joint": "S"
+        },
+        {
+          "dx": 0,
+          "dy": 4,
+          "baseline": "S",
+          "joint": "S"
+        },
+        {
+          "dx": 1,
+          "dy": 4,
+          "baseline": "S",
+          "joint": "S"
+        },
+        {
+          "dx": 2,
+          "dy": 4,
+          "baseline": "S",
+          "joint": "S"
+        },
+        {
+          "dx": 3,
+          "dy": 4,
+          "baseline": "S",
+          "joint": "S"
+        },
+        {
+          "dx": 4,
+          "dy": 4,
+          "baseline": "S",
+          "joint": "S"
+        }
+      ]
+    }
+  }
+}

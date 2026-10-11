@@ -1,0 +1,1 @@
+"tb_traffic_sign_photo_replay" -s "snapshot" -log "elaborate.log" 

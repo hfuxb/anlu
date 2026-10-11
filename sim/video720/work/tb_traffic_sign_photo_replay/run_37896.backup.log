@@ -1,0 +1,54 @@
+#-----------------------------------------------------------
+# xsim v2019.2.1 (64-bit)
+# SW Build 2729669 on Thu Dec  5 04:49:17 MST 2019
+# IP Build 2729494 on Thu Dec  5 07:38:25 MST 2019
+# Start of session at: Sat Oct 10 13:20:40 2026
+# Process ID: 37896
+# Current directory: D:/anlu/rtl/sim/video720/work/tb_traffic_sign_photo_replay
+# Command line: xsim.exe -log run.log -mode tcl -source {xsim.dir/snapshot/xsim_script.tcl}
+# Log file: D:/anlu/rtl/sim/video720/work/tb_traffic_sign_photo_replay/run.log
+# Journal file: D:/anlu/rtl/sim/video720/work/tb_traffic_sign_photo_replay\xsim.jou
+#-----------------------------------------------------------
+source xsim.dir/snapshot/xsim_script.tcl
+# xsim {snapshot} -autoloadwcfg -runall
+Vivado Simulator 2019.2
+Time resolution is 1 ps
+run -all
+PHOTO truth=L size=96 bright=100 tilt=0 result=L stage=3 candidate=1 white=3563 mask=d47b hits=5/6/2 box=112,72:207,167
+PHOTO truth=L size=64 bright=100 tilt=0 result=L stage=3 candidate=1 white=1569 mask=d47b hits=5/6/2 box=128,88:191,151
+PHOTO truth=L size=128 bright=100 tilt=0 result=L stage=3 candidate=1 white=4095 mask=d47b hits=5/6/2 box=96,56:223,183
+PHOTO truth=L size=192 bright=100 tilt=0 result=L stage=3 candidate=1 white=4095 mask=d47b hits=5/6/2 box=64,24:255,215
+PHOTO truth=L size=96 bright=75 tilt=0 result=L stage=3 candidate=1 white=3324 mask=d47b hits=5/6/2 box=112,72:207,167
+PHOTO truth=L size=96 bright=100 tilt=1 result=L stage=3 candidate=1 white=3261 mask=d46b hits=5/5/2 box=112,72:207,167
+PHOTO truth=L size=96 bright=100 tilt=-1 result=L stage=3 candidate=1 white=3263 mask=947b hits=4/5/2 box=112,72:207,167
+PHOTO truth=R size=96 bright=100 tilt=0 result=R stage=3 candidate=1 white=3562 mask=b2ed hits=5/2/6 box=112,72:207,167
+PHOTO truth=R size=64 bright=100 tilt=0 result=R stage=3 candidate=1 white=1573 mask=b2ed hits=5/2/6 box=128,88:191,151
+PHOTO truth=R size=128 bright=100 tilt=0 result=R stage=3 candidate=1 white=4095 mask=b2ed hits=5/2/6 box=96,56:223,183
+PHOTO truth=R size=192 bright=100 tilt=0 result=R stage=3 candidate=1 white=4095 mask=b2ed hits=5/2/6 box=64,24:255,215
+PHOTO truth=R size=96 bright=75 tilt=0 result=R stage=3 candidate=1 white=3325 mask=b2ed hits=5/2/6 box=112,72:207,167
+PHOTO truth=R size=96 bright=100 tilt=1 result=R stage=3 candidate=1 white=3262 mask=92ed hits=4/2/5 box=112,72:207,167
+PHOTO truth=R size=96 bright=100 tilt=-1 result=R stage=3 candidate=1 white=3261 mask=b26d hits=5/2/5 box=112,72:207,167
+PHOTO truth=S size=96 bright=100 tilt=0 result=S stage=3 candidate=1 white=3169 mask=f66f hits=8/5/5 box=112,72:207,167
+PHOTO truth=S size=64 bright=100 tilt=0 result=S stage=3 candidate=1 white=1368 mask=f46f hits=7/5/4 box=128,88:191,151
+PHOTO truth=S size=128 bright=100 tilt=0 result=S stage=3 candidate=1 white=4095 mask=f66f hits=8/5/5 box=96,56:223,183
+PHOTO truth=S size=192 bright=100 tilt=0 result=S stage=3 candidate=1 white=4095 mask=f66f hits=8/5/5 box=64,24:255,215
+PHOTO truth=S size=96 bright=75 tilt=0 result=S stage=3 candidate=1 white=2858 mask=d46f hits=6/5/3 box=112,72:207,167
+PHOTO truth=S size=96 bright=100 tilt=1 result=S stage=3 candidate=1 white=2876 mask=f66f hits=8/5/5 box=112,72:207,167
+PHOTO truth=S size=96 bright=100 tilt=-1 result=S stage=3 candidate=1 white=2876 mask=d46f hits=6/5/3 box=112,72:207,167
+PHOTO truth=? size=0 bright=100 tilt=0 result=? stage=0 candidate=0 white=0 mask=0000 hits=0/0/0 box=0,0:0,0
+PHOTO truth=? size=0 bright=100 tilt=0 result=? stage=0 candidate=0 white=0 mask=0000 hits=0/0/0 box=0,0:0,0
+PHOTO truth=L size=96 bright=75 tilt=0 result=L stage=3 candidate=1 white=3324 mask=d47b hits=5/6/2 box=112,72:207,167
+PHOTO truth=L size=128 bright=100 tilt=0 result=L stage=3 candidate=1 white=4095 mask=d47b hits=5/6/2 box=96,56:223,183
+PHOTO truth=L size=192 bright=100 tilt=0 result=L stage=3 candidate=1 white=4095 mask=d47b hits=5/6/2 box=64,24:255,215
+PHOTO truth=R size=96 bright=75 tilt=0 result=R stage=3 candidate=1 white=3325 mask=b2ed hits=5/2/6 box=112,72:207,167
+PHOTO truth=R size=128 bright=100 tilt=0 result=R stage=3 candidate=1 white=4095 mask=b2ed hits=5/2/6 box=96,56:223,183
+PHOTO truth=R size=192 bright=100 tilt=0 result=R stage=3 candidate=1 white=4095 mask=b2ed hits=5/2/6 box=64,24:255,215
+PHOTO truth=S size=96 bright=75 tilt=0 result=S stage=3 candidate=1 white=2858 mask=d46f hits=6/5/3 box=112,72:207,167
+PHOTO truth=S size=128 bright=100 tilt=0 result=S stage=3 candidate=1 white=4095 mask=f66f hits=8/5/5 box=96,56:223,183
+PHOTO truth=S size=192 bright=100 tilt=0 result=S stage=3 candidate=1 white=4095 mask=f66f hits=8/5/5 box=64,24:255,215
+PHOTO truth=? size=0 bright=100 tilt=0 result=? stage=0 candidate=0 white=0 mask=0000 hits=0/0/0 box=0,0:0,0
+PASS traffic sign photo replay (33 cases)
+$finish called at time : 12674665 ns : File "D:/anlu/rtl/sim/video720/tb_traffic_sign_photo_replay.sv" Line 154
+run: Time (s): cpu = 00:00:00 ; elapsed = 00:00:10 . Memory (MB): peak = 223.961 ; gain = 0.000
+exit
+INFO: [Common 17-206] Exiting xsim at Sat Oct 10 13:20:52 2026...

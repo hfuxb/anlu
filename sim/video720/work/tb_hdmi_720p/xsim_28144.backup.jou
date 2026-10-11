@@ -1,0 +1,13 @@
+#-----------------------------------------------------------
+# xsim v2019.2.1 (64-bit)
+# SW Build 2729669 on Thu Dec  5 04:49:17 MST 2019
+# IP Build 2729494 on Thu Dec  5 07:38:25 MST 2019
+# Start of session at: Sat Oct 10 11:13:57 2026
+# Process ID: 28144
+# Current directory: D:/anlu/rtl/sim/video720/work/tb_hdmi_720p
+# Command line: xsim.exe -log run.log -mode tcl -source {xsim.dir/snapshot/xsim_script.tcl}
+# Log file: D:/anlu/rtl/sim/video720/work/tb_hdmi_720p/run.log
+# Journal file: D:/anlu/rtl/sim/video720/work/tb_hdmi_720p\xsim.jou
+#-----------------------------------------------------------
+source xsim.dir/snapshot/xsim_script.tcl
+run -all

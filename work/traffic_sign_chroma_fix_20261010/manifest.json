@@ -1,0 +1,109 @@
+{
+  "builds": {
+    "production": {
+      "setup_wns_ps": 104,
+      "hold_wns_ps": 20,
+      "files": {
+        "bit": {
+          "name": "traffic_sign_td_chroma_production_bit.bit",
+          "sha256": "fcb6e8d5c1569db92b577e358802b48a58b6da6300d2590feaef57832725d2b0"
+        },
+        "qor": {
+          "name": "traffic_sign_td_chroma_production_qor.qor",
+          "sha256": "eaee5c77f2dc3cc9fd2c559f89f470ebcc4b628ffeb2c205ca4ac8441271945e"
+        },
+        "timing": {
+          "name": "traffic_sign_td_chroma_production_timing.rpt",
+          "sha256": "cd6c58b9b9e4d90b1dd43ca7ceb3556bbae91ff70e57062f39f340d2fba98cc5"
+        },
+        "log": {
+          "name": "traffic_sign_td_chroma_production_log.log",
+          "sha256": "3a24f962fd175dbc3ffe2de382176026bd04063b42d404c42f35c4cf011a6afa"
+        },
+        "project": {
+          "name": "traffic_sign_td_chroma_production_project.al",
+          "sha256": "1c9a11c297d2082f63e34b520769b06ee4d0a90feb364f2cd55b2781c258f71f"
+        },
+        "constraints": {
+          "name": "traffic_sign_td_chroma_production_constraints.sdc",
+          "sha256": "37bcdcb33c6b5cb25706f3962c288f458582d7efca686da093072863328a2b3a"
+        },
+        "build_script": {
+          "name": "traffic_sign_td_chroma_production_build_script.tcl",
+          "sha256": "39ac83bfb4acc731c9f3a5072b6b2a1e617429803bf4338e1eaf3b8b42305c3f"
+        }
+      }
+    },
+    "diagnostic": {
+      "setup_wns_ps": 69,
+      "hold_wns_ps": 20,
+      "files": {
+        "bit": {
+          "name": "traffic_sign_td_chroma_diagnostic_bit.bit",
+          "sha256": "8b0fcaab87f3201e8a0043c60565af56662bdb5ee91a63e71afb6beed888ff0b"
+        },
+        "qor": {
+          "name": "traffic_sign_td_chroma_diagnostic_qor.qor",
+          "sha256": "6bf6baafd1cdb333c773ae413f3981893d4c9335572d237de17f1a31493050ff"
+        },
+        "timing": {
+          "name": "traffic_sign_td_chroma_diagnostic_timing.rpt",
+          "sha256": "1909f296ab841b7df0adf74fc7a65750244d1701175376fc3d0a1f57768b5390"
+        },
+        "log": {
+          "name": "traffic_sign_td_chroma_diagnostic_log.log",
+          "sha256": "e453e18f923cf6cabc76f69eff9cf350a2f14aca920b0e492a7282bd76cd8f8b"
+        },
+        "project": {
+          "name": "traffic_sign_td_chroma_diagnostic_project.al",
+          "sha256": "b17aefc74de1a14ef234c538701b424dabb3ea1904aff154b6414ec327dd05e2"
+        },
+        "constraints": {
+          "name": "traffic_sign_td_chroma_diagnostic_constraints.sdc",
+          "sha256": "37bcdcb33c6b5cb25706f3962c288f458582d7efca686da093072863328a2b3a"
+        },
+        "build_script": {
+          "name": "traffic_sign_td_chroma_diagnostic_build_script.tcl",
+          "sha256": "523bc1e7edd62214c3e0cf70acff8ce0f6bbc1a1eb8bc9f8103456dfe9441d23"
+        },
+        "top": {
+          "name": "traffic_sign_td_chroma_diagnostic_top.v",
+          "sha256": "2f341c40a38b7718982b67c2cec818fb36879c76c7707068554ebe79365bb7a9"
+        }
+      }
+    }
+  },
+  "simulation": {
+    "passed": 9,
+    "total": 9,
+    "summary": "video720_simulation_summary.json"
+  },
+  "recording_bit_sha256_expected_not_verified_on_board": "519ee24650c42abf740b14c15376c33d31a8d394b7bbebc7743d4a9790f7bc71",
+  "recordings": [
+    {
+      "direction": "left",
+      "name": "5dc7b14b979ecefd698477fb6054f986.mp4",
+      "sha256": "102b67b2ab0f7fdb6ece0bd9d27572942fdc48273b7e46634bd4d0f73e3d9a02"
+    },
+    {
+      "direction": "right",
+      "name": "4454f9fe202e678a5eafcc2ea52bf680.mp4",
+      "sha256": "c021bc829e123ab01db8377baa92830b8b4d37fbac5722d223d5b487db35d73e"
+    },
+    {
+      "direction": "straight",
+      "name": "ab6eb966abb0066f08efc405655cbd83.mp4",
+      "sha256": "6409a9d6ed1d70dfce0710d7c6a06b619353e96135ef5d09749c46b714354fd3"
+    }
+  ],
+  "replay_background_sha256": "6f2e203f9d368e8a10980498d19e4f178cb26789b6c1fcdbf44c17b08d5f26e7",
+  "source_sha256": {
+    "fpga/traffic_sign_td/user_source/image/traffic_sign/traffic_sign_detector_96.v": "2324ba810d829ecd88c2547f5b9da24773fb1bd413f05fd5f9e371116bf42b77",
+    "fpga/traffic_sign_td/user_source/image/traffic_sign/traffic_sign_display_filter.v": "1816042f08d92f3beb8a25b0ccc256389327d72a841af885d706cb0e682b765f",
+    "fpga/traffic_sign_td/user_source/image/traffic_sign/traffic_sign_result_cdc.v": "012586bb06a7f13b09e53ddec2d486b4c71897da75cb9c6fa3819dd04649ad7a",
+    "fpga/traffic_sign_td/user_source/image/integration/isp_top.v": "88d7a30d593727ef03f71a3e71a45f77bcce05af065ea307cde7262f411a422c",
+    "fpga/traffic_sign_td/user_source/lab_ex_2026_nosoft/hdl_source/design_top_wrapper.v": "644edd159bc3353d9d56c87d431e1f4d29f25389bbb3bb1885a6e04103cff834",
+    "fpga/traffic_sign_td/user_source/lab_ex_2026_nosoft/hdl_source/hdmi_mixer.v": "16f56b19378bdd93710a06667b9389a6e4814fe752ebdb16f11d5edfa1ed49ab"
+  },
+  "hardware_acceptance": "pending board retest with new bitstreams"
+}

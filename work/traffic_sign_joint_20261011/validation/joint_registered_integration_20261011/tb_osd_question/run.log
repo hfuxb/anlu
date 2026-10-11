@@ -1,0 +1,20 @@
+#-----------------------------------------------------------
+# xsim v2019.2.1 (64-bit)
+# SW Build 2729669 on Thu Dec  5 04:49:17 MST 2019
+# IP Build 2729494 on Thu Dec  5 07:38:25 MST 2019
+# Start of session at: Sun Oct 11 11:58:16 2026
+# Process ID: 31604
+# Current directory: D:/anlu/rtl/work/tmp/joint_registered_integration_20261011/tb_osd_question
+# Command line: xsim.exe -log run.log -mode tcl -source {xsim.dir/snapshot/xsim_script.tcl}
+# Log file: D:/anlu/rtl/work/tmp/joint_registered_integration_20261011/tb_osd_question/run.log
+# Journal file: D:/anlu/rtl/work/tmp/joint_registered_integration_20261011/tb_osd_question\xsim.jou
+#-----------------------------------------------------------
+source xsim.dir/snapshot/xsim_script.tcl
+# xsim {snapshot} -autoloadwcfg -runall
+Vivado Simulator 2019.2
+Time resolution is 1 ps
+run -all
+PASS OSD QUESTION GLYPH
+$finish called at time : 17 ns : File "D:/anlu/rtl/sim/video720/tb_osd_question.sv" Line 17
+exit
+INFO: [Common 17-206] Exiting xsim at Sun Oct 11 11:58:20 2026...

@@ -1,0 +1,9 @@
+0.6
+2019.2
+Dec  5 2019
+05:06:03
+D:/anlu/rtl/fpga/traffic_sign_td/user_source/lab_ex_2026_nosoft/hdl_source/anlogic_logo_rom.v,1791466122,systemVerilog,,D:/anlu/rtl/fpga/traffic_sign_td/user_source/lab_ex_2026_nosoft/hdl_source/osd_char_lib.v,,anlogic_logo_rom,,,,,,,,
+D:/anlu/rtl/fpga/traffic_sign_td/user_source/lab_ex_2026_nosoft/hdl_source/hdmi_mixer.v,1791609675,systemVerilog,,D:/anlu/rtl/fpga/traffic_sign_td/user_source/lab_ex_2026_nosoft/hdl_source/anlogic_logo_rom.v,,hdmi_mixer,,,,,,,,
+D:/anlu/rtl/fpga/traffic_sign_td/user_source/lab_ex_2026_nosoft/hdl_source/osd_char_lib.v,1791466122,systemVerilog,,D:/anlu/rtl/sim/video720/tb_hdmi_black_camera.sv,,osd_char_lib,,,,,,,,
+D:/anlu/rtl/fpga/traffic_sign_td/user_source/lab_ex_2026_nosoft/hdl_source/vtc/uivtc.v,1791466122,systemVerilog,,D:/anlu/rtl/fpga/traffic_sign_td/user_source/lab_ex_2026_nosoft/hdl_source/hdmi_mixer.v,,uivtc,,,,,,,,
+D:/anlu/rtl/sim/video720/tb_hdmi_black_camera.sv,1791530238,systemVerilog,,,,tb_hdmi_black_camera,,,,,,,,

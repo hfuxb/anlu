@@ -1,0 +1,17 @@
+open_vcd joint_replay.vcd
+log_vcd /tb_traffic_sign_joint_replay/dut/O_result_valid
+log_vcd /tb_traffic_sign_joint_replay/dut/O_done
+log_vcd /tb_traffic_sign_joint_replay/dut/O_result_ascii
+log_vcd /tb_traffic_sign_joint_replay/dut/O_result_class
+log_vcd /tb_traffic_sign_joint_replay/dut/O_bbox_valid
+log_vcd /tb_traffic_sign_joint_replay/dut/O_x_min
+log_vcd /tb_traffic_sign_joint_replay/dut/O_x_max
+log_vcd /tb_traffic_sign_joint_replay/dut/O_y_min
+log_vcd /tb_traffic_sign_joint_replay/dut/O_y_max
+log_vcd /tb_traffic_sign_joint_replay/dut/result_candidate_matches
+log_vcd /tb_traffic_sign_joint_replay/dut/result_head_difference
+log_vcd /tb_traffic_sign_joint_replay/dut/result_stem_difference
+log_vcd /tb_traffic_sign_joint_replay/dut/result_turn_shape
+run all
+close_vcd
+quit

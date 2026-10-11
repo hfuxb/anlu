@@ -1,0 +1,1 @@
+"tb_traffic_sign_result_cdc" -s "snapshot" -log "elaborate.log" 

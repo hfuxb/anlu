@@ -1,0 +1,15 @@
+
+****** xsim v2019.2.1 (64-bit)
+  **** SW Build 2729669 on Thu Dec  5 04:49:17 MST 2019
+  **** IP Build 2729494 on Thu Dec  5 07:38:25 MST 2019
+    ** Copyright 1986-2019 Xilinx, Inc. All Rights Reserved.
+
+source xsim.dir/snapshot/xsim_script.tcl
+# xsim {snapshot} -autoloadwcfg -runall
+Vivado Simulator 2019.2
+Time resolution is 1 ps
+run -all
+PASS traffic sign result CDC (3 atomic events)
+$finish called at time : 400 ns : File "D:/anlu/rtl/sim/video720/tb_traffic_sign_result_cdc.sv" Line 98
+exit
+INFO: [Common 17-206] Exiting xsim at Sun Oct 11 11:40:50 2026...

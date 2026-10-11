@@ -1,0 +1,27 @@
+[
+  {
+    "test": "tb_traffic_sign_joint_evidence",
+    "passed": true,
+    "markers": [
+      "PASS joint evidence: 65536 mirror masks, white floor, edge bounds, signed extrema, reset"
+    ],
+    "failures": []
+  },
+  {
+    "test": "tb_traffic_sign_joint_replay",
+    "passed": true,
+    "markers": [
+      "SUMMARY L=81/81 ?=0 R=81/81 ?=0 S=80/81 ?=1 wrong=0",
+      "PASS traffic sign joint replay (243 poses, 6 negatives)"
+    ],
+    "failures": []
+  },
+  {
+    "test": "tb_traffic_sign_detector_96",
+    "passed": true,
+    "markers": [
+      "PASS traffic sign detector (15 scenes)"
+    ],
+    "failures": []
+  }
+]

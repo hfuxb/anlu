@@ -1,0 +1,4 @@
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "D:/anlu/rtl/fpga/traffic_sign_td/user_source/lab_ex_2026_nosoft/hdl_source/mode_selector.v" into library work
+INFO: [VRFC 10-311] analyzing module mode_selector
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "D:/anlu/rtl/sim/video720/tb_board_mode_selector.sv" into library work
+INFO: [VRFC 10-311] analyzing module tb_board_mode_selector

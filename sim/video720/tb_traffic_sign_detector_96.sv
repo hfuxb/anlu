@@ -185,7 +185,8 @@ module tb_traffic_sign_detector_96;
             tvalid = 1'b0;
             tuser = 1'b0;
             tlast = 1'b0;
-            repeat (4) @(posedge clk);
+        // 等待分类和候选框关联流水提交，再检查帧计数和输出。
+            repeat (8) @(negedge clk);
             @(negedge clk);
         end
     endtask

@@ -1,0 +1,4 @@
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "D:/anlu/rtl/work/tmp/joint_baseline_detector.v" into library work
+INFO: [VRFC 10-311] analyzing module traffic_sign_detector_96
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "D:/anlu/rtl/sim/video720/tb_traffic_sign_photo_replay.sv" into library work
+INFO: [VRFC 10-311] analyzing module tb_traffic_sign_photo_replay

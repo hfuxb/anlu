@@ -1,0 +1,12 @@
+[
+  {
+    "test": "tb_traffic_sign_photo_replay",
+    "passed": false,
+    "markers": [
+      "SUMMARY photo checks=33 mismatches=9 candidate_misses=9"
+    ],
+    "failures": [
+      "Fatal: photo replay存在9项失败，其中9项没有候选"
+    ]
+  }
+]

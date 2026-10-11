@@ -1,0 +1,21 @@
+#-----------------------------------------------------------
+# xsim v2019.2.1 (64-bit)
+# SW Build 2729669 on Thu Dec  5 04:49:17 MST 2019
+# IP Build 2729494 on Thu Dec  5 07:38:25 MST 2019
+# Start of session at: Sat Oct 10 11:33:13 2026
+# Process ID: 21728
+# Current directory: D:/anlu/rtl/sim/video720/work/tb_traffic_sign_detector_96
+# Command line: xsim.exe -log run.log -mode tcl -source {xsim.dir/snapshot/xsim_script.tcl}
+# Log file: D:/anlu/rtl/sim/video720/work/tb_traffic_sign_detector_96/run.log
+# Journal file: D:/anlu/rtl/sim/video720/work/tb_traffic_sign_detector_96\xsim.jou
+#-----------------------------------------------------------
+source xsim.dir/snapshot/xsim_script.tcl
+# xsim {snapshot} -autoloadwcfg -runall
+Vivado Simulator 2019.2
+Time resolution is 1 ps
+run -all
+PASS traffic sign detector (15 scenes)
+$finish called at time : 69121520 ns : File "D:/anlu/rtl/sim/video720/tb_traffic_sign_detector_96.sv" Line 260
+run: Time (s): cpu = 00:00:00 ; elapsed = 00:00:38 . Memory (MB): peak = 240.953 ; gain = 0.000
+exit
+INFO: [Common 17-206] Exiting xsim at Sat Oct 10 11:33:53 2026...

@@ -1,0 +1,276 @@
+
+****** xsim v2019.2.1 (64-bit)
+  **** SW Build 2729669 on Thu Dec  5 04:49:17 MST 2019
+  **** IP Build 2729494 on Thu Dec  5 07:38:25 MST 2019
+    ** Copyright 1986-2019 Xilinx, Inc. All Rights Reserved.
+
+source xsim.dir/snapshot/xsim_script.tcl
+# xsim {snapshot} -autoloadwcfg -tclbatch {D:/anlu/rtl/sim/video720/joint_wave.tcl}
+Vivado Simulator 2019.2
+Time resolution is 1 ps
+source D:/anlu/rtl/sim/video720/joint_wave.tcl
+## open_vcd joint_replay.vcd
+## log_vcd /tb_traffic_sign_joint_replay/dut/O_result_valid
+## log_vcd /tb_traffic_sign_joint_replay/dut/O_done
+## log_vcd /tb_traffic_sign_joint_replay/dut/O_result_ascii
+## log_vcd /tb_traffic_sign_joint_replay/dut/O_result_class
+## log_vcd /tb_traffic_sign_joint_replay/dut/O_bbox_valid
+## log_vcd /tb_traffic_sign_joint_replay/dut/O_x_min
+## log_vcd /tb_traffic_sign_joint_replay/dut/O_x_max
+## log_vcd /tb_traffic_sign_joint_replay/dut/O_y_min
+## log_vcd /tb_traffic_sign_joint_replay/dut/O_y_max
+## log_vcd /tb_traffic_sign_joint_replay/dut/result_candidate_matches
+## log_vcd /tb_traffic_sign_joint_replay/dut/result_head_difference
+## log_vcd /tb_traffic_sign_joint_replay/dut/result_stem_difference
+## log_vcd /tb_traffic_sign_joint_replay/dut/result_turn_shape
+## run all
+POSE expected=L dx=-4 dy=-4 result=L mask=d47b roi=112,72:207,167
+POSE expected=L dx=-3 dy=-4 result=L mask=d47b roi=112,72:207,167
+POSE expected=L dx=-2 dy=-4 result=L mask=d47b roi=112,72:207,167
+POSE expected=L dx=-1 dy=-4 result=L mask=d47b roi=112,72:207,167
+POSE expected=L dx=0 dy=-4 result=L mask=947b roi=112,72:207,167
+POSE expected=L dx=1 dy=-4 result=L mask=946b roi=112,72:207,167
+POSE expected=L dx=2 dy=-4 result=L mask=946b roi=112,72:207,167
+POSE expected=L dx=3 dy=-4 result=L mask=9c6b roi=112,72:207,167
+POSE expected=L dx=4 dy=-4 result=L mask=9c6b roi=112,72:207,167
+POSE expected=L dx=-4 dy=-3 result=L mask=d47b roi=112,72:207,167
+POSE expected=L dx=-3 dy=-3 result=L mask=d47b roi=112,72:207,167
+POSE expected=L dx=-2 dy=-3 result=L mask=d47b roi=112,72:207,167
+POSE expected=L dx=-1 dy=-3 result=L mask=d47b roi=112,72:207,167
+POSE expected=L dx=0 dy=-3 result=L mask=d47b roi=112,72:207,167
+POSE expected=L dx=1 dy=-3 result=L mask=946b roi=112,72:207,167
+POSE expected=L dx=2 dy=-3 result=L mask=946b roi=112,72:207,167
+POSE expected=L dx=3 dy=-3 result=L mask=9c6b roi=112,72:207,167
+POSE expected=L dx=4 dy=-3 result=L mask=9c6b roi=112,72:207,167
+POSE expected=L dx=-4 dy=-2 result=L mask=d47b roi=112,72:207,167
+POSE expected=L dx=-3 dy=-2 result=L mask=d47b roi=112,72:207,167
+POSE expected=L dx=-2 dy=-2 result=L mask=d47b roi=112,72:207,167
+POSE expected=L dx=-1 dy=-2 result=L mask=d47b roi=112,72:207,167
+POSE expected=L dx=0 dy=-2 result=L mask=d47b roi=112,72:207,167
+POSE expected=L dx=1 dy=-2 result=L mask=d47b roi=112,72:207,167
+POSE expected=L dx=2 dy=-2 result=L mask=946b roi=112,72:207,167
+POSE expected=L dx=3 dy=-2 result=L mask=946b roi=112,72:207,167
+POSE expected=L dx=4 dy=-2 result=L mask=9c6b roi=112,72:207,167
+POSE expected=L dx=-4 dy=-1 result=L mask=d47b roi=112,72:207,167
+POSE expected=L dx=-3 dy=-1 result=L mask=d47b roi=112,72:207,167
+POSE expected=L dx=-2 dy=-1 result=L mask=d47b roi=112,72:207,167
+POSE expected=L dx=-1 dy=-1 result=L mask=d47b roi=112,72:207,167
+POSE expected=L dx=0 dy=-1 result=L mask=d47b roi=112,72:207,167
+POSE expected=L dx=1 dy=-1 result=L mask=d47b roi=112,72:207,167
+POSE expected=L dx=2 dy=-1 result=L mask=946b roi=112,72:207,167
+POSE expected=L dx=3 dy=-1 result=L mask=946b roi=112,72:207,167
+POSE expected=L dx=4 dy=-1 result=L mask=9c6b roi=112,72:207,167
+POSE expected=L dx=-4 dy=0 result=L mask=d47b roi=112,72:207,167
+POSE expected=L dx=-3 dy=0 result=L mask=d47b roi=112,72:207,167
+POSE expected=L dx=-2 dy=0 result=L mask=d47b roi=112,72:207,167
+POSE expected=L dx=-1 dy=0 result=L mask=d47b roi=112,72:207,167
+POSE expected=L dx=0 dy=0 result=L mask=d47b roi=112,72:207,167
+POSE expected=L dx=1 dy=0 result=L mask=d47b roi=112,72:207,167
+POSE expected=L dx=2 dy=0 result=L mask=d46b roi=112,72:207,167
+POSE expected=L dx=3 dy=0 result=L mask=946b roi=112,72:207,167
+POSE expected=L dx=4 dy=0 result=L mask=9c6b roi=112,72:207,167
+POSE expected=L dx=-4 dy=1 result=L mask=d67b roi=112,72:207,167
+POSE expected=L dx=-3 dy=1 result=L mask=d67b roi=112,72:207,167
+POSE expected=L dx=-2 dy=1 result=L mask=d67b roi=112,72:207,167
+POSE expected=L dx=-1 dy=1 result=L mask=d67b roi=112,72:207,167
+POSE expected=L dx=0 dy=1 result=L mask=d67b roi=112,72:207,167
+POSE expected=L dx=1 dy=1 result=L mask=d67b roi=112,72:207,167
+POSE expected=L dx=2 dy=1 result=L mask=d47b roi=112,72:207,167
+POSE expected=L dx=3 dy=1 result=L mask=946b roi=112,72:207,167
+POSE expected=L dx=4 dy=1 result=L mask=9c6b roi=112,72:207,167
+POSE expected=L dx=-4 dy=2 result=L mask=d679 roi=112,72:207,167
+POSE expected=L dx=-3 dy=2 result=L mask=d679 roi=112,72:207,167
+POSE expected=L dx=-2 dy=2 result=L mask=d67b roi=112,72:207,167
+POSE expected=L dx=-1 dy=2 result=L mask=d67b roi=112,72:207,167
+POSE expected=L dx=0 dy=2 result=L mask=d67b roi=112,72:207,167
+POSE expected=L dx=1 dy=2 result=L mask=d67b roi=112,72:207,167
+POSE expected=L dx=2 dy=2 result=L mask=d67b roi=112,72:207,167
+POSE expected=L dx=3 dy=2 result=L mask=966b roi=112,72:207,167
+POSE expected=L dx=4 dy=2 result=L mask=9e6b roi=112,72:207,167
+POSE expected=L dx=-4 dy=3 result=L mask=d679 roi=112,72:207,167
+POSE expected=L dx=-3 dy=3 result=L mask=d679 roi=112,72:207,167
+POSE expected=L dx=-2 dy=3 result=L mask=d679 roi=112,72:207,167
+POSE expected=L dx=-1 dy=3 result=L mask=d679 roi=112,72:207,167
+POSE expected=L dx=0 dy=3 result=L mask=d679 roi=112,72:207,167
+POSE expected=L dx=1 dy=3 result=L mask=d67b roi=112,72:207,167
+POSE expected=L dx=2 dy=3 result=L mask=d67b roi=112,72:207,167
+POSE expected=L dx=3 dy=3 result=L mask=967b roi=112,72:207,167
+POSE expected=L dx=4 dy=3 result=L mask=9e6b roi=112,72:207,167
+POSE expected=L dx=-4 dy=4 result=L mask=d679 roi=112,72:207,167
+POSE expected=L dx=-3 dy=4 result=L mask=d679 roi=112,72:207,167
+POSE expected=L dx=-2 dy=4 result=L mask=d679 roi=112,72:207,167
+POSE expected=L dx=-1 dy=4 result=L mask=d679 roi=112,72:207,167
+POSE expected=L dx=0 dy=4 result=L mask=d679 roi=112,72:207,167
+POSE expected=L dx=1 dy=4 result=L mask=d679 roi=112,72:207,167
+POSE expected=L dx=2 dy=4 result=L mask=d679 roi=112,72:207,167
+POSE expected=L dx=3 dy=4 result=L mask=d679 roi=112,72:207,167
+POSE expected=L dx=4 dy=4 result=L mask=9e69 roi=112,72:207,167
+POSE expected=R dx=-4 dy=-4 result=R mask=936d roi=112,72:207,167
+POSE expected=R dx=-3 dy=-4 result=R mask=936d roi=112,72:207,167
+POSE expected=R dx=-2 dy=-4 result=R mask=926d roi=112,72:207,167
+POSE expected=R dx=-1 dy=-4 result=R mask=926d roi=112,72:207,167
+POSE expected=R dx=0 dy=-4 result=R mask=92ed roi=112,72:207,167
+POSE expected=R dx=1 dy=-4 result=R mask=b2ed roi=112,72:207,167
+POSE expected=R dx=2 dy=-4 result=R mask=b2ed roi=112,72:207,167
+POSE expected=R dx=3 dy=-4 result=R mask=b2ed roi=112,72:207,167
+POSE expected=R dx=4 dy=-4 result=R mask=b2ed roi=112,72:207,167
+POSE expected=R dx=-4 dy=-3 result=R mask=936d roi=112,72:207,167
+POSE expected=R dx=-3 dy=-3 result=R mask=936d roi=112,72:207,167
+POSE expected=R dx=-2 dy=-3 result=R mask=926d roi=112,72:207,167
+POSE expected=R dx=-1 dy=-3 result=R mask=926d roi=112,72:207,167
+POSE expected=R dx=0 dy=-3 result=R mask=b2ed roi=112,72:207,167
+POSE expected=R dx=1 dy=-3 result=R mask=b2ed roi=112,72:207,167
+POSE expected=R dx=2 dy=-3 result=R mask=b2ed roi=112,72:207,167
+POSE expected=R dx=3 dy=-3 result=R mask=b2ed roi=112,72:207,167
+POSE expected=R dx=4 dy=-3 result=R mask=b2ed roi=112,72:207,167
+POSE expected=R dx=-4 dy=-2 result=R mask=936d roi=112,72:207,167
+POSE expected=R dx=-3 dy=-2 result=R mask=926d roi=112,72:207,167
+POSE expected=R dx=-2 dy=-2 result=R mask=926d roi=112,72:207,167
+POSE expected=R dx=-1 dy=-2 result=R mask=b2ed roi=112,72:207,167
+POSE expected=R dx=0 dy=-2 result=R mask=b2ed roi=112,72:207,167
+POSE expected=R dx=1 dy=-2 result=R mask=b2ed roi=112,72:207,167
+POSE expected=R dx=2 dy=-2 result=R mask=b2ed roi=112,72:207,167
+POSE expected=R dx=3 dy=-2 result=R mask=b2ed roi=112,72:207,167
+POSE expected=R dx=4 dy=-2 result=R mask=b2ed roi=112,72:207,167
+POSE expected=R dx=-4 dy=-1 result=R mask=936d roi=112,72:207,167
+POSE expected=R dx=-3 dy=-1 result=R mask=926d roi=112,72:207,167
+POSE expected=R dx=-2 dy=-1 result=R mask=926d roi=112,72:207,167
+POSE expected=R dx=-1 dy=-1 result=R mask=b2ed roi=112,72:207,167
+POSE expected=R dx=0 dy=-1 result=R mask=b2ed roi=112,72:207,167
+POSE expected=R dx=1 dy=-1 result=R mask=b2ed roi=112,72:207,167
+POSE expected=R dx=2 dy=-1 result=R mask=b2ed roi=112,72:207,167
+POSE expected=R dx=3 dy=-1 result=R mask=b2ed roi=112,72:207,167
+POSE expected=R dx=4 dy=-1 result=R mask=b2ed roi=112,72:207,167
+POSE expected=R dx=-4 dy=0 result=R mask=936d roi=112,72:207,167
+POSE expected=R dx=-3 dy=0 result=R mask=926d roi=112,72:207,167
+POSE expected=R dx=-2 dy=0 result=R mask=b26d roi=112,72:207,167
+POSE expected=R dx=-1 dy=0 result=R mask=b2ed roi=112,72:207,167
+POSE expected=R dx=0 dy=0 result=R mask=b2ed roi=112,72:207,167
+POSE expected=R dx=1 dy=0 result=R mask=b2ed roi=112,72:207,167
+POSE expected=R dx=2 dy=0 result=R mask=b2ed roi=112,72:207,167
+POSE expected=R dx=3 dy=0 result=R mask=b2ed roi=112,72:207,167
+POSE expected=R dx=4 dy=0 result=R mask=b2ed roi=112,72:207,167
+POSE expected=R dx=-4 dy=1 result=R mask=936d roi=112,72:207,167
+POSE expected=R dx=-3 dy=1 result=R mask=926d roi=112,72:207,167
+POSE expected=R dx=-2 dy=1 result=R mask=b2ed roi=112,72:207,167
+POSE expected=R dx=-1 dy=1 result=R mask=b6ed roi=112,72:207,167
+POSE expected=R dx=0 dy=1 result=R mask=b6ed roi=112,72:207,167
+POSE expected=R dx=1 dy=1 result=R mask=b6ed roi=112,72:207,167
+POSE expected=R dx=2 dy=1 result=R mask=b6ed roi=112,72:207,167
+POSE expected=R dx=3 dy=1 result=R mask=b6ed roi=112,72:207,167
+POSE expected=R dx=4 dy=1 result=R mask=b6ed roi=112,72:207,167
+POSE expected=R dx=-4 dy=2 result=R mask=976d roi=112,72:207,167
+POSE expected=R dx=-3 dy=2 result=R mask=966d roi=112,72:207,167
+POSE expected=R dx=-2 dy=2 result=R mask=b6ed roi=112,72:207,167
+POSE expected=R dx=-1 dy=2 result=R mask=b6ed roi=112,72:207,167
+POSE expected=R dx=0 dy=2 result=R mask=b6ed roi=112,72:207,167
+POSE expected=R dx=1 dy=2 result=R mask=b6ed roi=112,72:207,167
+POSE expected=R dx=2 dy=2 result=R mask=b6ed roi=112,72:207,167
+POSE expected=R dx=3 dy=2 result=R mask=b6e9 roi=112,72:207,167
+POSE expected=R dx=4 dy=2 result=R mask=b6e9 roi=112,72:207,167
+POSE expected=R dx=-4 dy=3 result=R mask=976d roi=112,72:207,167
+POSE expected=R dx=-3 dy=3 result=R mask=96ed roi=112,72:207,167
+POSE expected=R dx=-2 dy=3 result=R mask=b6ed roi=112,72:207,167
+POSE expected=R dx=-1 dy=3 result=R mask=b6e9 roi=112,72:207,167
+POSE expected=R dx=0 dy=3 result=R mask=b6e9 roi=112,72:207,167
+POSE expected=R dx=1 dy=3 result=R mask=b6e9 roi=112,72:207,167
+POSE expected=R dx=2 dy=3 result=R mask=b6e9 roi=112,72:207,167
+POSE expected=R dx=3 dy=3 result=R mask=b6e9 roi=112,72:207,167
+POSE expected=R dx=4 dy=3 result=R mask=b6e9 roi=112,72:207,167
+POSE expected=R dx=-4 dy=4 result=R mask=9769 roi=112,72:207,167
+POSE expected=R dx=-3 dy=4 result=R mask=b6e9 roi=112,72:207,167
+POSE expected=R dx=-2 dy=4 result=R mask=b6e9 roi=112,72:207,167
+POSE expected=R dx=-1 dy=4 result=R mask=b6e9 roi=112,72:207,167
+POSE expected=R dx=0 dy=4 result=R mask=b6e9 roi=112,72:207,167
+POSE expected=R dx=1 dy=4 result=R mask=b6e9 roi=112,72:207,167
+POSE expected=R dx=2 dy=4 result=R mask=b6e9 roi=112,72:207,167
+POSE expected=R dx=3 dy=4 result=R mask=b6e9 roi=112,72:207,167
+POSE expected=R dx=4 dy=4 result=R mask=b6e9 roi=112,72:207,167
+POSE expected=S dx=-4 dy=-4 result=S mask=b26f roi=112,72:207,167
+POSE expected=S dx=-3 dy=-4 result=S mask=b26f roi=112,72:207,167
+POSE expected=S dx=-2 dy=-4 result=S mask=b26f roi=112,72:207,167
+POSE expected=S dx=-1 dy=-4 result=S mask=f66f roi=112,72:207,167
+POSE expected=S dx=0 dy=-4 result=S mask=d66f roi=112,72:207,167
+POSE expected=S dx=1 dy=-4 result=S mask=d46f roi=112,72:207,167
+POSE expected=S dx=2 dy=-4 result=S mask=d46f roi=112,72:207,167
+POSE expected=S dx=3 dy=-4 result=S mask=d46f roi=112,72:207,167
+POSE expected=S dx=4 dy=-4 result=S mask=d46f roi=112,72:207,167
+POSE expected=S dx=-4 dy=-3 result=S mask=b26f roi=112,72:207,167
+POSE expected=S dx=-3 dy=-3 result=S mask=b26f roi=112,72:207,167
+POSE expected=S dx=-2 dy=-3 result=S mask=b26f roi=112,72:207,167
+POSE expected=S dx=-1 dy=-3 result=S mask=f66f roi=112,72:207,167
+POSE expected=S dx=0 dy=-3 result=S mask=d66f roi=112,72:207,167
+POSE expected=S dx=1 dy=-3 result=S mask=d46f roi=112,72:207,167
+POSE expected=S dx=2 dy=-3 result=S mask=d46f roi=112,72:207,167
+POSE expected=S dx=3 dy=-3 result=S mask=d46f roi=112,72:207,167
+POSE expected=S dx=4 dy=-3 result=S mask=d46d roi=112,72:207,167
+POSE expected=S dx=-4 dy=-2 result=S mask=b26f roi=112,72:207,167
+POSE expected=S dx=-3 dy=-2 result=S mask=b26f roi=112,72:207,167
+POSE expected=S dx=-2 dy=-2 result=S mask=f26f roi=112,72:207,167
+POSE expected=S dx=-1 dy=-2 result=S mask=f66f roi=112,72:207,167
+POSE expected=S dx=0 dy=-2 result=S mask=f66f roi=112,72:207,167
+POSE expected=S dx=1 dy=-2 result=S mask=d46f roi=112,72:207,167
+POSE expected=S dx=2 dy=-2 result=S mask=d46f roi=112,72:207,167
+POSE expected=S dx=3 dy=-2 result=S mask=d46f roi=112,72:207,167
+POSE expected=S dx=4 dy=-2 result=S mask=d46d roi=112,72:207,167
+POSE expected=S dx=-4 dy=-1 result=S mask=b26f roi=112,72:207,167
+POSE expected=S dx=-3 dy=-1 result=S mask=b26f roi=112,72:207,167
+POSE expected=S dx=-2 dy=-1 result=S mask=f26f roi=112,72:207,167
+POSE expected=S dx=-1 dy=-1 result=S mask=f66f roi=112,72:207,167
+POSE expected=S dx=0 dy=-1 result=S mask=f66f roi=112,72:207,167
+POSE expected=S dx=1 dy=-1 result=S mask=f46f roi=112,72:207,167
+POSE expected=S dx=2 dy=-1 result=S mask=d46f roi=112,72:207,167
+POSE expected=S dx=3 dy=-1 result=S mask=d46f roi=112,72:207,167
+POSE expected=S dx=4 dy=-1 result=S mask=d46f roi=112,72:207,167
+POSE expected=S dx=-4 dy=0 result=S mask=b26f roi=112,72:207,167
+POSE expected=S dx=-3 dy=0 result=S mask=f26f roi=112,72:207,167
+POSE expected=S dx=-2 dy=0 result=S mask=f26f roi=112,72:207,167
+POSE expected=S dx=-1 dy=0 result=S mask=f66f roi=112,72:207,167
+POSE expected=S dx=0 dy=0 result=S mask=f66f roi=112,72:207,167
+POSE expected=S dx=1 dy=0 result=S mask=f46f roi=112,72:207,167
+POSE expected=S dx=2 dy=0 result=S mask=d46f roi=112,72:207,167
+POSE expected=S dx=3 dy=0 result=S mask=d46f roi=112,72:207,167
+POSE expected=S dx=4 dy=0 result=S mask=d46f roi=112,72:207,167
+POSE expected=S dx=-4 dy=1 result=S mask=b26f roi=112,72:207,167
+POSE expected=S dx=-3 dy=1 result=S mask=b26f roi=112,72:207,167
+POSE expected=S dx=-2 dy=1 result=S mask=b26f roi=112,72:207,167
+POSE expected=S dx=-1 dy=1 result=S mask=f66f roi=112,72:207,167
+POSE expected=S dx=0 dy=1 result=S mask=f66f roi=112,72:207,167
+POSE expected=S dx=1 dy=1 result=S mask=d46f roi=112,72:207,167
+POSE expected=S dx=2 dy=1 result=S mask=d46f roi=112,72:207,167
+POSE expected=S dx=3 dy=1 result=S mask=d46f roi=112,72:207,167
+POSE expected=S dx=4 dy=1 result=S mask=d46f roi=112,72:207,167
+POSE expected=S dx=-4 dy=2 result=S mask=b26f roi=112,72:207,167
+POSE expected=S dx=-3 dy=2 result=S mask=b26f roi=112,72:207,167
+POSE expected=S dx=-2 dy=2 result=S mask=b26f roi=112,72:207,167
+POSE expected=S dx=-1 dy=2 result=S mask=f66f roi=112,72:207,167
+POSE expected=S dx=0 dy=2 result=S mask=d66f roi=112,72:207,167
+POSE expected=S dx=1 dy=2 result=S mask=d46f roi=112,72:207,167
+POSE expected=S dx=2 dy=2 result=S mask=d46d roi=112,72:207,167
+POSE expected=S dx=3 dy=2 result=S mask=d46d roi=112,72:207,167
+POSE expected=S dx=4 dy=2 result=S mask=d46d roi=112,72:207,167
+POSE expected=S dx=-4 dy=3 result=S mask=b26b roi=112,72:207,167
+POSE expected=S dx=-3 dy=3 result=S mask=b26b roi=112,72:207,167
+POSE expected=S dx=-2 dy=3 result=S mask=b26f roi=112,72:207,167
+POSE expected=S dx=-1 dy=3 result=S mask=b66f roi=112,72:207,167
+POSE expected=S dx=0 dy=3 result=S mask=d66d roi=112,72:207,167
+POSE expected=S dx=1 dy=3 result=S mask=d46d roi=112,72:207,167
+POSE expected=S dx=2 dy=3 result=S mask=d46d roi=112,72:207,167
+POSE expected=S dx=3 dy=3 result=S mask=d46d roi=112,72:207,167
+POSE expected=S dx=4 dy=3 result=S mask=d46d roi=112,72:207,167
+POSE expected=S dx=-4 dy=4 result=S mask=b26b roi=112,72:207,167
+POSE expected=S dx=-3 dy=4 result=S mask=b26b roi=112,72:207,167
+POSE expected=S dx=-2 dy=4 result=? mask=b269 roi=112,72:207,167
+POSE expected=S dx=-1 dy=4 result=S mask=b669 roi=112,72:207,167
+POSE expected=S dx=0 dy=4 result=S mask=d66d roi=112,72:207,167
+POSE expected=S dx=1 dy=4 result=S mask=d46d roi=112,72:207,167
+POSE expected=S dx=2 dy=4 result=S mask=d46d roi=112,72:207,167
+POSE expected=S dx=3 dy=4 result=S mask=d46d roi=112,72:207,167
+POSE expected=S dx=4 dy=4 result=S mask=d46d roi=112,72:207,167
+SUMMARY L=81/81 ?=0 R=81/81 ?=0 S=80/81 ?=1 wrong=0
+PASS traffic sign joint replay (243 poses, 6 negatives)
+$finish called at time : 98411150 ns : File "D:/anlu/rtl/sim/video720/tb_traffic_sign_joint_replay.sv" Line 200
+run: Time (s): cpu = 00:00:00 ; elapsed = 00:01:53 . Memory (MB): peak = 241.004 ; gain = 0.000
+## close_vcd
+## quit
+INFO: [Common 17-206] Exiting xsim at Sun Oct 11 11:56:05 2026...

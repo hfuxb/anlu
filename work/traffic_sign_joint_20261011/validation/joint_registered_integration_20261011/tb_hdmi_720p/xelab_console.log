@@ -1,0 +1,24 @@
+Vivado Simulator 2019.2
+Copyright 1986-1999, 2001-2019 Xilinx, Inc. All Rights Reserved.
+Running: D:/Xilinx/Vivado/2019.2/bin/unwrapped/win64.o/xelab.exe tb_hdmi_720p -s snapshot -log elaborate.log 
+Multi-threading is on. Using 30 slave threads.
+Starting static elaboration
+Pass Through NonSizing Optimizer
+Completed static elaboration
+Starting simulation data flow analysis
+Completed simulation data flow analysis
+Time Resolution for simulation is 1ps
+Compiling module work.uivtc(H_ActiveSize=1280,H_FrameS...
+Compiling module work.anlogic_logo_rom
+Compiling module work.osd_char_lib
+Compiling module work.hdmi_mixer(H_OFFSET=0,V_OFFSET=0...
+Compiling module work.tb_hdmi_720p
+Built simulation snapshot snapshot
+
+****** Webtalk v2019.2.1 (64-bit)
+  **** SW Build 2729669 on Thu Dec  5 04:49:17 MST 2019
+  **** IP Build 2729494 on Thu Dec  5 07:38:25 MST 2019
+    ** Copyright 1986-2019 Xilinx, Inc. All Rights Reserved.
+
+source D:/anlu/rtl/work/tmp/joint_registered_integration_20261011/tb_hdmi_720p/xsim.dir/snapshot/webtalk/xsim_webtalk.tcl -notrace
+INFO: [Common 17-206] Exiting Webtalk at Sun Oct 11 11:58:26 2026...

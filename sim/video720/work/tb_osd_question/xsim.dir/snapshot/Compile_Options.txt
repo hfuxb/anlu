@@ -1,0 +1,1 @@
+"tb_osd_question" -s "snapshot" -log "elaborate.log" 

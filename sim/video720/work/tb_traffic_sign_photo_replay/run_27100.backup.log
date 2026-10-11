@@ -1,0 +1,26 @@
+#-----------------------------------------------------------
+# xsim v2019.2.1 (64-bit)
+# SW Build 2729669 on Thu Dec  5 04:49:17 MST 2019
+# IP Build 2729494 on Thu Dec  5 07:38:25 MST 2019
+# Start of session at: Sat Oct 10 13:18:40 2026
+# Process ID: 27100
+# Current directory: D:/anlu/rtl/sim/video720/work/tb_traffic_sign_photo_replay
+# Command line: xsim.exe -log run.log -mode tcl -source {xsim.dir/snapshot/xsim_script.tcl}
+# Log file: D:/anlu/rtl/sim/video720/work/tb_traffic_sign_photo_replay/run.log
+# Journal file: D:/anlu/rtl/sim/video720/work/tb_traffic_sign_photo_replay\xsim.jou
+#-----------------------------------------------------------
+source xsim.dir/snapshot/xsim_script.tcl
+# xsim {snapshot} -autoloadwcfg -runall
+Vivado Simulator 2019.2
+Time resolution is 1 ps
+run -all
+PHOTO truth=L size=96 bright=100 tilt=0 result=L stage=3 candidate=1 white=3247 mask=d47b hits=5/6/2 box=113,73:206,166
+PHOTO truth=L size=64 bright=100 tilt=0 result=L stage=3 candidate=1 white=1464 mask=d47b hits=5/6/2 box=129,89:191,151
+PHOTO truth=L size=128 bright=100 tilt=0 result=L stage=3 candidate=1 white=4095 mask=d47b hits=5/6/2 box=97,57:222,182
+PHOTO truth=L size=192 bright=100 tilt=0 result=L stage=3 candidate=1 white=4095 mask=d47b hits=5/6/2 box=65,25:253,213
+PHOTO truth=L size=96 bright=75 tilt=0 result=? stage=0 candidate=0 white=0 mask=0000 hits=0/0/0 box=0,0:0,0
+Fatal: photo replay mismatch: expected L, got ?
+Time: 1920425 ns  Iteration: 0  Process: /tb_traffic_sign_photo_replay/run_case  File: D:/anlu/rtl/sim/video720/tb_traffic_sign_photo_replay.sv
+$finish called at time : 1920425 ns
+exit
+INFO: [Common 17-206] Exiting xsim at Sat Oct 10 13:18:43 2026...

@@ -1,0 +1,1 @@
+"tb_board_mode_selector" -s "snapshot" -log "elaborate.log" 

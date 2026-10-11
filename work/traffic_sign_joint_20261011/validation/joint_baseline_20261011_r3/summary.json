@@ -1,0 +1,11 @@
+[
+  {
+    "test": "tb_traffic_sign_joint_replay",
+    "passed": true,
+    "markers": [
+      "SUMMARY L=59/81 ?=19 R=59/81 ?=19 S=80/81 ?=1 wrong=6",
+      "BASELINE 左右转位移失败已复现"
+    ],
+    "failures": []
+  }
+]

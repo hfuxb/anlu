@@ -1,0 +1,12 @@
+#-----------------------------------------------------------
+# Webtalk v2019.2.1 (64-bit)
+# SW Build 2729669 on Thu Dec  5 04:49:17 MST 2019
+# IP Build 2729494 on Thu Dec  5 07:38:25 MST 2019
+# Start of session at: Sat Oct 10 10:31:29 2026
+# Process ID: 40392
+# Current directory: D:/anlu/rtl/sim/video720/work/tb_hdmi_720p
+# Command line: wbtcv.exe -mode batch -source D:/anlu/rtl/sim/video720/work/tb_hdmi_720p/xsim.dir/snapshot/webtalk/xsim_webtalk.tcl -notrace
+# Log file: D:/anlu/rtl/sim/video720/work/tb_hdmi_720p/webtalk.log
+# Journal file: D:/anlu/rtl/sim/video720/work/tb_hdmi_720p\webtalk.jou
+#-----------------------------------------------------------
+source D:/anlu/rtl/sim/video720/work/tb_hdmi_720p/xsim.dir/snapshot/webtalk/xsim_webtalk.tcl -notrace

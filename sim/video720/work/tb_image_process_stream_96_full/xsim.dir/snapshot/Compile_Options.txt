@@ -1,0 +1,1 @@
+"tb_image_process_stream_96_full" -s "snapshot" -log "elaborate.log" 

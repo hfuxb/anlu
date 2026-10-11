@@ -1,0 +1,1 @@
+"tb_hdmi_black_camera" -s "snapshot" -log "elaborate.log" 

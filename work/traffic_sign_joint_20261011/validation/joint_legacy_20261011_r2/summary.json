@@ -1,0 +1,42 @@
+[
+  {
+    "test": "tb_traffic_sign_detector_96",
+    "passed": true,
+    "markers": [
+      "PASS traffic sign detector (15 scenes)"
+    ],
+    "failures": []
+  },
+  {
+    "test": "tb_traffic_sign_result_cdc",
+    "passed": true,
+    "markers": [
+      "PASS traffic sign result CDC (3 atomic events)"
+    ],
+    "failures": []
+  },
+  {
+    "test": "tb_osd_question",
+    "passed": true,
+    "markers": [
+      "PASS OSD QUESTION GLYPH"
+    ],
+    "failures": []
+  },
+  {
+    "test": "tb_hdmi_720p",
+    "passed": true,
+    "markers": [
+      "PASS HDMI 1280x720: frame-latched SIG box, mode hiding, and stale-box clearing checked"
+    ],
+    "failures": []
+  },
+  {
+    "test": "tb_hdmi_black_camera",
+    "passed": true,
+    "markers": [
+      "PASS HDMI BLACK CAMERA: mixer outputs full 720P frames with nonblack OSD even when camera input is zero"
+    ],
+    "failures": []
+  }
+]

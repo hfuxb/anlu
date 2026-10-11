@@ -114,6 +114,27 @@ module traffic_sign_detector_96 #(
     reg [9:0]  result_stage_y_max;
     reg [15:0] result_stage_white_mask;
     reg [11:0] result_stage_white_total;
+    // 强格保留原判定；弱格只参与头部和竖杆证据一致的转向补充判定。
+    reg [15:0] result_stage_weak_mask;
+    reg [22:0] result_stage_box_area;
+    reg [11:0] result_stage_width;
+    reg [11:0] result_stage_height;
+    reg [15:0] result_head_left_count;
+    reg [15:0] result_head_right_count;
+    reg [15:0] result_stem_left_count;
+    reg [15:0] result_stem_right_count;
+    reg signed [16:0] result_head_difference;
+    reg signed [16:0] result_stem_difference;
+    reg [1:0] result_legacy_arrow;
+    reg [1:0] result_turn_shape;
+    reg result_head_left;
+    reg result_head_right;
+    reg result_stem_left;
+    reg result_stem_right;
+    reg result_candidate_matches;
+    reg turn_score_pending;
+    reg candidate_match_pending;
+    reg result_commit_pending;
 
     wire [X_GROUP_BITS-1:0] active_x =
         pixel_stage_tuser ? {X_GROUP_BITS{1'b0}} : x_group;
@@ -134,6 +155,54 @@ module traffic_sign_detector_96 #(
             blue  = pixel[7:0];
             F_blue_pixel = (blue >= 8'd70) && (blue > red + 20) &&
                            (blue > green + 10) && (green > red - 30);
+        end
+    endfunction
+
+    // 只有同一候选的四条边都在框尺寸的1/24以内，才使用弱格补充证据。
+    function F_edge_matches;
+        input [11:0] old_edge;
+        input [11:0] new_edge;
+        input [11:0] size;
+        reg [11:0] difference;
+        reg [16:0] scaled_difference;
+        begin
+            difference = (old_edge >= new_edge) ? old_edge - new_edge : new_edge - old_edge;
+            scaled_difference = ({5'd0, difference} << 4) + ({5'd0, difference} << 3);
+            F_edge_matches = (scaled_difference <= {5'd0, size});
+        end
+    endfunction
+
+    // 弱格不能单独识别方向；强格外白块和反方向优势仍必须受限。
+    function [1:0] F_turn_shape;
+        input [15:0] weak_mask;
+        input [15:0] strong_mask;
+        input [11:0] white_total;
+        reg [4:0] left_hits;
+        reg [4:0] right_hits;
+        reg [4:0] left_extra;
+        reg [4:0] right_extra;
+        integer bit_index;
+        begin
+            left_hits = 0;
+            right_hits = 0;
+            left_extra = 0;
+            right_extra = 0;
+            for (bit_index = 0; bit_index < 16; bit_index = bit_index + 1) begin
+                if (16'h6FF6 & (16'h0001 << bit_index)) begin
+                    if (weak_mask[bit_index] && MASK_LEFT[bit_index]) left_hits = left_hits + 1'b1;
+                    if (weak_mask[bit_index] && MASK_RIGHT[bit_index]) right_hits = right_hits + 1'b1;
+                    if (strong_mask[bit_index] && !MASK_LEFT[bit_index]) left_extra = left_extra + 1'b1;
+                    if (strong_mask[bit_index] && !MASK_RIGHT[bit_index]) right_extra = right_extra + 1'b1;
+                end
+            end
+            if (white_total < MIN_WHITE_TOTAL)
+                F_turn_shape = 2'd0;
+            else if ((left_hits >= 5) && (left_extra <= 2) && (left_hits >= right_hits + 1))
+                F_turn_shape = 2'd1;
+            else if ((right_hits >= 5) && (right_extra <= 2) && (right_hits >= left_hits + 1))
+                F_turn_shape = 2'd2;
+            else
+                F_turn_shape = 2'd0;
         end
     endfunction
 
@@ -566,11 +635,13 @@ module traffic_sign_detector_96 #(
     reg [2:0] white_grid_add[0:15];
     reg [14:0] white_cell_after[0:15];
     reg [15:0] white_cell_mask_after;
+    reg [15:0] white_cell_weak_mask_after;
     reg [16:0] white_cell_sum;
     reg [22:0] white_cell_scaled;
     integer grid_i;
     always @* begin
         white_cell_mask_after = 16'd0;
+        white_cell_weak_mask_after = 16'd0;
         white_cell_sum = 17'd0;
         white_cell_scaled = 23'd0;
         for (grid_i = 0; grid_i < 16; grid_i = grid_i + 1) begin
@@ -595,6 +666,8 @@ module traffic_sign_detector_96 #(
                 ({8'd0, white_cell_after[grid_i]} << 4);
             white_cell_mask_after[grid_i] =
                 (white_cell_scaled >= track_box_area);
+            white_cell_weak_mask_after[grid_i] =
+                ({white_cell_scaled, 1'b0} >= {1'b0, track_box_area});
         end
     end
 
@@ -604,8 +677,20 @@ module traffic_sign_detector_96 #(
         {1'b0, white_total_base} + F_count4(white_roi_mask);
     wire [11:0] white_total_after =
         (white_total_sum >= 13'd4095) ? 12'd4095 : white_total_sum[11:0];
+    // 先扩展符号位再乘160；差值范围为-65534至65534，25位不会溢出。
+    wire signed [24:0] head_difference_extended =
+        {{8{result_head_difference[16]}}, result_head_difference};
+    wire signed [24:0] stem_difference_extended =
+        {{8{result_stem_difference[16]}}, result_stem_difference};
+    wire signed [24:0] head_difference_scaled =
+        (head_difference_extended <<< 7) + (head_difference_extended <<< 5);
+    wire signed [24:0] stem_difference_scaled =
+        (stem_difference_extended <<< 7) + (stem_difference_extended <<< 5);
+    wire signed [24:0] result_area_signed = $signed({2'b00, result_stage_box_area});
     wire [1:0] classified_arrow =
-        F_classify_arrow(result_stage_white_mask, result_stage_white_total);
+        (result_candidate_matches && result_turn_shape == 2'd1 && result_head_left && result_stem_left) ? 2'd1 :
+        (result_candidate_matches && result_turn_shape == 2'd2 && result_head_right && result_stem_right) ? 2'd2 :
+        result_legacy_arrow;
     wire [11:0] result_x_max_margin =
         {1'b0, result_stage_x_max} + BOX_MARGIN;
     wire [10:0] result_x_max_display =
@@ -666,6 +751,26 @@ module traffic_sign_detector_96 #(
             result_stage_y_max <= 10'd0;
             result_stage_white_mask <= 16'd0;
             result_stage_white_total <= 12'd0;
+            result_stage_weak_mask <= 16'd0;
+            result_stage_box_area <= 23'd0;
+            result_stage_width <= 12'd0;
+            result_stage_height <= 12'd0;
+            result_head_left_count <= 16'd0;
+            result_head_right_count <= 16'd0;
+            result_stem_left_count <= 16'd0;
+            result_stem_right_count <= 16'd0;
+            result_head_difference <= 17'sd0;
+            result_stem_difference <= 17'sd0;
+            result_legacy_arrow <= 2'd0;
+            result_turn_shape <= 2'd0;
+            result_head_left <= 1'b0;
+            result_head_right <= 1'b0;
+            result_stem_left <= 1'b0;
+            result_stem_right <= 1'b0;
+            result_candidate_matches <= 1'b0;
+            turn_score_pending <= 1'b0;
+            candidate_match_pending <= 1'b0;
+            result_commit_pending <= 1'b0;
             O_busy <= 1'b0;
             O_done <= 1'b0;
             O_result_valid <= 1'b0;
@@ -683,6 +788,9 @@ module traffic_sign_detector_96 #(
             O_result_valid <= 1'b0;
             O_frame_drop <= 1'b0;
             result_stage_valid <= 1'b0;
+            turn_score_pending <= result_stage_valid;
+            candidate_match_pending <= turn_score_pending;
+            result_commit_pending <= candidate_match_pending;
             frame_select_pending <= frame_end;
             cluster_select_pending <= frame_select_pending;
 
@@ -740,6 +848,14 @@ module traffic_sign_detector_96 #(
                     result_stage_y_max <= track_y_max;
                     result_stage_white_mask <= white_cell_mask_after;
                     result_stage_white_total <= white_total_after;
+                    result_stage_weak_mask <= white_cell_weak_mask_after;
+                    result_stage_box_area <= track_box_area;
+                    result_stage_width <= track_width;
+                    result_stage_height <= track_height;
+                    result_head_left_count <= {1'b0, white_cell_after[1]} + {1'b0, white_cell_after[4]};
+                    result_head_right_count <= {1'b0, white_cell_after[2]} + {1'b0, white_cell_after[7]};
+                    result_stem_left_count <= {1'b0, white_cell_after[9]} + {1'b0, white_cell_after[13]};
+                    result_stem_right_count <= {1'b0, white_cell_after[10]} + {1'b0, white_cell_after[14]};
 
                 end
             end
@@ -774,6 +890,32 @@ module traffic_sign_detector_96 #(
             end
 
             if (result_stage_valid) begin
+                result_head_difference <= $signed({1'b0, result_head_left_count}) -
+                                          $signed({1'b0, result_head_right_count});
+                result_stem_difference <= $signed({1'b0, result_stem_right_count}) -
+                                          $signed({1'b0, result_stem_left_count});
+                result_legacy_arrow <= F_classify_arrow(result_stage_white_mask, result_stage_white_total);
+                result_turn_shape <= F_turn_shape(result_stage_weak_mask, result_stage_white_mask,
+                                                 result_stage_white_total);
+            end
+
+            if (turn_score_pending) begin
+                result_head_left <= head_difference_scaled > result_area_signed;
+                result_head_right <= head_difference_scaled < -result_area_signed;
+                result_stem_left <= stem_difference_scaled > result_area_signed;
+                result_stem_right <= stem_difference_scaled < -result_area_signed;
+            end
+
+            // 候选评分先进入track寄存器，再关联取样框，避免评分与边差比较串接。
+            if (candidate_match_pending) begin
+                result_candidate_matches <= result_stage_track_valid && track_valid &&
+                    F_edge_matches({1'b0, result_stage_x_min}, {1'b0, track_x_min}, result_stage_width) &&
+                    F_edge_matches({1'b0, result_stage_x_max}, {1'b0, track_x_max}, result_stage_width) &&
+                    F_edge_matches({2'b00, result_stage_y_min}, {2'b00, track_y_min}, result_stage_height) &&
+                    F_edge_matches({2'b00, result_stage_y_max}, {2'b00, track_y_max}, result_stage_height);
+            end
+
+            if (result_commit_pending) begin
                 O_done <= 1'b1;
                 O_result_valid <= 1'b1;
                 case (result_stage_track_valid ? classified_arrow : 2'd0)
