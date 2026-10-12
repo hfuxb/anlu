@@ -1,0 +1,6 @@
+{
+  "sobel": 1251,
+  "erosion": 416,
+  "opening": 724,
+  "direct_dilation": 1827
+}

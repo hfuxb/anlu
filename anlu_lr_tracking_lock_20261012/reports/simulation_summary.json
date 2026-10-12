@@ -17,6 +17,6 @@
   {
     "Test": "tb_car_control",
     "Passed": true,
-    "Marker": "PASS tb_car_control (23 checks; 66 complete UART packets)"
+    "Marker": "PASS tb_car_control (35 checks; 78 complete UART packets)"
   }
 ]

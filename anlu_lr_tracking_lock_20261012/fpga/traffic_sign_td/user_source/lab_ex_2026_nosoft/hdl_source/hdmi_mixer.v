@@ -145,6 +145,9 @@ module hdmi_mixer #(
     reg        S_traffic_sign_toggle_sync2;
     reg        S_traffic_sign_toggle_seen;
     reg        S_traffic_sign_result_ready;
+    reg        S_sign_ready_frame;
+    wire       S_sign_mode_sync = S_traffic_sign_mode_sync2 && S_image_mode_sync2==2'b00;
+    wire       S_sign_overlay_enable = S_traffic_sign_mode_frame && S_image_mode_frame==2'b00;
 
     localparam LOGO_X = 12'd0;
     localparam LOGO_Y = 12'd0;
@@ -570,42 +573,51 @@ module hdmi_mixer #(
         .O_row_bits ( S_pf_row_bits )
     );
 
-    // HDMI像素时钟域同步模式、运行状态和结果通知。
+    // Synchronize mode controls and commit OSD changes only at HDMI frame start.
+    // Entering SIG starts a new result epoch: old CDC metadata cannot reappear
+    // until a fresh detector notification has arrived during this SIG session.
     always @(posedge I_clk or negedge I_rst_n) begin
         if(!I_rst_n) begin
-            S_traffic_sign_mode_sync1  <= 1'b0;
-            S_traffic_sign_mode_sync2  <= 1'b0;
-            S_traffic_sign_mode_frame   <= 1'b0;
+            S_traffic_sign_mode_sync1 <= 1'b0;
+            S_traffic_sign_mode_sync2 <= 1'b0;
+            S_traffic_sign_mode_frame <= 1'b0;
             S_image_mode_sync1 <= 2'b11;
             S_image_mode_sync2 <= 2'b11;
             S_image_mode_frame <= 2'b11;
             S_traffic_sign_toggle_sync1 <= 1'b0;
             S_traffic_sign_toggle_sync2 <= 1'b0;
-            S_traffic_sign_toggle_seen  <= 1'b0;
+            S_traffic_sign_toggle_seen <= 1'b0;
             S_traffic_sign_result_ready <= 1'b0;
+            S_sign_ready_frame <= 1'b0;
             S_sign_meta_frame <= 0; S_sign_ascii_frame <= "?";
             S_score_hundred_frame<=0;S_score_tens_frame<=0;S_score_ones_frame<=0;
-        end
-        else begin
-            S_traffic_sign_mode_sync1   <= I_traffic_sign_mode;
-            S_traffic_sign_mode_sync2   <= S_traffic_sign_mode_sync1;
+        end else begin
+            S_traffic_sign_mode_sync1 <= I_traffic_sign_mode;
+            S_traffic_sign_mode_sync2 <= S_traffic_sign_mode_sync1;
             S_image_mode_sync1 <= I_image_mode;
             S_image_mode_sync2 <= S_image_mode_sync1;
-            if(I_video_user)
-                S_traffic_sign_mode_frame <= S_traffic_sign_mode_sync2;
-            if(I_video_user) begin
-                S_image_mode_frame <= S_image_mode_sync2;
-                S_sign_meta_frame <= I_traffic_sign_metadata;
-                S_sign_ascii_frame <= I_traffic_sign_result_ascii;
-                S_score_hundred_frame <= I_traffic_sign_metadata[7:0]>=100;
-                S_score_tens_frame <= S_incoming_tens;
-                S_score_ones_frame <= I_traffic_sign_metadata[7:0]>=100?0:I_traffic_sign_metadata[7:0]-S_incoming_ten_value;
-            end
             S_traffic_sign_toggle_sync1 <= I_traffic_sign_result_toggle;
             S_traffic_sign_toggle_sync2 <= S_traffic_sign_toggle_sync1;
-            if(S_traffic_sign_toggle_sync2 != S_traffic_sign_toggle_seen) begin
-                S_traffic_sign_toggle_seen   <= S_traffic_sign_toggle_sync2;
-                S_traffic_sign_result_ready  <= 1'b1;
+            S_traffic_sign_toggle_seen <= S_traffic_sign_toggle_sync2;
+            if(!S_sign_mode_sync || !S_traffic_sign_mode_frame)
+                S_traffic_sign_result_ready <= 1'b0;
+            else if(S_traffic_sign_toggle_sync2 != S_traffic_sign_toggle_seen)
+                S_traffic_sign_result_ready <= 1'b1;
+            if(I_video_user) begin
+                S_image_mode_frame <= S_image_mode_sync2;
+                S_traffic_sign_mode_frame <= S_sign_mode_sync;
+                if(S_sign_mode_sync && S_traffic_sign_mode_frame && S_traffic_sign_result_ready) begin
+                    S_sign_ready_frame <= 1'b1;
+                    S_sign_meta_frame <= I_traffic_sign_metadata;
+                    S_sign_ascii_frame <= I_traffic_sign_result_ascii;
+                    S_score_hundred_frame <= I_traffic_sign_metadata[7:0]>=100;
+                    S_score_tens_frame <= S_incoming_tens;
+                    S_score_ones_frame <= I_traffic_sign_metadata[7:0]>=100?0:I_traffic_sign_metadata[7:0]-S_incoming_ten_value;
+                end else begin
+                    S_sign_ready_frame <= 1'b0;
+                    S_sign_meta_frame <= 0; S_sign_ascii_frame <= "?";
+                    S_score_hundred_frame<=0;S_score_tens_frame<=0;S_score_ones_frame<=0;
+                end
             end
         end
     end
@@ -800,8 +812,8 @@ module hdmi_mixer #(
                 end
             end
 
-            // 识别模式显示DIR:<字母>；结果尚未完成时显示DIR:WAIT。
-            if((S_x_2d >= 12'd375) && (S_x_2d < 12'd503) &&
+            // SIG alone shows DIR; RAW/ERO/DIL keep only mode/count/logo OSD.
+            if(S_sign_overlay_enable && (S_x_2d >= 12'd375) && (S_x_2d < 12'd503) &&
                (S_y_2d >= 12'd150) && (S_y_2d < 12'd174)) begin
                 S_dyn_x = S_x_2d - 12'd375;
                 S_dyn_y = S_y_2d - 12'd150;
@@ -818,15 +830,15 @@ module hdmi_mixer #(
                     else if(S_dyn_x < 12'd64)
                         S_pf_char = CHAR_COLON;
                     // ASCII已由前级CDC模块稳定保持，HDMI域同步toggle后直接读取。
-                    else if(S_traffic_sign_result_ready && (S_dyn_x < 12'd80))
+                    else if(S_sign_ready_frame && (S_dyn_x < 12'd80))
                         S_pf_char = S_sign_ascii_frame;
-                    else if(!S_traffic_sign_result_ready && (S_dyn_x < 12'd80))
+                    else if(!S_sign_ready_frame && (S_dyn_x < 12'd80))
                         S_pf_char = 8'h57;
-                    else if(!S_traffic_sign_result_ready && (S_dyn_x < 12'd96))
+                    else if(!S_sign_ready_frame && (S_dyn_x < 12'd96))
                         S_pf_char = 8'h41;
-                    else if(!S_traffic_sign_result_ready && (S_dyn_x < 12'd112))
+                    else if(!S_sign_ready_frame && (S_dyn_x < 12'd112))
                         S_pf_char = 8'h49;
-                    else if(!S_traffic_sign_result_ready && (S_dyn_x < 12'd128))
+                    else if(!S_sign_ready_frame && (S_dyn_x < 12'd128))
                         S_pf_char = 8'h54;
                     else
                         S_pf_char = 8'd0;
@@ -888,14 +900,14 @@ module hdmi_mixer #(
             end
 
             // Two-pixel ROI border; uses the SAME delayed coordinate as RGB.
-            if(S_sign_box && S_x_2d>=S_sign_x0 && S_x_2d<=S_sign_x1 &&
+            if(S_sign_overlay_enable && S_sign_box && S_x_2d>=S_sign_x0 && S_x_2d<=S_sign_x1 &&
                S_y_2d>=S_sign_y0 && S_y_2d<=S_sign_y1 &&
                (S_x_2d<S_sign_x0+2 || S_x_2d+2>S_sign_x1 ||
                 S_y_2d<S_sign_y0+2 || S_y_2d+2>S_sign_y1)) begin
                 S_osd_hit=1; S_osd_color=S_sign_accepted?24'h20ff40:24'hfff200;
             end
             // MATCH:000..100 = foreground IoU score, not a probability.
-            if(S_x_2d>=375 && S_x_2d<519 && S_y_2d>=214 && S_y_2d<230) begin
+            if(S_sign_overlay_enable && S_x_2d>=375 && S_x_2d<519 && S_y_2d>=214 && S_y_2d<230) begin
                 S_dyn_x=S_x_2d-375; S_pf_row=S_y_2d-214;
                 if(S_dyn_x<16) S_pf_char="M";
                 else if(S_dyn_x<32) S_pf_char="A";
@@ -913,7 +925,7 @@ module hdmi_mixer #(
                 S_pf_on=S_pf_row_bits[15-S_pf_col];
                 if(S_pf_on)begin S_osd_hit=1;S_osd_color=COLOR_DYN_TEXT;end
             end
-            if(S_x_2d>=375 && S_x_2d<575 && S_y_2d>=234 && S_y_2d<240)begin
+            if(S_sign_overlay_enable && S_x_2d>=375 && S_x_2d<575 && S_y_2d>=234 && S_y_2d<240)begin
                 S_osd_hit=1;
                 S_osd_color=S_x_2d-375<({4'b0,S_sign_score}<<1)?24'h20ff40:24'h303030;
             end

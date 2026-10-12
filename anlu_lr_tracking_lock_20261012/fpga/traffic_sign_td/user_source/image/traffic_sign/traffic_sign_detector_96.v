@@ -3,10 +3,11 @@
 // 4x4 sampling -> eight bounded blue-run candidates -> 16x16 white
 // occupancy -> foreground IoU templates. Previous-frame ROI is measured
 // in the current frame. Nearest associated candidate is preferred; confirmed
-// L/R is latched until sustained target loss or reset. The pixel path is unchanged.
+// L/R holds through weak frames; six strong opposite frames update the label.
 module traffic_sign_detector_96 #(
  parameter integer IMG_WIDTH=1280, IMG_HEIGHT=720, MIN_SCORE=50, MIN_MARGIN=12,
- parameter integer CONFIRM_FRAMES=3, HOLD_FRAMES=8
+ parameter integer CONFIRM_FRAMES=3, HOLD_FRAMES=14,
+ parameter integer SWITCH_FRAMES=6, SWITCH_SCORE=65, SWITCH_MARGIN=20
 )(
  input wire I_clk,I_rst_n,I_tuser,I_tlast,I_tvalid,
  input wire [95:0] I_tdata,
@@ -205,7 +206,7 @@ module traffic_sign_detector_96 #(
  reg [2:0] drain_count,select_index;
  reg best_valid,best_associated;
  reg locked;
- reg [7:0] locked_ascii,vote_ascii,vote_count,missing_count;
+ reg [7:0] locked_ascii,vote_ascii,vote_count,missing_count,switch_count;
  reg assoc_valid;
  reg [10:0] assoc_distance;
  reg [8:0] assoc_x0,assoc_x1;
@@ -245,13 +246,17 @@ module traffic_sign_detector_96 #(
  wire [7:0] score_margin=score_l>=score_r?score_l-score_r:score_r-score_l;
  wire [7:0] frame_ascii=score_l>score_r?"L":"R";
  wire accept_result=track_valid && best_valid && best_associated && best_score>=MIN_SCORE && score_margin>=MIN_MARGIN && white_cells>=10;
+ // Hysteresis for a new arrow at the SAME associated blue face. Weak,
+ // interrupted, or alternating evidence cannot change the published command.
+ wire reverse_result=accept_result && frame_ascii!=locked_ascii &&
+                     best_score>=SWITCH_SCORE && score_margin>=SWITCH_MARGIN;
  always @(posedge I_clk or negedge I_rst_n)begin
  if(!I_rst_n)begin
  state<=INIT;scan_addr<=0;track_valid<=0;tx0<=0;tx1<=0;ty0<=0;ty1<=0;tw<=1;th<=1;
  O_busy<=1;O_done<=0;O_result_valid<=0;O_result_class<=0;O_result_ascii<="?";O_frame_drop<=0;
  O_box_valid<=0;O_x_min<=0;O_x_max<=0;O_y_min<=0;O_y_max<=0;O_score<=0;
  intersection_l<=0;union_l<=0;intersection_r<=0;union_r<=0;white_cells<=0;
- locked<=0;locked_ascii<="?";vote_ascii<="?";vote_count<=0;missing_count<=0;
+ locked<=0;locked_ascii<="?";vote_ascii<="?";vote_count<=0;missing_count<=0;switch_count<=0;
  assoc_valid<=0;assoc_distance<=11'h7ff;assoc_x0<=0;assoc_x1<=0;assoc_y0<=0;assoc_y1<=0;
  drain_count<=0;select_index<=0;best_valid<=0;best_associated<=0;best_area<=0;best_x0<=0;best_x1<=0;best_y0<=0;best_y1<=0;
  dividend<=0;quotient<=0;remainder<=0;divisor<=1;divide_count<=0;score_l<=0;score_r<=0;
@@ -322,27 +327,33 @@ module traffic_sign_detector_96 #(
  O_score<=track_valid && best_associated?best_score:8'd0;
  if(locked)begin
    if(best_associated)begin
-     // Blue face is still associated: keep the confirmed direction even if
-     // arrow score falls to zero, or a single frame suggests the other side.
+     // Keep the confirmed label through poor matching and short opposite
+     // bursts, but allow a replacement sign to update after sustained evidence.
      missing_count<=0;O_box_valid<=1;O_result_valid<=1;
      O_result_ascii<=locked_ascii;O_result_class<=locked_ascii=="L"?5'd1:5'd2;
+     if(reverse_result)begin
+       if(SWITCH_FRAMES<=1 || switch_count>=SWITCH_FRAMES-1)begin
+         locked_ascii<=frame_ascii;switch_count<=0;
+         O_result_ascii<=frame_ascii;O_result_class<=frame_ascii=="L"?5'd1:5'd2;
+       end else switch_count<=switch_count+1'b1;
+     end else switch_count<=0;
      O_x_min<={best_x0,2'b00};O_x_max<={best_x1,2'b11};
      O_y_min<={best_y0,2'b00};O_y_max<={best_y1,2'b11};
      track_valid<=1;tx0<=best_x0;tx1<=best_x1;ty0<=best_y0;ty1<=best_y1;
      tw<=best_x1-best_x0+1'b1;th<=best_y1-best_y0+1'b1;
    end else if(missing_count<HOLD_FRAMES-1)begin
      // Brief occlusion: retain both the last box and L/R, for a bounded time.
-     missing_count<=missing_count+1'b1;O_box_valid<=1;O_result_valid<=1;
+     missing_count<=missing_count+1'b1;switch_count<=0;O_box_valid<=1;O_result_valid<=1;
      O_result_ascii<=locked_ascii;O_result_class<=locked_ascii=="L"?5'd1:5'd2;
      O_x_min<={tx0,2'b00};O_x_max<={tx1,2'b11};
      O_y_min<={ty0,2'b00};O_y_max<={ty1,2'b11};
    end else begin
-     // The eighth consecutive missing frame releases the target and direction.
-     locked<=0;locked_ascii<="?";missing_count<=0;
+     // The HOLD_FRAMES-th consecutive missing frame releases the target and direction.
+     locked<=0;locked_ascii<="?";missing_count<=0;switch_count<=0;
      vote_count<=0;vote_ascii<="?";track_valid<=0;O_box_valid<=0;
    end
  end else begin
-   missing_count<=0;
+   missing_count<=0;switch_count<=0;
    // Acquisition stays '?' until the same associated direction is confirmed.
    O_box_valid<=best_valid;
    O_x_min<={best_x0,2'b00};O_x_max<={best_x1,2'b11};
@@ -363,5 +374,70 @@ module traffic_sign_detector_96 #(
  end
  default:state<=INIT;
  endcase end end
+endmodule
+
+// Mode boundary around the recognizer. Display-only modes never feed pixels to
+// the core. Enabling warms its statistic RAM, then waits for a complete SOF.
+// Disabling aborts a partial frame, clears old tracking, and emits one neutral
+// result event; the caller's result toggle remains monotonic across mode changes.
+module traffic_sign_sig_only_96 #(
+ parameter integer IMG_WIDTH=1280, IMG_HEIGHT=720
+)(
+ input wire I_clk,I_rst_n,I_tuser,I_tlast,I_tvalid,
+ input wire [95:0] I_tdata,
+ input wire [1:0] I_algo_mode,
+ input wire I_recognition_request,
+ output wire O_enabled,O_busy,O_frame_drop,
+ output reg O_done,O_result_valid,O_box_valid,
+ output reg [4:0] O_result_class,
+ output reg [7:0] O_result_ascii,O_score,
+ output reg [10:0] O_x_min,O_x_max,
+ output reg [9:0] O_y_min,O_y_max
+);
+ wire requested=I_recognition_request && I_algo_mode==2'b00;
+ reg core_run,frame_active,was_requested;
+ wire core_busy,core_done,core_ok,core_box,core_drop;
+ wire [4:0] core_class;
+ wire [7:0] core_ascii,core_score;
+ wire [10:0] core_x0,core_x1;
+ wire [9:0] core_y0,core_y1;
+ wire core_reset_n=I_rst_n && core_run;
+ wire core_input_valid=I_tvalid && requested && core_run &&
+                       (I_tuser ? !core_busy : frame_active);
+ assign O_enabled=requested && core_run && frame_active;
+ assign O_busy=requested && core_run && core_busy;
+ assign O_frame_drop=O_enabled && core_drop;
+ traffic_sign_detector_96 #(.IMG_WIDTH(IMG_WIDTH),.IMG_HEIGHT(IMG_HEIGHT)) u_detector(
+  .I_clk(I_clk),.I_rst_n(core_reset_n),
+  .I_tuser(I_tuser && core_input_valid),.I_tlast(I_tlast && core_input_valid),
+  .I_tvalid(core_input_valid),.I_tdata(I_tdata),
+  .O_busy(core_busy),.O_done(core_done),.O_result_valid(core_ok),
+  .O_result_class(core_class),.O_result_ascii(core_ascii),.O_frame_drop(core_drop),
+  .O_box_valid(core_box),.O_x_min(core_x0),.O_x_max(core_x1),
+  .O_y_min(core_y0),.O_y_max(core_y1),.O_score(core_score));
+ always @(posedge I_clk or negedge I_rst_n)begin
+  if(!I_rst_n)begin
+   core_run<=0;frame_active<=0;was_requested<=0;
+   O_done<=0;O_result_valid<=0;O_result_class<=0;O_result_ascii<="?";
+   O_box_valid<=0;O_x_min<=0;O_x_max<=0;O_y_min<=0;O_y_max<=0;O_score<=0;
+  end else begin
+   was_requested<=requested;
+   O_done<=0;
+   if(!requested)begin
+    core_run<=0;frame_active<=0;
+    O_result_valid<=0;O_result_class<=0;O_result_ascii<="?";
+    O_box_valid<=0;O_x_min<=0;O_x_max<=0;O_y_min<=0;O_y_max<=0;O_score<=0;
+    if(was_requested)O_done<=1;
+   end else begin
+    core_run<=1;
+    if(I_tvalid && I_tuser)frame_active<=core_run && !core_busy;
+    if(core_done && frame_active)begin
+     O_done<=1;O_result_valid<=core_ok;O_result_class<=core_class;O_result_ascii<=core_ascii;
+     O_box_valid<=core_box;O_x_min<=core_x0;O_x_max<=core_x1;
+     O_y_min<=core_y0;O_y_max<=core_y1;O_score<=core_score;
+    end
+   end
+  end
+ end
 endmodule
 

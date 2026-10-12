@@ -16,6 +16,7 @@ module isp_top #(
 
     // 图像处理配置和输出握手
     input [1:0]  	I_algo_mode		,
+    input           I_recognition_request,
     input 			O_tready		,
 
     // 输出RGB视频流
@@ -26,6 +27,7 @@ module isp_top #(
     output 			I_tready,
 
     // 路牌识别状态仅在工程内部使用，不增加design_top_wrapper物理端口。
+    output wire        O_traffic_sign_enabled,
     output wire        O_traffic_sign_busy,
     output wire        O_traffic_sign_done,
     output wire        O_traffic_sign_result_valid,
@@ -78,6 +80,7 @@ wire         m_aixs_tvalid;  //synthesis keep
   reg          process_stage_tlast;
   reg  [95:0]  process_stage_tdata;
   reg  [1:0]   process_stage_algo_mode;
+  reg          process_stage_recognition_request;
 
   // 传统蓝底白箭头识别器的帧级结果握手信号。
   // 保留 traffic_sign_* 内部别名，避免改变 design_top_wrapper 和 HDMI OSD 端口。
@@ -131,6 +134,7 @@ wire         m_aixs_tvalid;  //synthesis keep
           process_stage_tlast     <= 1'b0;
           process_stage_tdata     <= 96'd0;
           process_stage_algo_mode <= 2'b11;
+          process_stage_recognition_request <= 1'b0;
       end
       else begin
           process_stage_tvalid    <= awb_O_tvalid;
@@ -138,6 +142,7 @@ wire         m_aixs_tvalid;  //synthesis keep
           process_stage_tlast     <= awb_O_tlast;
           process_stage_tdata     <= awb_O_tdata;
           process_stage_algo_mode <= I_algo_mode;
+          process_stage_recognition_request <= I_recognition_request;
       end
   end
   
@@ -226,7 +231,7 @@ image_process_stream_96 #(
 );
 
 // Blue run candidates and bent-arrow foreground IoU (left/right only).
-traffic_sign_detector_96 #(
+traffic_sign_sig_only_96 #(
     .IMG_WIDTH (IMG_WIDTH),
     .IMG_HEIGHT(IMG_HEIGHT)
 ) u_traffic_sign_detector_96 (
@@ -236,6 +241,9 @@ traffic_sign_detector_96 #(
     .I_tlast        (process_stage_tlast),
     .I_tvalid       (process_stage_tvalid),
     .I_tdata        (process_stage_tdata),
+    .I_algo_mode    (process_stage_algo_mode),
+    .I_recognition_request(process_stage_recognition_request),
+    .O_enabled      (O_traffic_sign_enabled),
     .O_busy         (traffic_sign_busy),
     .O_done         (traffic_sign_done),
     .O_result_valid (traffic_sign_result_valid),

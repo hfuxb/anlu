@@ -19,7 +19,7 @@ always @(posedge clk)begin
  if(drop)$fatal(1,"frame dropped");
  if(done)begin
   done_count=done_count+1;
-  $display("frame=%0d ascii=%c locked=%0d score=%0d box=%0d x=%0d..%0d missing=%0d vote=%0d",done_count,ascii,dut.locked,score,box,x0,x1,dut.missing_count,dut.vote_count);
+  $display("frame=%0d ascii=%c locked=%0d score=%0d box=%0d x=%0d..%0d missing=%0d vote=%0d switch=%0d",done_count,ascii,dut.locked,score,box,x0,x1,dut.missing_count,dut.vote_count,dut.switch_count);
  end
 end
 task reset_core;
@@ -47,7 +47,7 @@ begin
  if(expected=="R" && (!ok || cls!==2))$fatal(1,"right command/class not stable");
  if(expected=="?" && (ok || cls!==0))$fatal(1,"unconfirmed direction published");
 end endtask
-integer n;
+integer n,settle_frames;
 initial begin
  reset_core;
  frame("../tracking/left.hex","?",1);
@@ -69,9 +69,15 @@ initial begin
  frame("../tracking/blank.hex","L",1);
  frame("../tracking/left_return.hex","L",1);
  if(dut.missing_count!=0)$fatal(1,"recovery did not clear loss count");
- for(n=0;n<7;n=n+1)begin
+ // Nine missing frames exceed the old eight-frame expiry, but must now hold.
+ for(n=0;n<9;n=n+1)frame("../tracking/blank.hex","L",1);
+ if(dut.missing_count!=9 || !dut.locked)$fatal(1,"extended loss hold failed");
+ frame("../tracking/left_return.hex","L",1);
+ if(dut.missing_count!=0)$fatal(1,"long-loss recovery did not restart expiry");
+ for(n=0;n<13;n=n+1)begin
   frame("../tracking/blank.hex","L",1);
  end
+ if(dut.missing_count!=13 || !dut.locked)$fatal(1,"must retain direction through missing frame 13");
  frame("../tracking/blank.hex","?",0);
  if(dut.locked)$fatal(1,"persistent loss failed to unlock");
  frame("../tracking/right_new.hex","?",1);
@@ -88,7 +94,38 @@ initial begin
  if(dut.vote_count!=1 || dut.vote_ascii!=="L")$fatal(1,"direction change failed to reset confirmation");
  frame("../tracking/right_same_position.hex","?",1);
  if(dut.locked)$fatal(1,"alternating votes incorrectly locked");
- $display("PASS LR tracking lock %0d frames: confirm / low score / opposite direction / movement / distractor / short loss / expiry / rearm / reset",checks);
+ // Replacement at the same position must update without removing the blue face.
+ reset_core;
+ frame("../tracking/left.hex","?",1);
+ frame("../tracking/left.hex","?",1);
+ frame("../tracking/left.hex","?",1);
+ frame("../tracking/left.hex","L",1);
+ for(n=0;n<3;n=n+1)begin
+  frame("../tracking/right_same_position.hex","L",1);
+  frame("../tracking/left.hex","L",1);
+  if(dut.switch_count!=0)$fatal(1,"alternating directions accumulated switch votes");
+ end
+ for(n=0;n<4;n=n+1) frame("../tracking/right_same_position.hex","L",1);
+ if(dut.switch_count!=4)$fatal(1,"strong opposite frames not counted");
+ frame("../tracking/no_arrow.hex","L",1);
+ if(dut.switch_count!=0)$fatal(1,"weak arrow did not interrupt replacement votes");
+ // Replacing the blank face can briefly reduce the score while ROI settles.
+ // Count six QUALIFYING frames; weak frames must not accelerate the switch.
+ settle_frames=0;
+ while(dut.switch_count<5)begin
+  frame("../tracking/right_same_position.hex","L",1);
+  settle_frames=settle_frames+1;
+  if(settle_frames>8)$fatal(1,"replacement never gathered strong votes");
+ end
+ frame("../tracking/right_same_position.hex","R",1);
+ if(dut.locked_ascii!=="R" || dut.switch_count!=0)$fatal(1,"same-position L to R replacement failed");
+ for(n=0;n<5;n=n+1) frame("../tracking/left.hex","R",1);
+ frame("../tracking/blank.hex","R",1);
+ if(dut.switch_count!=0)$fatal(1,"missing face did not interrupt replacement votes");
+ for(n=0;n<5;n=n+1) frame("../tracking/left.hex","R",1);
+ frame("../tracking/left.hex","L",1);
+ if(dut.locked_ascii!=="L")$fatal(1,"same-position R to L replacement failed");
+ $display("PASS LR tracking lock %0d frames: confirm / low score / opposite bursts / movement / distractor / short loss / expiry / rearm / reset / L-R-L replacement / interrupted votes",checks);
  $finish;
 end
 initial begin #100000000;$fatal(1,"tracking timeout");end

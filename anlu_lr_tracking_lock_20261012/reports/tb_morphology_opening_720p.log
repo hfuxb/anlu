@@ -1,0 +1,20 @@
+#-----------------------------------------------------------
+# xsim v2019.2 (64-bit)
+# SW Build 2708876 on Wed Nov  6 21:40:23 MST 2019
+# IP Build 2700528 on Thu Nov  7 00:09:20 MST 2019
+# Start of session at: Mon Oct 12 16:32:04 2026
+# Process ID: 31364
+# Current directory: D:/qrsfpga/qrsfpga/anlu_lr_tracking_lock_20261012/sim/video720/work/tb_morphology_opening
+# Command line: xsim.exe -log run.log -mode tcl -source {xsim.dir/snapshot/xsim_script.tcl}
+# Log file: D:/qrsfpga/qrsfpga/anlu_lr_tracking_lock_20261012/sim/video720/work/tb_morphology_opening/run.log
+# Journal file: D:/qrsfpga/qrsfpga/anlu_lr_tracking_lock_20261012/sim/video720/work/tb_morphology_opening\xsim.jou
+#-----------------------------------------------------------
+source xsim.dir/snapshot/xsim_script.tcl
+# xsim {snapshot} -autoloadwcfg -runall
+Vivado Simulator 2019.2
+Time resolution is 1 ps
+run -all
+PASS MORPHOLOGY OPENING: 3072 stream words / 2304 DDR words, independent Sobel/erosion/opening reference, RAW/gray/mode/markers, stalls and consecutive frames
+$finish called at time : 37140 ns : File "D:/qrsfpga/qrsfpga/anlu_lr_tracking_lock_20261012/sim/video720/tb_morphology_opening.sv" Line 87
+exit
+INFO: [Common 17-206] Exiting xsim at Mon Oct 12 16:32:07 2026...

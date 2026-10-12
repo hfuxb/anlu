@@ -8,6 +8,14 @@ module tb_car_control;
     reg [7:0] src_result_ascii="?";
     reg src_result_toggle=0;
     reg arm_n=1,stop_n=1,obstacle_n=1,slow_n=1,rx=1;
+    // Model the top-level SIG-only interlock: camera-domain availability is
+    // synchronized before combining it with the existing car STOP input.
+    reg src_mode_enable=1;
+    reg mode_enable_sync1=0,mode_enable_sync2=0;
+    always @(posedge clk or negedge rst_n) begin
+        if(!rst_n) begin mode_enable_sync1<=0; mode_enable_sync2<=0; end
+        else begin mode_enable_sync1<=src_mode_enable; mode_enable_sync2<=mode_enable_sync1; end
+    end
     wire tx,armed,link_ok,result_stale,status_valid;
     wire [2:0] state;
     wire signed [15:0] command_vx,command_vy,command_wz,actual_vx,actual_vy,actual_wz;
@@ -15,7 +23,8 @@ module tb_car_control;
     wire [15:0] battery_mv;
     wire [31:0] tx_count,rx_count,rx_error_count;
     car_control #(.CLK_HZ(1000000),.BAUD(100000),.SEND_HZ(500),
-        .DEBOUNCE_MS(1),.RESULT_TIMEOUT_MS(30),.LINK_TIMEOUT_MS(30),.TURN_MS(20)) dut(.*);
+        .DEBOUNCE_MS(1),.RESULT_TIMEOUT_MS(30),.LINK_TIMEOUT_MS(30),.TURN_MS(20)) dut(
+        .stop_n(stop_n && mode_enable_sync2),.*);
     reg [7:0] feedback[0:23],tx_bytes[0:10],monitor_byte,checksum;
     reg signed [15:0] last_tx_vx,last_tx_vy,last_tx_wz;
     integer frames=0,byte_index=0,checks=0,baseline,k,j;
@@ -108,6 +117,40 @@ module tb_car_control;
         for(integer n=0;n<13;n=n+1) send_feedback(0,0);
         check(link_ok && result_stale && !armed && command_vx==0,"vision timeout independently stops while telemetry remains fresh");
         tick(4000); check(last_tx_vx==0 && last_tx_wz==0,"vision timeout is visible as a stop packet on UART");
+        // Leaving SIG must cancel an active turn without waiting for either
+        // the 20 ms demo turn timer or the 30 ms vision timeout.
+        send_feedback(0,0); vision("?"); press_arm();
+        check(armed && state==1,"fresh SIG session permits manual ARM");
+        vision("L"); vision("L"); vision("L");
+        check(state==2 && command_wz==250,"SIG starts left turn before mode exit");
+        tick(4000); check(last_tx_wz==250,"left turn is present on wire before SIG exit");
+        @(negedge src_clk); src_mode_enable=0;
+        tick(6);
+        check(!mode_enable_sync2 && !armed && state==0 && command_vx==0 && command_wz==0,
+              "leaving SIG synchronously cancels active turn and disarms");
+        baseline=frames; tick(3500);
+        check(frames>baseline && last_tx_vx==0 && last_tx_vy==0 && last_tx_wz==0,
+              "non-SIG interlock sends zero UART packets after any atomic packet");
+        // Even queued or accidentally published L/R events cannot turn or
+        // rearm the car while RAW/ERO/DIL keeps the mode interlock disabled.
+        vision("L"); vision("L"); vision("L");
+        vision("R"); vision("R"); vision("R");
+        check(!armed && state==0 && command_vx==0 && command_wz==0,
+              "new non-SIG L/R events cannot cause movement");
+        press_arm();
+        check(!armed && command_vx==0,"manual ARM is blocked outside SIG");
+        @(negedge src_clk); src_mode_enable=1;
+        tick(20);
+        check(mode_enable_sync2 && !armed && command_vx==0 && command_wz==0,
+              "reentering SIG cannot resume the old turn automatically");
+        send_feedback(0,0); vision("?"); press_arm();
+        check(armed && state==1 && command_wz==0,"reentered SIG requires a new manual ARM");
+        vision("R"); vision("R");
+        check(state==1 && command_wz==0,"off-mode direction votes do not survive reentry");
+        vision("R");
+        check(state==3 && command_wz==-250,"three new SIG votes can start a new right turn");
+        tick(4000);
+        check(last_tx_vx==50 && last_tx_wz==-250,"reentered SIG publishes the new turn on UART");
         $display("PASS tb_car_control (%0d checks; %0d complete UART packets)",checks,frames); $finish;
     end
     initial begin #300000000; $fatal(1,"control test timeout"); end

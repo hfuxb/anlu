@@ -1,0 +1,31 @@
+#-----------------------------------------------------------
+# xsim v2019.2 (64-bit)
+# SW Build 2708876 on Wed Nov  6 21:40:23 MST 2019
+# IP Build 2700528 on Thu Nov  7 00:09:20 MST 2019
+# Start of session at: Mon Oct 12 18:07:11 2026
+# Process ID: 26268
+# Current directory: D:/qrsfpga/qrsfpga/anlu_lr_tracking_lock_20261012/sim/lr_turn/work_sig_only
+# Command line: xsim.exe -log run.log -mode tcl -source {xsim.dir/snapshot/xsim_script.tcl}
+# Log file: D:/qrsfpga/qrsfpga/anlu_lr_tracking_lock_20261012/sim/lr_turn/work_sig_only/run.log
+# Journal file: D:/qrsfpga/qrsfpga/anlu_lr_tracking_lock_20261012/sim/lr_turn/work_sig_only\xsim.jou
+#-----------------------------------------------------------
+source xsim.dir/snapshot/xsim_script.tcl
+# xsim {snapshot} -autoloadwcfg -runall
+Vivado Simulator 2019.2
+Time resolution is 1 ps
+run -all
+event=1 mode=00 enabled=1 ascii=? score=0 box=1
+event=2 mode=00 enabled=1 ascii=? score=82 box=1
+event=3 mode=00 enabled=1 ascii=? score=82 box=1
+event=4 mode=00 enabled=1 ascii=L score=82 box=1
+event=5 mode=10 enabled=0 ascii=? score=0 box=0
+event=6 mode=00 enabled=1 ascii=? score=0 box=1
+event=7 mode=00 enabled=1 ascii=? score=85 box=1
+event=8 mode=00 enabled=1 ascii=? score=85 box=1
+event=9 mode=00 enabled=1 ascii=R score=85 box=1
+event=10 mode=11 enabled=0 ascii=? score=0 box=0
+PASS SIG ONLY detector: 19 frames / 18 checks / mode gating, RAM warmup, complete SOF, partial abort, reset lock, fresh reentry, clear CDC
+$finish called at time : 12567040 ns : File "D:/qrsfpga/qrsfpga/anlu_lr_tracking_lock_20261012/sim/lr_turn/tb_sig_only.sv" Line 99
+run: Time (s): cpu = 00:00:00 ; elapsed = 00:00:17 . Memory (MB): peak = 223.785 ; gain = 0.000
+exit
+INFO: [Common 17-206] Exiting xsim at Mon Oct 12 18:07:35 2026...

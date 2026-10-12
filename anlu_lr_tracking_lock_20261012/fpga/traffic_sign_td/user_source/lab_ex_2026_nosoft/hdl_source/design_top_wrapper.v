@@ -99,6 +99,10 @@ module design_top_wrapper (
 	wire [1:0]		S_algo_mode_24m;
 	reg [1:0]		S_algo_mode_sync_1;
 	reg [1:0]		S_algo_mode_sync_2;
+    reg S_sig_requested_24m;
+    (* ASYNC_REG = "TRUE" *) reg S_sig_request_sync_1,S_sig_request_sync_2;
+    wire S_traffic_sign_enabled;
+    (* ASYNC_REG = "TRUE" *) reg [1:0] S_car_sig_enabled_sync;
 	wire [50:0] S_traffic_sign_metadata, S_traffic_sign_hdmi_metadata;
 	wire        S_traffic_sign_busy;
 	wire        S_traffic_sign_done;
@@ -248,6 +252,12 @@ module design_top_wrapper (
 
     // Recognition results originate in the CSI byte-clock domain.
     // car_control synchronizes result events and releases its reset on I_sys_clk.
+    // Leaving SIG cancels visual driving through the existing stop interlock.
+    // Returning to SIG cannot re-arm the vehicle without another KEY1 press.
+    always @(posedge I_sys_clk or negedge I_rst_n) begin
+        if(!I_rst_n)S_car_sig_enabled_sync<=2'b00;
+        else S_car_sig_enabled_sync<={S_car_sig_enabled_sync[0],S_traffic_sign_enabled};
+    end
     car_control #(
         .CLK_HZ(50000000),
         .BAUD(115200)
@@ -259,7 +269,7 @@ module design_top_wrapper (
         .src_result_ascii(S_traffic_sign_result_ascii),
         .src_result_toggle(S_traffic_sign_result_toggle),
         .arm_n(I_car_arm_n),
-        .stop_n(I_car_stop_n),
+        .stop_n(I_car_stop_n && S_car_sig_enabled_sync[1]),
         .obstacle_n(I_car_obstacle_n),
         .slow_n(I_car_slow_n),
         .rx(I_car_rx),
@@ -274,14 +284,23 @@ module design_top_wrapper (
 		.O_mode   (S_algo_mode_24m)
 	);
 
+    // Register a single-bit SIG request before crossing clock domains; this
+    // avoids a false 00 decode when the two-bit ERO/DIL mode changes.
+    always @(posedge S_24m_clk or negedge S_rst_n) begin
+        if(!S_rst_n)S_sig_requested_24m<=1'b0;
+        else S_sig_requested_24m<=S_algo_mode_24m==2'b00;
+    end
 	always @(posedge S_csi_rx_clk or negedge S_rst_n) begin
 		if(!S_rst_n) begin
 			S_algo_mode_sync_1 <= 2'b11;
 			S_algo_mode_sync_2 <= 2'b11;
+            S_sig_request_sync_1<=1'b0;S_sig_request_sync_2<=1'b0;
 		end
 		else begin
 			S_algo_mode_sync_1 <= S_algo_mode_24m;
 			S_algo_mode_sync_2 <= S_algo_mode_sync_1;
+            S_sig_request_sync_1<=S_sig_requested_24m;
+            S_sig_request_sync_2<=S_sig_request_sync_1;
 		end
 	end
 
@@ -782,12 +801,14 @@ isp_top #(
 .I_tdest         (10'd0),
 .I_tready        (S_ISP_I_tready),
 .I_algo_mode     (S_algo_mode_sync_2),
+.I_recognition_request(S_sig_request_sync_2),
 .O_tready        (S_ISP_O_tready),
 .O_tdata         (S_ISP_O_tdata ),
 .O_tlast         (S_ISP_O_tlast ),
 .O_tuser         (S_ISP_O_tuser ),
 .O_tvalid        (S_ISP_O_tvalid),
 .O_traffic_sign_busy      (S_traffic_sign_busy),
+.O_traffic_sign_enabled   (S_traffic_sign_enabled),
 .O_traffic_sign_done      (S_traffic_sign_done),
 .O_traffic_sign_result_valid(S_traffic_sign_result_valid),
 .O_traffic_sign_result_class(S_traffic_sign_result_class),
@@ -971,7 +992,7 @@ isp_top #(
         .I_video_last    ( S_hdmi_last        ),
         .I_debug_status  ( S_hdmi_debug_status),
         .I_image_mode    ( S_algo_mode_sync_2 ),
-        .I_traffic_sign_mode      ( S_algo_mode_sync_2[1:0] == 2'b00 ),
+        .I_traffic_sign_mode      ( S_traffic_sign_enabled ),
         .I_traffic_sign_busy      ( S_traffic_sign_busy        ),
         .I_traffic_sign_result_toggle( S_traffic_sign_hdmi_toggle ),
         .I_traffic_sign_result_ascii( S_traffic_sign_hdmi_ascii  ),

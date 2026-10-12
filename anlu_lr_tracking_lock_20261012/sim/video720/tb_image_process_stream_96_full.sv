@@ -95,18 +95,18 @@ module tb_image_process_stream_96_full;
     task check_output;
         begin
             #1;
-            if (o_tvalid !== expected_valid[2]) begin
+            if (o_tvalid !== expected_valid[3]) begin
                 $display("[FAIL] valid alignment frame=%0d x=%0d y=%0d got=%b expected=%b",
-                         frame_index, x_group, y, o_tvalid, expected_valid[2]);
+                         frame_index, x_group, y, o_tvalid, expected_valid[3]);
                 error_count = error_count + 1;
             end
             if (o_tvalid) begin
                 output_beats = output_beats + 1;
-                if (o_tuser !== expected_user[2]) begin
+                if (o_tuser !== expected_user[3]) begin
                     $display("[FAIL] tuser alignment beat=%0d", output_beats);
                     error_count = error_count + 1;
                 end
-                if (o_tlast !== expected_last[2]) begin
+                if (o_tlast !== expected_last[3]) begin
                     $display("[FAIL] tlast alignment beat=%0d", output_beats);
                     error_count = error_count + 1;
                 end
@@ -114,20 +114,25 @@ module tb_image_process_stream_96_full;
                     output_users = output_users + 1;
                 if (o_tlast)
                     output_lasts = output_lasts + 1;
-                if (expected_raw[2] && (o_tdata !== expected_data[2])) begin
+                if (expected_raw[3] && (o_tdata !== expected_data[3])) begin
                     $display("[FAIL] raw data mismatch beat=%0d got=%h expected=%h",
-                             output_beats, o_tdata, expected_data[2]);
+                             output_beats, o_tdata, expected_data[3]);
                     error_count = error_count + 1;
                 end
             end
-            if (o_gray_tvalid !== expected_valid[2] ||
-                o_gray_tuser  !== expected_user[2]  ||
-                o_gray_tlast  !== expected_last[2]) begin
+            if (o_gray_tvalid !== expected_valid[3] ||
+                o_gray_tuser  !== expected_user[3]  ||
+                o_gray_tlast  !== expected_last[3]) begin
                 $display("[FAIL] gray sideband marker mismatch beat=%0d", output_beats);
                 error_count = error_count + 1;
             end
 
-            // DUT 有灰度、窗口和 Sobel 三个寄存器级。当前输出与前三拍输入比较。
+            // Erosion adds one stage; all output data and markers delay four clocks.
+            expected_valid[3] = expected_valid[2];
+            expected_user[3]  = expected_user[2];
+            expected_last[3]  = expected_last[2];
+            expected_data[3]  = expected_data[2];
+            expected_raw[3]   = expected_raw[2];
             expected_valid[2] = expected_valid[1];
             expected_user[2]  = expected_user[1];
             expected_last[2]  = expected_last[1];

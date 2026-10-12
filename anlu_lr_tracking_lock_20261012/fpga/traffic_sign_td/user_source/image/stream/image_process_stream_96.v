@@ -5,6 +5,8 @@
 // 每个输入拍包含四个连续像素。行缓存按四像素打包，横向窗口使用
 // 当前组和前一组的移位数据，因此组边界不会把四个像素错误地合并。
 // 窗口采用“当前像素为右下角”的因果 3x3 窗口，边界补零。
+// ERO = erosion(Sobel); DIL = dilation(erosion(Sobel)), i.e. opening.
+// All RGB, gray and marker outputs have the same four-clock latency.
 module image_process_stream_96 #(
     parameter integer IMG_WIDTH  = 1280,
     parameter integer IMG_HEIGHT = 720
@@ -44,6 +46,8 @@ module image_process_stream_96 #(
     (* ram_style = "block" *) reg [31:0] gray_line_b [0:GROUP_WIDTH-1];
     (* ram_style = "block" *) reg [3:0]  sobel_line_a[0:GROUP_WIDTH-1];
     (* ram_style = "block" *) reg [3:0]  sobel_line_b[0:GROUP_WIDTH-1];
+    (* ram_style = "block" *) reg [3:0] erosion_line_a[0:GROUP_WIDTH-1];
+    (* ram_style = "block" *) reg [3:0] erosion_line_b[0:GROUP_WIDTH-1];
 
     reg [31:0] gray_prev_word;
     reg [31:0] gray_top_prev_word;
@@ -99,6 +103,16 @@ module image_process_stream_96 #(
     reg [X_GROUP_BITS-1:0]  sobel_stage_x;
     reg [9:0]  sobel_stage_y;
 
+    // Register erosion before dilation: no AND/OR cascade on the Sobel path.
+    reg erosion_stage_valid, erosion_stage_tuser, erosion_stage_tlast;
+    reg [95:0] erosion_stage_rgb_data;
+    reg [31:0] erosion_stage_gray_data;
+    reg [3:0] erosion_stage_word;
+    reg [1:0] erosion_stage_mode;
+    reg [X_GROUP_BITS-1:0] erosion_stage_x;
+    reg [9:0] erosion_stage_y;
+    reg [3:0] erosion_prev_word, erosion_top_prev_word, erosion_mid_prev_word;
+
     wire [X_GROUP_BITS-1:0] gray_active_x = gray_stage_tuser ? 8'd0 : x_group;
     wire [9:0] gray_active_y = gray_stage_tuser ? 10'd0 : y_pos;
     wire [1:0] gray_active_mode = gray_stage_tuser ? gray_stage_mode : frame_algo_mode;
@@ -143,6 +157,26 @@ module image_process_stream_96 #(
         end
     endfunction
 
+    // Build a binary window from current and two preceding rows. Previous
+    // packed words carry the two left taps over the four-pixel group boundary.
+    function [8:0] F_binary_window;
+        input [3:0] top, mid, cur, top_prev, mid_prev, cur_prev;
+        input integer index;
+        input first_group;
+        reg [3:0] tprev, mprev, cprev;
+        begin
+            tprev=first_group ? 4'd0 : top_prev;
+            mprev=first_group ? 4'd0 : mid_prev;
+            cprev=first_group ? 4'd0 : cur_prev;
+            case(index)
+              0: F_binary_window={cur[0],cprev[3:2],mid[0],mprev[3:2],top[0],tprev[3:2]};
+              1: F_binary_window={cur[1:0],cprev[3],mid[1:0],mprev[3],top[1:0],tprev[3]};
+              2: F_binary_window={cur[2:0],mid[2:0],top[2:0]};
+              default: F_binary_window={cur[3:1],mid[3:1],top[3:1]};
+            endcase
+        end
+    endfunction
+
     function F_sobel;
         input [7:0] t_l2;
         input [7:0] t_l1;
@@ -157,7 +191,7 @@ module image_process_stream_96 #(
         integer gx;
         integer gy;
         begin
-            gx = t_c + (m_l1 << 1) + c_c - t_l2 - (m_l2 << 1) - c_l2;
+            gx = t_c + (m_c << 1) + c_c - t_l2 - (m_l2 << 1) - c_l2;
             gy = c_l2 + (c_l1 << 1) + c_c - t_l2 - (t_l1 << 1) - t_c;
             if (gx < 0) gx = -gx;
             if (gy < 0) gy = -gy;
@@ -252,11 +286,9 @@ module image_process_stream_96 #(
         for (lane = 0; lane < 4; lane = lane + 1) begin
             if (morph_active_y < 2) begin
                 erosion_taps[lane] = 9'd0;
-                dilation_taps[lane] = 9'd0;
             end
             else begin
                 erosion_taps[lane] = 9'd0;
-                dilation_taps[lane] = 9'd0;
                 if (lane == 0) begin
                     erosion_taps[lane][0] = (morph_active_x == 0) ? 1'b0 : F_lane1(sobel_top_prev_word, 2);
                     erosion_taps[lane][1] = (morph_active_x == 0) ? 1'b0 : F_lane1(sobel_top_prev_word, 3);
@@ -284,19 +316,26 @@ module image_process_stream_96 #(
                 erosion_taps[lane][2] = F_lane1(sobel_line_b[morph_active_x], lane);
                 erosion_taps[lane][5] = F_lane1(sobel_line_a[morph_active_x], lane);
                 erosion_taps[lane][8] = sobel_stage_word[lane];
-                dilation_taps[lane] = erosion_taps[lane];
+
             end
             erosion_word[lane]  = F_morph(erosion_taps[lane], 1'b0);
+        end
+
+        for (lane = 0; lane < 4; lane = lane + 1) begin
+            dilation_taps[lane] = (erosion_stage_y < 2) ? 9'd0 : F_binary_window(
+                erosion_line_b[erosion_stage_x], erosion_line_a[erosion_stage_x],
+                erosion_stage_word, erosion_top_prev_word, erosion_mid_prev_word,
+                erosion_prev_word, lane, erosion_stage_x == 0);
             dilation_word[lane] = F_morph(dilation_taps[lane], 1'b1);
         end
 
-        selected_data = sobel_stage_rgb_data;
-        if (sobel_stage_mode == MODE_EROSION)
-            selected_data = {erosion_word[3] ? 24'hffffff : 24'h000000,
-                             erosion_word[2] ? 24'hffffff : 24'h000000,
-                             erosion_word[1] ? 24'hffffff : 24'h000000,
-                             erosion_word[0] ? 24'hffffff : 24'h000000};
-        else if (sobel_stage_mode == MODE_DILATION)
+        selected_data = erosion_stage_rgb_data;
+        if (erosion_stage_mode == MODE_EROSION)
+            selected_data = {erosion_stage_word[3] ? 24'hffffff : 24'h000000,
+                             erosion_stage_word[2] ? 24'hffffff : 24'h000000,
+                             erosion_stage_word[1] ? 24'hffffff : 24'h000000,
+                             erosion_stage_word[0] ? 24'hffffff : 24'h000000};
+        else if (erosion_stage_mode == MODE_DILATION)
             selected_data = {dilation_word[3] ? 24'hffffff : 24'h000000,
                              dilation_word[2] ? 24'hffffff : 24'h000000,
                              dilation_word[1] ? 24'hffffff : 24'h000000,
@@ -343,6 +382,18 @@ module image_process_stream_96 #(
             sobel_stage_mode <= MODE_RAW;
             sobel_stage_x <= 8'd0;
             sobel_stage_y <= 10'd0;
+            erosion_stage_valid <= 1'b0;
+            erosion_stage_tuser <= 1'b0;
+            erosion_stage_tlast <= 1'b0;
+            erosion_stage_rgb_data <= 96'd0;
+            erosion_stage_gray_data <= 32'd0;
+            erosion_stage_word <= 4'd0;
+            erosion_stage_mode <= MODE_RAW;
+            erosion_stage_x <= 0;
+            erosion_stage_y <= 0;
+            erosion_prev_word <= 4'd0;
+            erosion_top_prev_word <= 4'd0;
+            erosion_mid_prev_word <= 4'd0;
             gray_prev_word   <= 32'd0;
             gray_top_prev_word <= 32'd0;
             gray_mid_prev_word <= 32'd0;
@@ -387,15 +438,15 @@ module image_process_stream_96 #(
             window_cur_l1 <= {cur_l1[3], cur_l1[2], cur_l1[1], cur_l1[0]};
             window_cur_c <= {gray_word[3], gray_word[2], gray_word[1], gray_word[0]};
 
-            O_tvalid      <= sobel_stage_valid;
-            O_tuser       <= sobel_stage_valid && sobel_stage_tuser;
-            O_tlast       <= sobel_stage_valid && sobel_stage_tlast;
+            O_tvalid      <= erosion_stage_valid;
+            O_tuser       <= erosion_stage_valid && erosion_stage_tuser;
+            O_tlast       <= erosion_stage_valid && erosion_stage_tlast;
             O_tdata       <= selected_data;
-            O_gray_tvalid <= sobel_stage_valid;
-            O_gray_tuser  <= sobel_stage_valid && sobel_stage_tuser;
-            O_gray_tlast  <= sobel_stage_valid && sobel_stage_tlast;
-            O_gray_data   <= sobel_stage_gray_data;
-            O_gray_mode   <= sobel_stage_mode;
+            O_gray_tvalid <= erosion_stage_valid;
+            O_gray_tuser  <= erosion_stage_valid && erosion_stage_tuser;
+            O_gray_tlast  <= erosion_stage_valid && erosion_stage_tlast;
+            O_gray_data   <= erosion_stage_gray_data;
+            O_gray_mode   <= erosion_stage_mode;
 
             if (gray_stage_valid) begin
                 if (gray_stage_tuser) begin
@@ -433,6 +484,30 @@ module image_process_stream_96 #(
             sobel_stage_mode <= window_stage_mode;
             sobel_stage_x <= window_stage_x;
             sobel_stage_y <= window_stage_y;
+
+            erosion_stage_valid <= sobel_stage_valid;
+            erosion_stage_tuser <= sobel_stage_valid && sobel_stage_tuser;
+            erosion_stage_tlast <= sobel_stage_valid && sobel_stage_tlast;
+            erosion_stage_rgb_data <= sobel_stage_rgb_data;
+            erosion_stage_gray_data <= sobel_stage_gray_data;
+            erosion_stage_word <= erosion_word;
+            erosion_stage_mode <= sobel_stage_mode;
+            erosion_stage_x <= morph_active_x;
+            erosion_stage_y <= morph_active_y;
+
+            if (erosion_stage_valid) begin
+                erosion_line_a[erosion_stage_x] <= erosion_stage_word;
+                if (erosion_stage_y != 0)
+                    erosion_line_b[erosion_stage_x] <= erosion_line_a[erosion_stage_x];
+                erosion_prev_word <= erosion_stage_word;
+                erosion_top_prev_word <= (erosion_stage_y < 2) ? 4'd0 : erosion_line_b[erosion_stage_x];
+                erosion_mid_prev_word <= (erosion_stage_y == 0) ? 4'd0 : erosion_line_a[erosion_stage_x];
+                if (erosion_stage_tlast) begin
+                    erosion_prev_word <= 4'd0;
+                    erosion_top_prev_word <= 4'd0;
+                    erosion_mid_prev_word <= 4'd0;
+                end
+            end
 
             if (sobel_stage_valid) begin
                 sobel_line_a[morph_active_x] <= sobel_stage_word;

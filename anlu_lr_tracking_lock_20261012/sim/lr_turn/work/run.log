@@ -2,8 +2,8 @@
 # xsim v2019.2 (64-bit)
 # SW Build 2708876 on Wed Nov  6 21:40:23 MST 2019
 # IP Build 2700528 on Thu Nov  7 00:09:20 MST 2019
-# Start of session at: Mon Oct 12 10:18:03 2026
-# Process ID: 28224
+# Start of session at: Mon Oct 12 16:30:30 2026
+# Process ID: 30592
 # Current directory: D:/qrsfpga/qrsfpga/anlu_lr_tracking_lock_20261012/sim/lr_turn/work
 # Command line: xsim.exe -log run.log -mode tcl -source {xsim.dir/snapshot/xsim_script.tcl}
 # Log file: D:/qrsfpga/qrsfpga/anlu_lr_tracking_lock_20261012/sim/lr_turn/work/run.log
@@ -88,6 +88,6 @@ result R score=83 L=32 R=83 box=80,207,36,163 white=57
 result R score=83 L=32 R=83 box=80,207,36,163 white=57
 PASS LR real-sign image scenes / rejection / RMW gaps
 $finish called at time : 14748480 ns : File "D:/qrsfpga/qrsfpga/anlu_lr_tracking_lock_20261012/sim/lr_turn/tb_lr_turn.sv" Line 50
-run: Time (s): cpu = 00:00:00 ; elapsed = 00:00:11 . Memory (MB): peak = 224.094 ; gain = 0.000
+run: Time (s): cpu = 00:00:00 ; elapsed = 00:00:10 . Memory (MB): peak = 225.090 ; gain = 0.000
 exit
-INFO: [Common 17-206] Exiting xsim at Mon Oct 12 10:18:17 2026...
+INFO: [Common 17-206] Exiting xsim at Mon Oct 12 16:30:43 2026...

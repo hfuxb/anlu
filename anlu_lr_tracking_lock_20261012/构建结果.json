@@ -1,11 +1,11 @@
 {
-  "generated_utc": "2026-10-12T02:30:26.090824+00:00",
-  "project": "HX1P35A associated-target tracking and confirmed L/R lock with AE/AWB",
+  "generated_utc": "2026-10-12T10:32:34.276045+00:00",
+  "project": "HX1P35A SIG-only L/R recognition, stable replacement, opening and AE/AWB",
   "bit": "fpga\\traffic_sign_td\\td_project\\bitstream\\traffic_sign_td_lr_tracking_lock.bit",
   "bytes": 1789539,
-  "sha256": "57419BEE9D1366E7403C0EDF8146DA3707875D1A04CBA6676A84353843D93FE2",
+  "sha256": "6D30D717985D6DB7BC6A5E209331383B053CAF173FD86579A535A6A10157DB15",
   "final_routed_timing_ns": {
-    "SWNS": 0.177,
+    "SWNS": 0.196,
     "STNS": 0.0,
     "HWNS": 0.02,
     "HTNS": 0.0
@@ -23,12 +23,15 @@
     }
   },
   "tests": {
-    "tracking lock and persistent loss (29 frames)": "sim\\lr_turn\\work_tracking\\run.log",
+    "SIG-only detector and mode-exit result CDC": "sim\\lr_turn\\work_sig_only\\run.log",
+    "Sobel erosion opening and DDR packing": "reports\\tb_morphology_opening_720p.log",
+    "four-mode full720 stream alignment": "reports\\tb_image_process_stream_96_full_720p.log",
+    "direction hysteresis and 14-frame loss expiry (79 frames)": "sim\\lr_turn\\work_tracking\\run.log",
     "12 reference-image scenarios": "sim\\lr_turn\\work\\run.log",
     "1280x720 image frames": "sim\\lr_turn\\work_full720\\run.log",
     "result metadata CDC (both edge phases)": "sim\\lr_turn\\work\\tb_lr_metadata\\run.log",
     "uniform Latin/digit font geometry": "sim\\lr_turn\\work\\tb_osd_font\\run.log",
-    "HDMI alignment, ROI, score, frame latch": "sim\\lr_turn\\work\\tb_lr_hdmi\\run.log",
+    "HDMI 10 frames: SIG-only overlays, reentry and RGB alignment": "sim\\lr_turn\\work\\tb_lr_hdmi\\run.log",
     "STM32 UART": "reports\\tb_car_uart.log",
     "car policy": "reports\\tb_car_decision.log",
     "car result CDC": "reports\\tb_car_result_cdc.log",
@@ -168,9 +171,29 @@
   },
   "lock_policy": {
     "confirm_frames": 3,
-    "hold_frames": 8,
+    "hold_frames": 14,
     "initial_score": 50,
-    "direction_margin": 12
+    "direction_margin": 12,
+    "switch_frames": 6,
+    "switch_score": 65,
+    "switch_margin": 20
+  },
+  "recognition_mode": {
+    "enabled_mode": "SIG (00)",
+    "disabled_modes": [
+      "RAW (11)",
+      "ERO (10)",
+      "DIL (01)"
+    ],
+    "clear_lock_on_exit": true,
+    "wait_for_complete_SOF_after_RAM_init": true,
+    "visual_drive_stop_and_disarm_outside_SIG": true
+  },
+  "morphology": {
+    "erosion": "erosion(Sobel)",
+    "dilation": "dilation(erosion(Sobel))",
+    "stream_latency_clocks": 4,
+    "standard_sobel_gx_fixed": true
   },
   "source_sha256": {
     "fpga\\traffic_sign_td\\user_source\\lab_ex_2026_nosoft\\hdl_source\\anlogic_logo_rom.v": "37c76680345f17a85632b7835e46a3a197cf75fdd91ca6a970b75f5346e7a9f8",
@@ -178,9 +201,9 @@
     "fpga\\traffic_sign_td\\user_source\\lab_ex_2026_nosoft\\hdl_source\\auto_white_balance.v": "248b841fdc7640d07768b0e6e086704a862da24047de40c80beb8cc201180e0f",
     "fpga\\traffic_sign_td\\user_source\\lab_ex_2026_nosoft\\hdl_source\\csi_unpacket.v": "cc66fec1ee55fff7e8a31964e6c27670006caf294d153fea8823c83fa9890233",
     "fpga\\traffic_sign_td\\user_source\\lab_ex_2026_nosoft\\hdl_source\\data_96bit_to_128bit.v": "6861038b75f2f7010bff99742e4db9470643716c7e6b9b615a27da60d4542924",
-    "fpga\\traffic_sign_td\\user_source\\lab_ex_2026_nosoft\\hdl_source\\design_top_wrapper.v": "369a6b8fafb36a8f86e803f1dca1b5017e0da0853c1340904c1ffe7a016e01a1",
+    "fpga\\traffic_sign_td\\user_source\\lab_ex_2026_nosoft\\hdl_source\\design_top_wrapper.v": "d06537d8f8bad96d3302af1eaf1f731be9d4b400815f7b733f7cd8e47818efa6",
     "fpga\\traffic_sign_td\\user_source\\lab_ex_2026_nosoft\\hdl_source\\hdmi_1_4b_transmitter_core_wrapper.enc.v": "867e0b0bdd874bc383d00918c9e1be3fe01edf41f343b6a0d73e262776596a63",
-    "fpga\\traffic_sign_td\\user_source\\lab_ex_2026_nosoft\\hdl_source\\hdmi_mixer.v": "8d2c56e44e0d55878bff24e2b467618654f2663285fb991f2f3cba1013b96d7b",
+    "fpga\\traffic_sign_td\\user_source\\lab_ex_2026_nosoft\\hdl_source\\hdmi_mixer.v": "cf92c6a8fe7dbfb652fd80a2c5f13a447bc5278c2a2b575df9a51a2f51ef1f54",
     "fpga\\traffic_sign_td\\user_source\\lab_ex_2026_nosoft\\hdl_source\\hdmi_phy_warpper.v": "416b082b0987001bdbc0a7e20a557cb8fb1dca34e25dc881e6d28a8cb3cf4300",
     "fpga\\traffic_sign_td\\user_source\\lab_ex_2026_nosoft\\hdl_source\\hdmi_tx.v": "c38dd1be1d14663b8e0c0b87c5b974cb3879b424d131e6282709abf4aabdd543",
     "fpga\\traffic_sign_td\\user_source\\lab_ex_2026_nosoft\\hdl_source\\I2S_receiver.v": "08904598b42c2e1a4836cd9fb3293bc6c791ea2f79e35c7663a33127dc97f47b",
@@ -274,10 +297,10 @@
     "fpga\\traffic_sign_td\\user_source\\ip_source\\demosaic\\blk_mem_gen_zhenghe\\RTL\\include\\define.v": "104eb8d9b626b944b1e2d3b8070f51c636af132bc00b32ebed0236bbb2c144c0",
     "fpga\\traffic_sign_td\\user_source\\ip_source\\demosaic\\blk_mem_gen_demosaic\\RTL\\ram_c36c2ca3b3a7.v": "4c007b82769a2af9474683ec27711133c735ac776fd1f3d037d4eb00cc20a832",
     "fpga\\traffic_sign_td\\user_source\\ip_source\\demosaic\\blk_mem_gen_demosaic\\RTL\\include\\define.v": "ce22c429acd5d725b986015db98a3a86609204620dc1ba9158123f1e335b6ac5",
-    "fpga\\traffic_sign_td\\user_source\\image\\integration\\isp_top.v": "9bb70d49fef77c373f01af28a4260ac2d790f5b6890997be825aeca0e8686fa4",
+    "fpga\\traffic_sign_td\\user_source\\image\\integration\\isp_top.v": "d425c71ecbfc96ee506f44678b6e1dc5e4c16476b970f64ebe9e2cba1f6b71ab",
     "fpga\\traffic_sign_td\\user_source\\image\\stream\\image_correction.v": "50a808f962581428691c0f39cc55422a0b8866526f03601ab6c5ec4fc139af7e",
-    "fpga\\traffic_sign_td\\user_source\\image\\stream\\image_process_stream_96.v": "08b190bed3d9c58f4320785a747ddfe219c205adc02886a0d028f02e01074cef",
-    "fpga\\traffic_sign_td\\user_source\\image\\traffic_sign\\traffic_sign_detector_96.v": "304a2deb7e9f3f8e03df89a123311d925d0918247ddd0d3e8d52f1d04e3aca4d",
+    "fpga\\traffic_sign_td\\user_source\\image\\stream\\image_process_stream_96.v": "2c7d1d0941309b94bd355a8fd81d27a566d65c811f5da630bbfc3a76a180b783",
+    "fpga\\traffic_sign_td\\user_source\\image\\traffic_sign\\traffic_sign_detector_96.v": "5016438c4c73914468d9aba42614c77e28526cad2fb603c01850527336e4080b",
     "fpga\\traffic_sign_td\\user_source\\image\\traffic_sign\\traffic_sign_result_cdc.v": "793f9b72a1aa82e5db611abf6c2ddc618c210017940724fd51b9262489951e69",
     "fpga\\traffic_sign_td\\user_source\\image\\stream\\blc\\BLC.v": "011d09b3e1de47b9e444945c257426836f4947e8dd9b3cd2e9c1539b44129221",
     "fpga\\traffic_sign_td\\user_source\\image\\awb\\active\\awb.v": "e8f6284ba783574d625bab8bd4ab965274ad1ec919d1b8e916d56e6c62744cdd",
