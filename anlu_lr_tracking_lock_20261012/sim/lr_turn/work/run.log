@@ -1,0 +1,93 @@
+#-----------------------------------------------------------
+# xsim v2019.2 (64-bit)
+# SW Build 2708876 on Wed Nov  6 21:40:23 MST 2019
+# IP Build 2700528 on Thu Nov  7 00:09:20 MST 2019
+# Start of session at: Mon Oct 12 10:18:03 2026
+# Process ID: 28224
+# Current directory: D:/qrsfpga/qrsfpga/anlu_lr_tracking_lock_20261012/sim/lr_turn/work
+# Command line: xsim.exe -log run.log -mode tcl -source {xsim.dir/snapshot/xsim_script.tcl}
+# Log file: D:/qrsfpga/qrsfpga/anlu_lr_tracking_lock_20261012/sim/lr_turn/work/run.log
+# Journal file: D:/qrsfpga/qrsfpga/anlu_lr_tracking_lock_20261012/sim/lr_turn/work\xsim.jou
+#-----------------------------------------------------------
+source xsim.dir/snapshot/xsim_script.tcl
+# xsim {snapshot} -autoloadwcfg -runall
+Vivado Simulator 2019.2
+Time resolution is 1 ps
+run -all
+CASE ../left120.hex
+result ? score=0 L=0 R=0 box=80,199,48,167 white=0
+result ? score=82 L=82 R=37 box=80,199,48,167 white=56
+result ? score=82 L=82 R=37 box=80,199,48,167 white=56
+result L score=82 L=82 R=37 box=80,199,48,167 white=56
+result L score=82 L=82 R=37 box=80,199,48,167 white=56
+CASE ../right160.hex
+result ? score=0 L=0 R=0 box=60,219,36,195 white=0
+result ? score=93 L=33 R=93 box=60,219,36,195 white=59
+result ? score=93 L=33 R=93 box=60,219,36,195 white=59
+result R score=93 L=33 R=93 box=60,219,36,195 white=59
+result R score=93 L=33 R=93 box=60,219,36,195 white=59
+CASE ../left_dark.hex
+result ? score=0 L=0 R=0 box=76,219,48,191 white=0
+result ? score=81 L=81 R=35 box=76,219,48,191 white=70
+result ? score=81 L=81 R=35 box=76,219,48,191 white=70
+result L score=81 L=81 R=35 box=76,219,48,191 white=70
+result L score=81 L=81 R=35 box=76,219,48,191 white=70
+CASE ../right_distractors.hex
+result ? score=0 L=0 R=0 box=60,187,32,159 white=0
+result ? score=83 L=32 R=83 box=60,187,32,159 white=57
+result ? score=83 L=32 R=83 box=60,187,32,159 white=57
+result R score=83 L=32 R=83 box=60,187,32,159 white=57
+result R score=83 L=32 R=83 box=60,187,32,159 white=57
+CASE ../blue_no_arrow.hex
+result ? score=0 L=0 R=0 box=72,199,48,175 white=0
+result ? score=0 L=0 R=0 box=72,199,48,175 white=0
+result ? score=0 L=0 R=0 box=72,199,48,175 white=0
+result ? score=0 L=0 R=0 box=72,199,48,175 white=0
+result ? score=0 L=0 R=0 box=72,199,48,175 white=0
+CASE ../straight_reject.hex
+result ? score=0 L=0 R=0 box=72,199,48,175 white=0
+result ? score=25 L=25 R=25 box=72,199,48,175 white=32
+result ? score=25 L=25 R=25 box=72,199,48,175 white=32
+result ? score=25 L=25 R=25 box=72,199,48,175 white=32
+result ? score=25 L=25 R=25 box=72,199,48,175 white=32
+CASE ../right96.hex
+result ? score=0 L=0 R=0 box=156,251,80,175 white=0
+result ? score=91 L=33 R=91 box=156,251,80,175 white=58
+result ? score=91 L=33 R=91 box=156,251,80,175 white=58
+result R score=91 L=33 R=91 box=156,251,80,175 white=58
+result R score=91 L=33 R=91 box=156,251,80,175 white=58
+CASE ../left_blur.hex
+result ? score=0 L=0 R=0 box=24,183,40,199 white=0
+result ? score=90 L=90 R=34 box=24,183,40,199 white=63
+result ? score=90 L=90 R=34 box=24,183,40,199 white=63
+result L score=90 L=90 R=34 box=24,183,40,199 white=63
+result L score=90 L=90 R=34 box=24,183,40,199 white=63
+CASE ../left_rotate12.hex
+result ? score=0 L=0 R=0 box=84,227,56,199 white=0
+result ? score=81 L=81 R=38 box=84,227,56,199 white=59
+result ? score=81 L=81 R=38 box=84,227,56,199 white=59
+result L score=81 L=81 R=38 box=84,227,56,199 white=59
+result L score=81 L=81 R=38 box=84,227,56,199 white=59
+CASE ../right_rotate12.hex
+result ? score=0 L=0 R=0 box=68,211,44,187 white=0
+result ? score=73 L=37 R=73 box=68,211,44,187 white=56
+result ? score=73 L=37 R=73 box=68,211,44,187 white=56
+result R score=73 L=37 R=73 box=68,211,44,187 white=56
+result R score=73 L=37 R=73 box=68,211,44,187 white=56
+CASE ../left_with_text.hex
+result ? score=0 L=0 R=0 box=80,207,36,163 white=0
+result ? score=83 L=83 R=32 box=80,207,36,163 white=57
+result ? score=83 L=83 R=32 box=80,207,36,163 white=57
+result L score=83 L=83 R=32 box=80,207,36,163 white=57
+result L score=83 L=83 R=32 box=80,207,36,163 white=57
+CASE ../right_with_text.hex
+result ? score=0 L=0 R=0 box=80,207,36,163 white=0
+result ? score=83 L=32 R=83 box=80,207,36,163 white=57
+result ? score=83 L=32 R=83 box=80,207,36,163 white=57
+result R score=83 L=32 R=83 box=80,207,36,163 white=57
+result R score=83 L=32 R=83 box=80,207,36,163 white=57
+PASS LR real-sign image scenes / rejection / RMW gaps
+$finish called at time : 14748480 ns : File "D:/qrsfpga/qrsfpga/anlu_lr_tracking_lock_20261012/sim/lr_turn/tb_lr_turn.sv" Line 50
+run: Time (s): cpu = 00:00:00 ; elapsed = 00:00:11 . Memory (MB): peak = 224.094 ; gain = 0.000
+exit
+INFO: [Common 17-206] Exiting xsim at Mon Oct 12 10:18:17 2026...

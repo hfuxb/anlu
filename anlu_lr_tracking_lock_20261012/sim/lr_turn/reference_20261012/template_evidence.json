@@ -1,0 +1,44 @@
+{
+  "left": {
+    "source_sha256": "ad129bcc2358b4169ae6240703417bb78a42c62689d9085156f5c5a3528dd98c",
+    "image_size": [
+      1440,
+      1840
+    ],
+    "blue_bbox": [
+      136,
+      146,
+      1298,
+      1309
+    ],
+    "sample_roi_512": [
+      0,
+      0,
+      127,
+      127
+    ],
+    "template_hex": "0000000004001c001c001c001c001ce01e700ff80ffc03f800e000c000000000",
+    "foreground_cells": 57
+  },
+  "right": {
+    "source_sha256": "d7c336611c75e1da02b074f4b2188b426e7f2175a13ea4e461cd20b1552997a7",
+    "image_size": [
+      1440,
+      1840
+    ],
+    "blue_bbox": [
+      140,
+      141,
+      1298,
+      1306
+    ],
+    "sample_roi_512": [
+      0,
+      0,
+      127,
+      127
+    ],
+    "template_hex": "000000000020003800380038003807380e781ff03ff01fc00700030000000000",
+    "foreground_cells": 57
+  }
+}

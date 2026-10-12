@@ -1,0 +1,79 @@
+#-----------------------------------------------------------
+# xsim v2019.2 (64-bit)
+# SW Build 2708876 on Wed Nov  6 21:40:23 MST 2019
+# IP Build 2700528 on Thu Nov  7 00:09:20 MST 2019
+# Start of session at: Mon Oct 12 10:18:05 2026
+# Process ID: 3324
+# Current directory: D:/qrsfpga/qrsfpga/anlu_lr_tracking_lock_20261012/sim/lr_turn/work_tracking
+# Command line: xsim.exe -log run.log -mode tcl -source {xsim.dir/snapshot/xsim_script.tcl}
+# Log file: D:/qrsfpga/qrsfpga/anlu_lr_tracking_lock_20261012/sim/lr_turn/work_tracking/run.log
+# Journal file: D:/qrsfpga/qrsfpga/anlu_lr_tracking_lock_20261012/sim/lr_turn/work_tracking\xsim.jou
+#-----------------------------------------------------------
+source xsim.dir/snapshot/xsim_script.tcl
+# xsim {snapshot} -autoloadwcfg -runall
+Vivado Simulator 2019.2
+Time resolution is 1 ps
+run -all
+SCENE ../tracking/left.hex expected ?
+frame=1 ascii=? locked=0 score=0 box=1 x=48..167 missing=0 vote=0
+SCENE ../tracking/left.hex expected ?
+frame=2 ascii=? locked=0 score=82 box=1 x=48..167 missing=0 vote=1
+SCENE ../tracking/left.hex expected ?
+frame=3 ascii=? locked=0 score=82 box=1 x=48..167 missing=0 vote=2
+SCENE ../tracking/left.hex expected L
+frame=4 ascii=L locked=1 score=82 box=1 x=48..167 missing=0 vote=0
+SCENE ../tracking/left_moved.hex expected L
+frame=5 ascii=L locked=1 score=69 box=1 x=56..175 missing=0 vote=0
+SCENE ../tracking/no_arrow.hex expected L
+frame=6 ascii=L locked=1 score=0 box=1 x=64..183 missing=0 vote=0
+SCENE ../tracking/opposite_in_lock.hex expected L
+frame=7 ascii=L locked=1 score=68 box=1 x=72..191 missing=0 vote=0
+SCENE ../tracking/two_signs.hex expected L
+frame=8 ascii=L locked=1 score=69 box=1 x=80..199 missing=0 vote=0
+SCENE ../tracking/only_distractor.hex expected L
+frame=9 ascii=L locked=1 score=0 box=1 x=80..199 missing=1 vote=0
+SCENE ../tracking/blank.hex expected L
+frame=10 ascii=L locked=1 score=0 box=1 x=80..199 missing=2 vote=0
+SCENE ../tracking/blank.hex expected L
+frame=11 ascii=L locked=1 score=0 box=1 x=80..199 missing=3 vote=0
+SCENE ../tracking/left_return.hex expected L
+frame=12 ascii=L locked=1 score=83 box=1 x=84..203 missing=0 vote=0
+SCENE ../tracking/blank.hex expected L
+frame=13 ascii=L locked=1 score=0 box=1 x=84..203 missing=1 vote=0
+SCENE ../tracking/blank.hex expected L
+frame=14 ascii=L locked=1 score=0 box=1 x=84..203 missing=2 vote=0
+SCENE ../tracking/blank.hex expected L
+frame=15 ascii=L locked=1 score=0 box=1 x=84..203 missing=3 vote=0
+SCENE ../tracking/blank.hex expected L
+frame=16 ascii=L locked=1 score=0 box=1 x=84..203 missing=4 vote=0
+SCENE ../tracking/blank.hex expected L
+frame=17 ascii=L locked=1 score=0 box=1 x=84..203 missing=5 vote=0
+SCENE ../tracking/blank.hex expected L
+frame=18 ascii=L locked=1 score=0 box=1 x=84..203 missing=6 vote=0
+SCENE ../tracking/blank.hex expected L
+frame=19 ascii=L locked=1 score=0 box=1 x=84..203 missing=7 vote=0
+SCENE ../tracking/blank.hex expected ?
+frame=20 ascii=? locked=0 score=0 box=0 x=84..203 missing=0 vote=0
+SCENE ../tracking/right_new.hex expected ?
+frame=21 ascii=? locked=0 score=0 box=1 x=300..439 missing=0 vote=0
+SCENE ../tracking/right_new.hex expected ?
+frame=22 ascii=? locked=0 score=86 box=1 x=300..439 missing=0 vote=1
+SCENE ../tracking/right_new.hex expected ?
+frame=23 ascii=? locked=0 score=86 box=1 x=300..439 missing=0 vote=2
+SCENE ../tracking/right_new.hex expected R
+frame=24 ascii=R locked=1 score=86 box=1 x=300..439 missing=0 vote=0
+SCENE ../tracking/blank.hex expected ?
+frame=25 ascii=? locked=0 score=0 box=0 x=0..3 missing=0 vote=0
+SCENE ../tracking/left.hex expected ?
+frame=26 ascii=? locked=0 score=0 box=1 x=48..167 missing=0 vote=0
+SCENE ../tracking/right_same_position.hex expected ?
+frame=27 ascii=? locked=0 score=85 box=1 x=48..167 missing=0 vote=1
+SCENE ../tracking/left.hex expected ?
+frame=28 ascii=? locked=0 score=82 box=1 x=48..167 missing=0 vote=1
+SCENE ../tracking/right_same_position.hex expected ?
+frame=29 ascii=? locked=0 score=85 box=1 x=48..167 missing=0 vote=1
+PASS LR tracking lock 29 frames: confirm / low score / opposite direction / movement / distractor / short loss / expiry / rearm / reset
+$finish called at time : 19296880 ns : File "D:/qrsfpga/qrsfpga/anlu_lr_tracking_lock_20261012/sim/lr_turn/tb_lr_tracking.sv" Line 92
+run: Time (s): cpu = 00:00:00 ; elapsed = 00:00:14 . Memory (MB): peak = 224.836 ; gain = 0.000
+exit
+INFO: [Common 17-206] Exiting xsim at Mon Oct 12 10:18:21 2026...

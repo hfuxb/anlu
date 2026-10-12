@@ -1,0 +1,12 @@
+run_case("../left120.hex",8'h4c);
+run_case("../right160.hex",8'h52);
+run_case("../left_dark.hex",8'h4c);
+run_case("../right_distractors.hex",8'h52);
+run_case("../blue_no_arrow.hex",8'h3f);
+run_case("../straight_reject.hex",8'h3f);
+run_case("../right96.hex",8'h52);
+run_case("../left_blur.hex",8'h4c);
+run_case("../left_rotate12.hex",8'h4c);
+run_case("../right_rotate12.hex",8'h52);
+run_case("../left_with_text.hex",8'h4c);
+run_case("../right_with_text.hex",8'h52);

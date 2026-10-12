@@ -1,0 +1,33 @@
+
+# FPGA / TD 临时文件
+**/.lock.f
+*.qor
+*.log
+*.logw
+*.tmp
+*.bak
+**/td_project/log/
+/integration/td_bit/
+
+# 综合与时序报告（需要归档的报告可单独保留）
+*.rpt
+
+# ModelSim / Questa 仿真输出
+*.wlf
+*.vcd
+*.vstf
+transcript
+work/
+modelsim.ini
+
+# Python 临时文件
+__pycache__/
+*.pyc
+.venv/
+
+# Windows 临时文件
+Thumbs.db
+.DS_Store
+/previous_720p_build/
+# 如果旧版本只用于本地备份，可取消下一行注释
+# /previous_720p_build/
