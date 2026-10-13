@@ -899,6 +899,16 @@
               <FileType>1</FileType>
               <FilePath>..\BALANCE\balance_task.c</FilePath>
             </File>
+              <File>
+                <FileName>fpga_turn.c</FileName>
+                <FileType>1</FileType>
+                <FilePath>..\BALANCE\fpga_turn.c</FilePath>
+              </File>
+              <File>
+                <FileName>fpga_turn_feedback.c</FileName>
+                <FileType>1</FileType>
+                <FilePath>..\BALANCE\fpga_turn_feedback.c</FilePath>
+              </File>
             <File>
               <FileName>imu_task.c</FileName>
               <FileType>1</FileType>
@@ -1921,6 +1931,16 @@
               <FileType>1</FileType>
               <FilePath>..\BALANCE\balance_task.c</FilePath>
             </File>
+              <File>
+                <FileName>fpga_turn.c</FileName>
+                <FileType>1</FileType>
+                <FilePath>..\BALANCE\fpga_turn.c</FilePath>
+              </File>
+              <File>
+                <FileName>fpga_turn_feedback.c</FileName>
+                <FileType>1</FileType>
+                <FilePath>..\BALANCE\fpga_turn_feedback.c</FilePath>
+              </File>
             <File>
               <FileName>imu_task.c</FileName>
               <FileType>1</FileType>
@@ -2943,6 +2963,16 @@
               <FileType>1</FileType>
               <FilePath>..\BALANCE\balance_task.c</FilePath>
             </File>
+              <File>
+                <FileName>fpga_turn.c</FileName>
+                <FileType>1</FileType>
+                <FilePath>..\BALANCE\fpga_turn.c</FilePath>
+              </File>
+              <File>
+                <FileName>fpga_turn_feedback.c</FileName>
+                <FileType>1</FileType>
+                <FilePath>..\BALANCE\fpga_turn_feedback.c</FilePath>
+              </File>
             <File>
               <FileName>imu_task.c</FileName>
               <FileType>1</FileType>
@@ -3965,6 +3995,16 @@
               <FileType>1</FileType>
               <FilePath>..\BALANCE\balance_task.c</FilePath>
             </File>
+              <File>
+                <FileName>fpga_turn.c</FileName>
+                <FileType>1</FileType>
+                <FilePath>..\BALANCE\fpga_turn.c</FilePath>
+              </File>
+              <File>
+                <FileName>fpga_turn_feedback.c</FileName>
+                <FileType>1</FileType>
+                <FilePath>..\BALANCE\fpga_turn_feedback.c</FilePath>
+              </File>
             <File>
               <FileName>imu_task.c</FileName>
               <FileType>1</FileType>
@@ -4987,6 +5027,16 @@
               <FileType>1</FileType>
               <FilePath>..\BALANCE\balance_task.c</FilePath>
             </File>
+              <File>
+                <FileName>fpga_turn.c</FileName>
+                <FileType>1</FileType>
+                <FilePath>..\BALANCE\fpga_turn.c</FilePath>
+              </File>
+              <File>
+                <FileName>fpga_turn_feedback.c</FileName>
+                <FileType>1</FileType>
+                <FilePath>..\BALANCE\fpga_turn_feedback.c</FilePath>
+              </File>
             <File>
               <FileName>imu_task.c</FileName>
               <FileType>1</FileType>

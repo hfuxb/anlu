@@ -1,4 +1,5 @@
 #include "imu_task.h"
+#include "fpga_turn_feedback.h"
 
 //imu数据结构体
 IMU_DATA_t imu;
@@ -11,6 +12,9 @@ void MPU6050_task(void *pvParameters)
         //This task runs at 100Hz
         //此任务以100Hz的频率运行
         vTaskDelayUntil(&lastWakeTime, F2T(IMU_TASK_RATE));
+
+        /* Checked physical-yaw sample, on the same exclusive IMU I2C owner. */
+        FPGA_TurnFeedbackSample();
 
         //Read the gyroscope zero before starting
         //开机前，读取陀螺仪零点
@@ -36,6 +40,9 @@ void ICM20948_task(void *pvParameters)
         //This task runs at 100Hz
         //此任务以100Hz的频率运行
         vTaskDelayUntil(&lastWakeTime, F2T(IMU_TASK_RATE));
+
+        /* Checked physical-yaw sample, on the same exclusive IMU I2C owner. */
+        FPGA_TurnFeedbackSample();
 
         //Read the gyroscope zero before starting
         //开机前，读取陀螺仪零点

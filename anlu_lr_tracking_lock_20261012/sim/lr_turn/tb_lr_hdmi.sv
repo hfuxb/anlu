@@ -4,7 +4,7 @@ reg clk=0,rst=0,toggle=0;
 always #5 clk=~clk;
 wire vs,hs,de,user,last,rd,ovs,ohs,ode;
 wire [23:0] rgb;
-reg [1:0] image_mode=2'b11;
+reg [2:0] image_mode=3'd3;
 reg sign_mode=0;
 reg [7:0] ascii="L";
 reg [50:0] meta={1'b1,11'd700,11'd879,10'd350,10'd529,8'd85};
@@ -35,14 +35,19 @@ integer frames=0,pixels=0,border_pixels=0,score_pixels=0,dir_pixels=0,logo_pixel
 reg started=0;
 wire expect_sign=(frames==1 || frames==2 || frames==3 || frames==7 || frames==8);
 wire expect_box=(frames==2 || frames==3 || frames==8);
-reg [1:0] expected_mode=2'b11;
+// New coordinate label is checked pixel-for-pixel by sim/coordinate. Here its
+// fixed extent is permitted only when the coherent SIG L/R box is present.
+wire in_coordinate_label=ex2>=700 && ex2<908 && ey2>=328 && ey2<348;
+reg [2:0] expected_mode=3'd3;
 reg [7:0] expected_ascii="?",expected_score=0;
 always @(*)begin
  case(frames)
-  0,6: expected_mode=2'b11;
-  4: expected_mode=2'b10;
-  5: expected_mode=2'b01;
-  default: expected_mode=2'b00;
+  0,6: expected_mode=3'd3;
+  4: expected_mode=3'd2;
+  5: expected_mode=3'd1;
+  10: expected_mode=3'd4;
+  11: expected_mode=3'd5;
+  default: expected_mode=3'd0;
  endcase
  case(frames)
   2:begin expected_ascii="R";expected_score=90;end
@@ -70,8 +75,8 @@ always @(negedge clk)if(rst)begin
    if(logo_pixels!=25600 || logo_colored==0)$fatal(1,"Logo coverage %0d/%0d",logo_pixels,logo_colored);
    $display("HDMI FRAME %0d mode=%b sign=%0d box=%0d pixels=%0d",frames,expected_mode,expect_sign,expect_box,pixels);
    frames=frames+1;
-   if(frames==10)begin
-    $display("PASS LR HDMI 720P SIG-only OSD / RAW-ERO-DIL hidden / stale epoch clearing / frame mode latch / RGB alignment / full 160x160 Logo");$finish;
+   if(frames==12)begin
+    $display("PASS LR HDMI 12 full720 frames: SIG-only OSD / RAW-ERO-DIL-MOT-DEH hidden / stale epoch clearing / frame mode latch / RGB alignment / full 160x160 Logo");$finish;
    end
   end
   started=1;pixels=0;border_pixels=0;score_pixels=0;dir_pixels=0;logo_pixels=0;logo_colored=0;mode_pixels=0;count_pixels=0;
@@ -89,6 +94,8 @@ always @(negedge clk)if(rst)begin
     if(rgb!==golden_logo_pixel[23:0])$fatal(1,"Logo misalignment x=%0d y=%0d",ex2,ey2);
     logo_colored=logo_colored+1;
    end else if(rgb!==expected2)$fatal(1,"RGB shifted behind transparent Logo");
+  end else if(in_coordinate_label && expect_box)begin
+   if(rgb!==24'h20ff40 && rgb!==24'h101820)$fatal(1,"coordinate label color invalid");
   end else if(ex2>=700 && ex2<=879 && ey2>=350 && ey2<=529)begin
    if(expect_box && (ex2<702 || ex2>877 || ey2<352 || ey2>527))begin
     if(rgb!==24'h20ff40)$fatal(1,"ROI border wrong x=%0d y=%0d",ex2,ey2);
@@ -133,6 +140,10 @@ initial begin
  nextframe; // frame 8: only fresh R appears.
  midframe;sign_mode=0;
  nextframe; // frame 9: even image_mode SIG cannot enable recognition alone.
+ midframe;image_mode=3'd4;sign_mode=1;
+ nextframe; // frame 10: MOT low two bits are 00; must still hide SIG overlays.
+ midframe;image_mode=3'd5;
+ nextframe; // frame 11: DEH likewise never enables SIG.
 end
-initial begin #140000000;$fatal(1,"HDMI timeout");end
+initial begin #190000000;$fatal(1,"HDMI timeout");end
 endmodule

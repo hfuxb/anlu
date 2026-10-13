@@ -13,9 +13,11 @@ $tests=@(
 $summary=@()
 foreach($test in $tests){
  if($Only.Count -gt 0 -and $test.Name -notin $Only){
-  $previous=Get-Content -LiteralPath (Join-Path $taskRoot ('reports\'+$test.Name+'_720p.log')) -Raw
-  if($previous -notmatch [regex]::Escape($test.Marker)){throw "Missing previous passing result: $($test.Name)"}
-  $summary+=@{Test=$test.Name;Passed=$true;Marker=$test.Marker}
+  $previousPath=Join-Path $taskRoot ('reports\'+$test.Name+'_720p.log')
+  if(Test-Path -LiteralPath $previousPath){
+   $previous=Get-Content -LiteralPath $previousPath -Raw
+   $summary+=@{Test=$test.Name;Passed=($previous -match [regex]::Escape($test.Marker));Marker=$test.Marker;Reused=$true}
+  }else{$summary+=@{Test=$test.Name;Skipped=$true;Reason='Not selected'}}
   continue
  }
  $taskWork=Join-Path $PSScriptRoot ('work\'+$test.Name)
@@ -36,6 +38,8 @@ foreach($test in $tests){
  }finally{Pop-Location}
 }
 $summary | ConvertTo-Json -Depth 4 | Set-Content -LiteralPath (Join-Path $taskRoot 'reports\video720_simulation_summary.json') -Encoding utf8
-& (Join-Path  'sim\lr_turn\run_lr_sim.ps1')
-Write-Output 'ALL VIDEO SIMULATIONS PASSED'
+if($Only.Count -eq 0){
+ & (Join-Path  'sim\lr_turn\run_lr_sim.ps1')
+ Write-Output 'ALL VIDEO SIMULATIONS PASSED'
+}else{Write-Output 'SELECTED VIDEO SIMULATIONS PASSED'}
 

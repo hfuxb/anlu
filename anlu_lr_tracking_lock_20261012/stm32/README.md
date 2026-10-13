@@ -1,12 +1,12 @@
 # C50C 与 FPGA 的串口对接固件
 
-本目录是厂家 `WHEELTEC_C50X_2025.12.26` 源码的独立副本。保留 STM32 电机 PI、编码器、运动学、车型电位器、急停和失能逻辑；FPGA 通过 USART3 发送速度并接收状态。本次没有向小车下载程序。
+本目录是厂家 `WHEELTEC_C50X_2025.12.26` 源码的独立副本。保留 STM32 电机 PI、编码器、运动学、车型电位器、急停和失能逻辑；FPGA 通过 USART3 发送普通速度或带编号的相对角度动作，并接收状态。本次没有向小车下载程序。2026-10-13 角度动作与实测陀螺仪外环见 [闭环转向说明](闭环转向说明.md)，本目录 HEX 必须与最新 FPGA bit 配套。
 
 ## 交付文件
 
 - `WHEELTEC_C50X_FPGA_PD89/USER/WHEELTEC.uvprojx`：完整 Keil 工程，包含厂家五个车型目标。用户照片是普通轮四驱，编译时明确选择 **4WD_Car**，不要使用工程列表首项 Akm_Car。
 - `WHEELTEC_C50X_FPGA_PD89/OBJ/cli_4WD/4WD_Car_FPGA_PD89.hex`：本次 ARMCC CLI 生成的四驱 HEX；同目录包含 BIN、AXF、MAP。起始地址 `0x08000000`，不是偏移到 `0x08010000` 的无线 bootloader 固件。
-- `uart_pd89_watchdog.patch` 与 `patch_manifest.json`：精确修改和修改前后 SHA-256；patch 用 UTF-8 展示，实际厂家 C/H 文件保留原 GBK 字节。不要把 UTF-8 patch 不经编码处理应用到 GBK 原文件，直接使用已修改的副本即可。
+- `patch_manifest.json`：当前八个厂家文件修改、四个新增文件及 SHA-256。`uart_pd89_watchdog.patch` 仅为最初改串口/看门狗的历史补丁，不包含新增角度功能；直接使用完整工程。原厂家 C/H 保留 GBK，新独立 C/H 使用 ASCII。
 - `build_armcc.py`、`build_armcc.log`、`build_commands.json`：本地 ARMCC 5 编译脚本、编译结果、完整命令清单。
 - `verify_package.py` 与 `verification.json`：复制范围、输入完整性、HEX 校验、向量表和产物摘要验证。
 - `verify_compiler_contract.py` 与 `compiler_contract.json`：用 ARMCC 实际预处理检查默认启动代码没有主动前进、显式开启诊断可恢复原逻辑，并编译检查 PD8/PD9 引脚宏。
@@ -17,6 +17,9 @@
 2. `SYSTEM/sys/sys.c`：`SecurityLevel=0`，启用厂家控制命令超时保护。
 3. `BALANCE/balance_task.c`：命令丢失计数饱和到 101，避免 u8 回绕；100 Hz 任务中超过 100 次未刷新后将 Vx/Vy/Vz 目标清零，约 1.01 秒。真实停车还受原厂速度平滑、PI 和机械惯性影响。
 4. `BALANCE/Inc/balance_task.h` 及 `BALANCE/balance_task.c`：新增 `FPGA_ENABLE_STARTUP_MOTION_CHECK`，默认 0。关闭厂家上电约 10–12 秒的 `Drive_Motor(0.2f,0,0)` 主动运动诊断，期间保持目标零并完成 `check_end` 标志；原诊断代码保留，只有明确设成 1 才开启。
+5. `fpga_turn.c/.h`：100Hz 相对角度外环、序号幂等、停止取消、保活和执行超时；USART3 ISR 仅投递完整帧，balance 任务拥有控制器状态，data 任务发送完整字节快照。
+6. `fpga_turn_feedback.c/.h` 与 `imu_task.c`：在唯一 IMU 总线任务中检查 WHO_AM_I、±500°/s 量程、数据就绪、ACK，启动静止校准后发布带时间的实际 Z 角速度。
+7. `uartx_callback.c`、`data_task.c`、Keil 源列表：接入模式0x10动作、11字节状态帧和新模块。普通速度包及24字节遥测格式保留。
 
 开机运动诊断检查编码器接错、未连接和过载，不进行方向自动校准。默认关闭后，这段主动诊断的报错功能也被关闭；原急停、低压保护和其他电机控制逻辑保持。原串口前 10 秒丢弃命令，约 12.3 秒后进入正常运动控制，这两个等待条件未改。第一次联调等待约 15 秒，并从零速度开始。
 
@@ -81,7 +84,7 @@ IMU 已按原代码变换坐标：X=原 Y，Y=-原 X。Z 陀螺仪低于原阈�
 
 厂家接收器找 0x7B 后固定收满 11 字节再检查，不在帧中遇到 0x7B 就重新开始，也没有逐字节超时；一个丢字节/噪声可能导致本帧失效，之后重新找帧头。有效控制数据自身也可能包含 0x7B/0x7D，所以不能用分隔符字符串方式处理。不同串口共享接收计数，交错控制会互相打断；联调时只使用一个控制来源。
 
-原保护逻辑会被任意帧尾和 XOR 合格的串口控制帧、CAN 控制刷新，不局限于本接口模式 0。如果其他控制器同时不断发送合法帧，不能假定 FPGA 断线必然触发保护。此包使用模式 0 连续帧，未扩展厂家帧格式或更改接收解析器。
+原普通速度保护会被其他合法串口/CAN 控制刷新，联调时只使用一个控制来源。新角度动作另外检查同编号/同参数保活（300ms）与总时长（7s），模式0速度包会取消当前动作。状态新增帧以 `7C A1` 开头、`7E` 结尾，详见闭环说明；厂家11字节接收器的基本组包方式保持。
 
 ## 构建与验证
 

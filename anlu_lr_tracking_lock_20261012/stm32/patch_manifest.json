@@ -1,12 +1,32 @@
 {
   "source": "D:\\qrsfpga\\car\\analysis_work\\source\\WHEELTEC_C50X_2025.12.26",
-  "copy": "D:\\qrsfpga\\qrsfpga\\stm32_car_control\\stm32\\WHEELTEC_C50X_FPGA_PD89",
+  "copy": "D:\\qrsfpga\\qrsfpga\\anlu_lr_tracking_lock_20261012\\stm32\\WHEELTEC_C50X_FPGA_PD89",
   "patch_encoding": "UTF-8; vendor C/H files retain original GBK bytes",
   "changes": [
     {
-      "path": "HARDWARE/Inc/uartx.h",
-      "original_sha256": "2df525114264b8ed7e6c62761d451b3d9311e8cc903c57eabeb07ad4fcc14676",
-      "patched_sha256": "ea156a625d92a2e53dc40efb21338933e910b8007dd181173ee3838ab2ae9eba"
+      "path": "BALANCE/balance_task.c",
+      "original_sha256": "cca547d5e858d308f77915b3c5f7d866c592c57c8b0aee53234fa1a4c9d462f8",
+      "patched_sha256": "90380cb4adaf933778029e4ab5a51a50ae6c30eccb44f0eda7fb39c13908fe32"
+    },
+    {
+      "path": "BALANCE/data_task.c",
+      "original_sha256": "eb8607d929274df533fda5e7270a8e6e17acc36db972fa3609063b2ff367638c",
+      "patched_sha256": "894167a4bf02292c283c0c599017c0c51ff069c428abb810dcd7ab6003fa8cd0"
+    },
+    {
+      "path": "BALANCE/imu_task.c",
+      "original_sha256": "e5a9aba744335dbda1d6a322e0cbdcdf43a2f4b2f073604ec9ea2d0808bdd674",
+      "patched_sha256": "9a8689ee2161009d94d39a6f44397683aebb4252f2ddfb33fa84d0a5dadd6aa9"
+    },
+    {
+      "path": "BALANCE/uartx_callback.c",
+      "original_sha256": "567572bdaecca1370f26214298f7e14c43293c7f4eae5acbac6e6e20fd627f14",
+      "patched_sha256": "69f8985ba1e01fe76c621e633fda5c12cdc9a5259855a01c6d0cfea3914f98cd"
+    },
+    {
+      "path": "USER/WHEELTEC.uvprojx",
+      "original_sha256": "d2c56346c926fe715eb6bd4125795622c306f47b57975c3295c6929a8a2d9600",
+      "patched_sha256": "9a08dac0ac9c0de96c50c55734b62c57c9372bf0a8a143d2e1ef85427fd78b22"
     },
     {
       "path": "SYSTEM/sys/sys.c",
@@ -14,14 +34,21 @@
       "patched_sha256": "02992394269e27cb32810de0e31fa699aa9401b8ac8fc10b8b8146c7b11625d2"
     },
     {
-      "path": "BALANCE/balance_task.c",
-      "original_sha256": "cca547d5e858d308f77915b3c5f7d866c592c57c8b0aee53234fa1a4c9d462f8",
-      "patched_sha256": "251b14d56292ef0c8248627014e5da1a13d52e77b3a5305aa0f6c4ca6861b9db"
+      "path": "HARDWARE/Inc/uartx.h",
+      "original_sha256": "2df525114264b8ed7e6c62761d451b3d9311e8cc903c57eabeb07ad4fcc14676",
+      "patched_sha256": "ea156a625d92a2e53dc40efb21338933e910b8007dd181173ee3838ab2ae9eba"
     },
     {
       "path": "BALANCE/Inc/balance_task.h",
       "original_sha256": "efecea6752fb7af8c95554d409093a6d227ebfffc2f5003cb3e444b8e4100d9b",
       "patched_sha256": "2a27969a6b9054465efa49061d6265d111d228663a505a1b3f2bb0b43d92a0f4"
     }
-  ]
+  ],
+  "added_files": {
+    "BALANCE/fpga_turn.c": "59758f39d5d8fc5a30571da6b811fb84cf2f138c0a3777cb5ba3987c107d9ca5",
+    "BALANCE/fpga_turn_feedback.c": "9a2fcc4cadf02faaccf2a3a297c0ff6a66abca4c8003ea0d53c4686127a3fa88",
+    "BALANCE/Inc/fpga_turn.h": "7e85342dacbc36b88f875a77b8f0d37ff4050a3fb2d5fbac7abe5d91a7ffb36c",
+    "BALANCE/Inc/fpga_turn_feedback.h": "1c8d3e9d2097abfb6532f7d07d93e70ba04d6cfa4443cad297b907575ae2e0d7"
+  },
+  "purpose": "USART3 angle-action controller with physical yaw feedback; original wheel encoder PI preserved"
 }

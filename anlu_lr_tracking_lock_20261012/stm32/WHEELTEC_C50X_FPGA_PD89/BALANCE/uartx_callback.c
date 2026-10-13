@@ -1,5 +1,6 @@
 #include "uartx_callback.h"
 #include "data_task.h"
+#include "fpga_turn.h"
 
 //用于接收数据的结构体
 RECEIVE_DATA Receive_Data;
@@ -54,6 +55,15 @@ static void UartxControll_Callback(USART_TypeDef* USARTx,uint8_t Usart_Receive)
 			//数据异或位校验计算，模式0是发送数据校验
 			if(Receive_Data.buffer[9] ==Check_BCC(Receive_Data.buffer,9))
 			{	
+                /* No state/controller changes in USART3 IRQ; publish a full frame. */
+                if(USARTx == USART3 &&
+                   (Receive_Data.buffer[1] == 0u || Receive_Data.buffer[1] == 0x10u))
+                {
+                    FPGA_TurnPublishFrameFromISR(Receive_Data.buffer);
+                    return;
+                }
+                /* Turn actions are exclusive to the validated FPGA USART3 link. */
+                if(Receive_Data.buffer[1] == 0x10u) return;
 				//串口、CAN控制命令丢失计数清零
 				robot_control.command_lostcount = 0;
 

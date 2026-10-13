@@ -8,7 +8,10 @@ module car_control #(
     parameter integer DEBOUNCE_MS = 20,
     parameter integer RESULT_TIMEOUT_MS = 500,
     parameter integer LINK_TIMEOUT_MS = 500,
-    parameter integer TURN_MS = 800,
+    parameter integer TURN_TIMEOUT_MS = 8000,
+    parameter integer ACK_TIMEOUT_MS = 500,
+    parameter integer TURN_ANGLE_CDEG = 9000,
+    parameter integer TURN_MAX_WZ_MRAD = 700,
     parameter integer CONFIRM_FRAMES = 3,
     parameter integer CLEAR_FRAMES = 3
 ) (
@@ -57,23 +60,52 @@ module car_control #(
         .battery_mv(battery_mv),.valid_count(rx_count),.error_count(rx_error_count),.uart_error());
     reg have_feedback;
     reg [31:0] link_age;
-    assign link_ok = have_feedback && link_age < LINK_TICKS;
+    wire ordinary_link_ok = have_feedback && link_age < LINK_TICKS;
+    wire action_status_valid;
+    wire [7:0] feedback_action_seq,feedback_action_state,feedback_action_fault;
+    wire signed [15:0] action_progress_cdeg,action_error_cdeg;
+    reg have_action_feedback;
+    reg [31:0] action_link_age;
+    // Action heartbeat proves that the peer supports this protocol.
+    assign link_ok=ordinary_link_ok && have_action_feedback && action_link_age<LINK_TICKS;
+    car_action_status_rx #(.CLK_HZ(CLK_HZ),.BAUD(BAUD)) u_action_feedback (
+        .clk(clk),.rst_n(control_rst_n),.rx(rx),.status_valid(action_status_valid),
+        .action_seq(feedback_action_seq),.action_state(feedback_action_state),
+        .action_progress_cdeg(action_progress_cdeg),.action_error_cdeg(action_error_cdeg),
+        .action_fault(feedback_action_fault),.valid_count(),.error_count());
+    always @(posedge clk or negedge control_rst_n)begin
+        if(!control_rst_n)begin have_action_feedback<=0;action_link_age<=LINK_TICKS;end
+        else if(action_status_valid)begin have_action_feedback<=1;action_link_age<=0;end
+        else if(action_link_age<LINK_TICKS)action_link_age<=action_link_age+1'b1;
+    end
     always @(posedge clk or negedge control_rst_n) begin
         if (!control_rst_n) begin have_feedback <= 0; link_age <= LINK_TICKS; end
         else if (status_valid) begin have_feedback <= 1; link_age <= 0; end
         else if (link_age < LINK_TICKS) link_age <= link_age + 1'b1;
     end
     wire force_zero;
+    wire action_active;
+    wire [7:0] action_seq;
+    wire signed [15:0] action_angle_cdeg,action_forward_mm_s;
+    wire [15:0] action_max_wz_mrad;
     car_decision #(.CLK_HZ(CLK_HZ),.CONFIRM_FRAMES(CONFIRM_FRAMES),
-        .CLEAR_FRAMES(CLEAR_FRAMES),.RESULT_TIMEOUT_MS(RESULT_TIMEOUT_MS),.TURN_MS(TURN_MS)) u_decision (
+        .CLEAR_FRAMES(CLEAR_FRAMES),.RESULT_TIMEOUT_MS(RESULT_TIMEOUT_MS),
+        .TURN_TIMEOUT_MS(TURN_TIMEOUT_MS),.ACK_TIMEOUT_MS(ACK_TIMEOUT_MS),
+        .TURN_ANGLE_CDEG(TURN_ANGLE_CDEG),.TURN_MAX_WZ_MRAD(TURN_MAX_WZ_MRAD)) u_decision (
         .clk(clk),.rst_n(control_rst_n),.arm_pulse(arm_pulse),
         .estop(!stop_sync[1]),.obstacle(!obstacle_sync[1]),.slow(!slow_sync[1]),
         .result_valid(result_valid),.result_ascii(result_ascii),
         .link_ok(link_ok),.flag_stop(flag_stop),.armed(armed),.state(state),
+        .action_status_valid(action_status_valid),.feedback_action_seq(feedback_action_seq),
+        .feedback_action_state(feedback_action_state),.feedback_action_fault(feedback_action_fault),
+        .action_active(action_active),.action_seq(action_seq),.action_angle_cdeg(action_angle_cdeg),
+        .action_max_wz_mrad(action_max_wz_mrad),.action_forward_mm_s(action_forward_mm_s),
         .cmd_vx(command_vx),.cmd_vy(command_vy),.cmd_wz(command_wz),
         .force_zero(force_zero),.result_stale(result_stale));
     car_command_tx #(.CLK_HZ(CLK_HZ),.BAUD(BAUD),.SEND_HZ(SEND_HZ)) u_command (
         .clk(clk),.rst_n(control_rst_n),.force_zero(force_zero),
         .cmd_vx(command_vx),.cmd_vy(command_vy),.cmd_wz(command_wz),
+        .action_active(action_active),.action_seq(action_seq),.action_angle_cdeg(action_angle_cdeg),
+        .action_max_wz_mrad(action_max_wz_mrad),.action_forward_mm_s(action_forward_mm_s),
         .tx(tx),.frame_sent(),.frame_count(tx_count));
 endmodule

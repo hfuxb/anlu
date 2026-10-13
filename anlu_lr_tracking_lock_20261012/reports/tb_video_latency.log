@@ -1,0 +1,20 @@
+#-----------------------------------------------------------
+# xsim v2019.2 (64-bit)
+# SW Build 2708876 on Wed Nov  6 21:40:23 MST 2019
+# IP Build 2700528 on Thu Nov  7 00:09:20 MST 2019
+# Start of session at: Tue Oct 13 17:15:48 2026
+# Process ID: 22964
+# Current directory: D:/qrsfpga/qrsfpga/anlu_lr_tracking_lock_20261012/sim/latency/work/tb_video_latency
+# Command line: xsim.exe -log run.log -mode tcl -source {xsim.dir/snapshot/xsim_script.tcl}
+# Log file: D:/qrsfpga/qrsfpga/anlu_lr_tracking_lock_20261012/sim/latency/work/tb_video_latency/run.log
+# Journal file: D:/qrsfpga/qrsfpga/anlu_lr_tracking_lock_20261012/sim/latency/work/tb_video_latency\xsim.jou
+#-----------------------------------------------------------
+source xsim.dir/snapshot/xsim_script.tcl
+# xsim {snapshot} -autoloadwcfg -runall
+Vivado Simulator 2019.2
+Time resolution is 1 ps
+run -all
+PASS VIDEO LATENCY 82 checks: shared Gray ticks, actual four DDR banks, full-frame validity, rewind, read latching, repeat age, wrap, BCD and overflow
+$finish called at time : 52338 ns : File "D:/qrsfpga/qrsfpga/anlu_lr_tracking_lock_20261012/sim/latency/tb_video_latency.sv" Line 109
+exit
+INFO: [Common 17-206] Exiting xsim at Tue Oct 13 17:15:51 2026...

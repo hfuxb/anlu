@@ -15,7 +15,7 @@ module isp_top #(
     input [9:0] 	I_tdest			,
 
     // 图像处理配置和输出握手
-    input [1:0]  	I_algo_mode		,
+    input [2:0]  	I_algo_mode		,
     input           I_recognition_request,
     input 			O_tready		,
 
@@ -79,8 +79,31 @@ wire         m_aixs_tvalid;  //synthesis keep
   reg          process_stage_tuser;
   reg          process_stage_tlast;
   reg  [95:0]  process_stage_tdata;
-  reg  [1:0]   process_stage_algo_mode;
+  reg  [2:0]   process_stage_algo_mode;
   reg          process_stage_recognition_request;
+  reg [2:0] process_frame_mode;
+  reg [2:0] process_mode_pipe [0:4];
+  wire [2:0] process_active_mode = process_stage_tvalid && process_stage_tuser ?
+      process_stage_algo_mode : process_frame_mode;
+  wire extra_O_tuser,extra_O_tlast,extra_O_tvalid;
+  wire [95:0] extra_O_tdata;
+  integer mode_index;
+
+  // Five registers match gray/window/Sobel/erosion/output, including bubbles.
+  // MOT/DEH use the RAW branch of the existing spatial processing block.
+  always @(posedge axi4s_video_aclk or negedge I_rst_n) begin
+      if(!I_rst_n) begin
+          process_frame_mode <= 3'd3;
+          for(mode_index=0;mode_index<5;mode_index=mode_index+1)
+              process_mode_pipe[mode_index] <= 3'd3;
+      end else begin
+          if(process_stage_tvalid && process_stage_tuser)
+              process_frame_mode <= process_stage_algo_mode;
+          process_mode_pipe[0] <= process_active_mode;
+          for(mode_index=1;mode_index<5;mode_index=mode_index+1)
+              process_mode_pipe[mode_index] <= process_mode_pipe[mode_index-1];
+      end
+  end
 
   // 传统蓝底白箭头识别器的帧级结果握手信号。
   // 保留 traffic_sign_* 内部别名，避免改变 design_top_wrapper 和 HDMI OSD 端口。
@@ -133,7 +156,7 @@ wire         m_aixs_tvalid;  //synthesis keep
           process_stage_tuser     <= 1'b0;
           process_stage_tlast     <= 1'b0;
           process_stage_tdata     <= 96'd0;
-          process_stage_algo_mode <= 2'b11;
+          process_stage_algo_mode <= 3'd3;
           process_stage_recognition_request <= 1'b0;
       end
       else begin
@@ -217,7 +240,7 @@ image_process_stream_96 #(
     .I_tlast         (process_stage_tlast),
     .I_tvalid        (process_stage_tvalid),
     .I_tdata         (process_stage_tdata),
-    .I_algo_mode     (process_stage_algo_mode),
+    .I_algo_mode     (process_stage_algo_mode[2] ? 2'b11 : process_stage_algo_mode[1:0]),
     .I_edge_threshold(EDGE_THRESHOLD),
     .O_tuser         (process_O_tuser),
     .O_tlast         (process_O_tlast),
@@ -241,7 +264,7 @@ traffic_sign_sig_only_96 #(
     .I_tlast        (process_stage_tlast),
     .I_tvalid       (process_stage_tvalid),
     .I_tdata        (process_stage_tdata),
-    .I_algo_mode    (process_stage_algo_mode),
+    .I_algo_mode    (process_stage_algo_mode[1:0]),
     .I_recognition_request(process_stage_recognition_request),
     .O_enabled      (O_traffic_sign_enabled),
     .O_busy         (traffic_sign_busy),
@@ -259,6 +282,14 @@ traffic_sign_sig_only_96 #(
 );
 
 // 结果数据在核心时钟域稳定保持，toggle用于通知HDMI时钟域捕获新结果。
+image_extra_modes_96 #(.IMG_WIDTH(IMG_WIDTH),.IMG_HEIGHT(IMG_HEIGHT)) u_extra_modes (
+    .I_clk(axi4s_video_aclk),.I_rst_n(I_rst_n),
+    .I_tuser(process_O_tuser),.I_tlast(process_O_tlast),
+    .I_tvalid(process_O_tvalid),.I_tdata(process_O_tdata),
+    .I_mode(process_mode_pipe[4]),
+    .O_tuser(extra_O_tuser),.O_tlast(extra_O_tlast),
+    .O_tvalid(extra_O_tvalid),.O_tdata(extra_O_tdata));
+
 always @(posedge axi4s_video_aclk or negedge I_rst_n) begin
     if (!I_rst_n)
         traffic_sign_result_toggle <= 1'b0;
@@ -273,9 +304,9 @@ end
         .I_rst_n            ( I_rst_n           ),
 	
         .I_96b_frame_start  ( awb_O_tuser       ),
-        .I_96b_last         ( process_O_tlast   ),
-        .I_96b_valid        ( process_O_tvalid  ),
-		.I_96b_data         ( process_O_tdata    ),
+        .I_96b_last         ( extra_O_tlast   ),
+        .I_96b_valid        ( extra_O_tvalid  ),
+		.I_96b_data         ( extra_O_tdata    ),
 	
         .O_128b_frame_start ( awb_O_tuser_128  	),
 		.O_128b_last       ( awb_O_tlast_128    ),

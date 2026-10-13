@@ -26,6 +26,9 @@ for source in SOURCE.rglob("*"):
         assert hashlib.sha256(after).hexdigest() == expected[rel]["patched_sha256"]
         observed.append(rel)
 assert set(observed) == set(expected)
+for rel, expected_hash in manifest.get('added_files', {}).items():
+    assert not (SOURCE / rel).exists(), f'Unexpected vendor input {rel}'
+    assert hashlib.sha256((COPY / rel).read_bytes()).hexdigest() == expected_hash, rel
 
 project = COPY / "USER/WHEELTEC.uvprojx"
 tree = ET.parse(project)

@@ -1,4 +1,5 @@
 #include "balance_task.h"
+#include "fpga_turn.h"
 
 //与小车控制相关
 ROBOT_CONTROL_t robot_control;
@@ -56,6 +57,9 @@ void Balance_task(void *pvParameters)
 		  Reduce power consumption, reduce motor noise.
 		//机器人驻车状态监测,清除残余电机控制量.降低功耗,降低电机噪音.
 		Robot_ParkingCheck();
+
+        /* Own the turn state and outer angle loop at 100 Hz before Drive_Motor. */
+        FPGA_TurnBalanceStep();
 		
 		//机器人上电自检
         //等陀螺仪初始化完成后,检测机器人型号是否选择错误

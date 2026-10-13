@@ -46,7 +46,7 @@ module mode_selector #(
 	input  wire       I_cycle_button_n,
 
 	// 当前帧算法模式
-	output reg  [1:0] O_mode
+	output reg  [2:0] O_mode
 );
 
 	// 按键同步寄存器，消除按键输入与系统时钟之间的亚稳态风险。
@@ -56,12 +56,12 @@ module mode_selector #(
 	reg [1:0] candidate_mode;
 	reg [16:0] stable_count;
 	reg [1:0] external_mode;
-	reg [1:0] board_mode;
+	reg [2:0] board_mode;
 	reg key_sync_1, key_sync_2, key_stable, key_stable_d;
 	reg [16:0] key_debounce_count;
 	reg [23:0] hold_count;
 
-	// 模式编码：11原图、10腐蚀、01膨胀、00路牌识别。
+	// Codes: RAW=3, ERO=2, DIL=1, MOT=4, DEH=5, SIG=0 (last in cycle).
 	wire [1:0] sampled_mode;
 
 	assign sampled_mode = button_sync_2;
@@ -75,14 +75,14 @@ module mode_selector #(
 			candidate_mode <= 2'b11;
 			stable_count <= 17'd0;
 			external_mode <= 2'b11;
-			board_mode <= 2'b11;
+			board_mode <= 3'd3;
 			key_sync_1 <= 1'b1;
 			key_sync_2 <= 1'b1;
 			key_stable <= 1'b1;
 			key_stable_d <= 1'b1;
 			key_debounce_count <= 17'd0;
 			hold_count <= 24'd0;
-			O_mode <= 2'b11;
+			O_mode <= 3'd3;
 		end
 		else begin
 			// 先同步外部按键，再使用同步后的值参与去抖。
@@ -124,16 +124,18 @@ module mode_selector #(
 				if (!key_stable_d && hold_count < SHORT_PRESS_LIMIT &&
 				    external_mode == 2'b11) begin
 					case (board_mode)
-						2'b11: board_mode <= 2'b10;
-						2'b10: board_mode <= 2'b01;
-						2'b01: board_mode <= 2'b00;
-						default: board_mode <= 2'b11;
+						3'd3: board_mode <= 3'd2;
+						3'd2: board_mode <= 3'd1;
+						3'd1: board_mode <= 3'd4;
+						3'd4: board_mode <= 3'd5;
+						3'd5: board_mode <= 3'd0;
+						default: board_mode <= 3'd3;
 					endcase
 				end
 				hold_count <= 24'd0;
 			end
 
-			O_mode <= (external_mode == 2'b11) ? board_mode : external_mode;
+			O_mode <= (external_mode == 2'b11) ? board_mode : {1'b0,external_mode};
 		end
 	end
 

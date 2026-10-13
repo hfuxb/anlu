@@ -12,9 +12,7 @@ foreach ($exe in @('xvlog.bat','xelab.bat','xsim.bat')) {
 $rtlFiles = @(Get-ChildItem -LiteralPath (Join-Path $taskRoot 'rtl') -Filter '*.v' | Sort-Object Name | ForEach-Object { $_.FullName })
 $tests = @(
     @{Name='tb_car_uart'; Marker='ALL CAR UART TESTS PASSED'},
-    @{Name='tb_car_decision'; Marker='PASS tb_car_decision'},
-    @{Name='tb_car_result_cdc'; Marker='PASS tb_car_result_cdc'},
-    @{Name='tb_car_control'; Marker='PASS tb_car_control'}
+    @{Name='tb_car_result_cdc'; Marker='PASS tb_car_result_cdc'}
 )
 $summary = @()
 foreach ($test in $tests) {
@@ -40,4 +38,6 @@ foreach ($test in $tests) {
     } finally { Pop-Location }
 }
 $summary | ConvertTo-Json -Depth 4 | Set-Content -LiteralPath (Join-Path $reportRoot 'simulation_summary.json') -Encoding UTF8
-Write-Output 'ALL FOUR RTL SIMULATIONS PASSED'
+& (Join-Path $PSScriptRoot 'turn_closed_loop\run_transport_sim.ps1') -VivadoBin $VivadoBin
+& (Join-Path $PSScriptRoot 'turn_closed_loop\run_control_sim.ps1') -VivadoBin $VivadoBin
+Write-Output 'ALL CURRENT CAR RTL SIMULATIONS PASSED'

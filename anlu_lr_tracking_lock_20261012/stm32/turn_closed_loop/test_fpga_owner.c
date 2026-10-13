@@ -1,0 +1,83 @@
+/* Compile the real firmware owner (without FPGA_TURN_HOST_TEST). */
+#include "balance_task.h"
+#include "fpga_turn.h"
+#include <assert.h>
+#include <stdio.h>
+#include <string.h>
+
+int EN=1;
+struct TestControl robot_control;
+struct TestSystem SysVal={1500,0};
+struct TestRobot robot={24.0f};
+struct TestCheck robot_check;
+struct TestCharger charger;
+static int mode=_ROS_Control,critical,gyro_valid=1,snoop;
+static float gyro_rate;
+static unsigned checks;
+static uint8_t snoop_frame[11];
+void Set_Control_Mode(int value){mode=value;}
+int Get_Control_Mode(int value){return mode==value;}
+void test_enter_critical(void){++critical;}
+void test_exit_critical(void){assert(critical>0);--critical;}
+int FPGA_TurnReadYawRate(float *rate){
+    *rate=gyro_rate;
+    if(snoop){test_enter_critical();FPGA_TurnStatusFrame(snoop_frame);test_exit_critical();}
+    return gyro_valid;
+}
+static void expect(int condition){++checks;assert(condition);}
+static void packet(uint8_t type,uint8_t seq,int16_t angle,uint16_t maximum,int16_t forward){
+    uint8_t frame[11]={0x7b,type,seq,(uint8_t)((uint16_t)angle>>8),(uint8_t)angle,
+        (uint8_t)(maximum>>8),(uint8_t)maximum,
+        (uint8_t)((uint16_t)forward>>8),(uint8_t)forward,0,0x7d};
+    unsigned i;for(i=0;i<9;++i)frame[9]^=frame[i];
+    FPGA_TurnPublishFrameFromISR(frame);
+}
+static void status(uint8_t frame[11]){
+    unsigned i;uint8_t sum=0;
+    test_enter_critical();FPGA_TurnStatusFrame(frame);test_exit_critical();
+    for(i=0;i<9;++i)sum^=frame[i];
+    expect(frame[0]==0x7c&&frame[1]==0xa1&&frame[9]==sum&&frame[10]==0x7e);
+    expect(critical==0);
+}
+int main(void){
+    uint8_t frame[11];unsigned i;float rate=0.0f;
+    status(frame);expect(frame[3]==FPGA_TURN_IDLE);
+    packet(0,0,100,0,0);FPGA_TurnBalanceStep();expect(robot_control.Vx==0.1f);
+    /* Data task preempts after live state changed but before owner publishes. */
+    snoop=1;packet(0x10,1,9000,700,0);FPGA_TurnBalanceStep();snoop=0;
+    expect(snoop_frame[2]==0&&snoop_frame[3]==FPGA_TURN_IDLE);
+    status(frame);expect(frame[2]==1&&frame[3]==FPGA_TURN_RUNNING);
+    expect(robot_control.Vx==0.0f&&robot_control.Vz>0.0f);
+    for(i=0;i<20;++i){
+        packet(0x10,1,9000,700,0);gyro_rate=0.2f;FPGA_TurnBalanceStep();
+    }
+    packet(0x10,2,-9000,700,0);FPGA_TurnBalanceStep();status(frame);
+    expect(frame[2]==2&&frame[3]==FPGA_TURN_FAULT&&frame[8]==FPGA_TURN_FAULT_BUSY);
+    status(frame);expect(frame[2]==1&&frame[3]==FPGA_TURN_RUNNING);
+    /* A received ordinary command cancels and owns the next motor targets. */
+    packet(0,0,0,0,0);FPGA_TurnBalanceStep();status(frame);
+    expect(frame[3]==FPGA_TURN_CANCELLED&&robot_control.Vx==0.0f&&robot_control.Vz==0.0f);
+    packet(0x10,1,9000,700,0);FPGA_TurnBalanceStep();status(frame);
+    expect(frame[3]==FPGA_TURN_CANCELLED&&robot_control.Vz==0.0f);
+    /* New request runs the real integration to terminal completion. */
+    packet(0x10,2,-9000,700,0);gyro_rate=0.0f;FPGA_TurnBalanceStep();
+    for(i=0;i<700;++i){
+        if(i%5==0)packet(0x10,2,-9000,700,0);
+        rate+=(robot_control.Vz-rate)*0.12f;gyro_rate=rate;FPGA_TurnBalanceStep();
+        status(frame);if(frame[3]==FPGA_TURN_DONE)break;
+    }
+    expect(i<700&&frame[2]==2&&frame[3]==FPGA_TURN_DONE&&robot_control.Vz==0.0f);
+    packet(0,0,100,0,0);FPGA_TurnBalanceStep();status(frame);
+    expect(frame[3]==FPGA_TURN_DONE&&robot_control.Vx==0.1f);
+    packet(0x10,3,9000,700,0);gyro_valid=0;FPGA_TurnBalanceStep();status(frame);
+    expect(frame[3]==FPGA_TURN_FAULT&&frame[8]==3&&robot_control.Vz==0.0f&&robot_control.Vx==0.0f);
+    gyro_valid=1;gyro_rate=0.0f;packet(0x10,4,9000,700,0);FPGA_TurnBalanceStep();
+    /* Overflow fails closed; even valid queued velocity packets cannot move. */
+    for(i=0;i<10;++i)packet(0x10,4,9000,700,0);
+    FPGA_TurnBalanceStep();status(frame);
+    expect(frame[3]==FPGA_TURN_FAULT&&frame[8]==5&&robot_control.Vx==0.0f&&robot_control.Vz==0.0f);
+    EN=0;packet(0x10,5,9000,700,0);FPGA_TurnBalanceStep();status(frame);
+    expect(frame[3]==FPGA_TURN_FAULT&&frame[8]==4&&robot_control.Vz==0.0f);
+    printf("PASS firmware action owner: %u checks, byte snapshot preemption, queued ISR commands, busy/cancel, physical-rate plant completion, invalid gyro and overflow/disabled stops\n",checks);
+    return 0;
+}

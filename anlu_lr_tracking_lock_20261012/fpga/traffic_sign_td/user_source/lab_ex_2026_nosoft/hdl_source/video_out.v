@@ -8,6 +8,8 @@ module video_out (
     output wire       O_video_out_rd_busy,  
     input wire        I_video_in_wr_busy,   
     input wire[1:0]   I_video_out_rp,
+    input wire[131:0] I_bank_stamps,
+    output wire[32:0] O_display_stamp,
     output wire       O_ddr_user_rd_en,
     output reg[24:0]  O_ddr_user_addr,
     input wire        I_ddr_user_ready,
@@ -46,6 +48,20 @@ module video_out (
     localparam IMAGE_BASE_ADDR_1 = 25'd7000000;
     localparam IMAGE_BASE_ADDR_2 = 25'd14000000;
     localparam IMAGE_BASE_ADDR_3 = 25'd21000000;
+
+    reg [32:0] S_read_stamp;
+    always @* begin
+        case(I_video_out_rp)
+            2'd0:S_read_stamp=I_bank_stamps[32:0];
+            2'd1:S_read_stamp=I_bank_stamps[65:33];
+            2'd2:S_read_stamp=I_bank_stamps[98:66];
+            2'd3:S_read_stamp=I_bank_stamps[131:99];
+        endcase
+    end
+    video_latency_read_tag_cdc u_latency_read_tag(
+        .I_src_clk(I_ddr_clk),.I_rst_n(I_rst_n),.I_src_frame_start(S_video_frame_start),
+        .I_src_stamp(S_read_stamp),.I_dst_clk(I_dsi_clk),.I_dst_vsync(I_video_vsync),
+        .O_display_stamp(O_display_stamp));
 
 
     always @(posedge I_ddr_clk) begin

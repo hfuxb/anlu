@@ -1,0 +1,28 @@
+#-----------------------------------------------------------
+# xsim v2019.2 (64-bit)
+# SW Build 2708876 on Wed Nov  6 21:40:23 MST 2019
+# IP Build 2700528 on Thu Nov  7 00:09:20 MST 2019
+# Start of session at: Tue Oct 13 17:20:38 2026
+# Process ID: 14744
+# Current directory: D:/qrsfpga/qrsfpga/anlu_lr_tracking_lock_20261012/sim/latency/work/tb_latency_hdmi
+# Command line: xsim.exe -log run.log -mode tcl -source {xsim.dir/snapshot/xsim_script.tcl}
+# Log file: D:/qrsfpga/qrsfpga/anlu_lr_tracking_lock_20261012/sim/latency/work/tb_latency_hdmi/run.log
+# Journal file: D:/qrsfpga/qrsfpga/anlu_lr_tracking_lock_20261012/sim/latency/work/tb_latency_hdmi\xsim.jou
+#-----------------------------------------------------------
+source xsim.dir/snapshot/xsim_script.tcl
+# xsim {snapshot} -autoloadwcfg -runall
+Vivado Simulator 2019.2
+Time resolution is 1 ps
+run -all
+LATENCY HDMI FRAME 0 pixels=921600 right_top_glyph_pixels=412
+LATENCY HDMI FRAME 1 pixels=921600 right_top_glyph_pixels=600
+LATENCY HDMI FRAME 2 pixels=921600 right_top_glyph_pixels=636
+LATENCY HDMI FRAME 3 pixels=921600 right_top_glyph_pixels=524
+LATENCY HDMI FRAME 4 pixels=921600 right_top_glyph_pixels=660
+LATENCY HDMI FRAME 5 pixels=921600 right_top_glyph_pixels=676
+LATENCY HDMI FRAME 6 pixels=921600 right_top_glyph_pixels=668
+PASS LATENCY HDMI 7 full720 frames: dashes, 213.4ms, wrap 2.1ms, OVFL, all six modes, exact top-right glyphs and unchanged RGB/DE/read timing
+$finish called at time : 99000110 ns : File "D:/qrsfpga/qrsfpga/anlu_lr_tracking_lock_20261012/sim/latency/tb_latency_hdmi.sv" Line 90
+run: Time (s): cpu = 00:00:00 ; elapsed = 00:01:03 . Memory (MB): peak = 224.012 ; gain = 0.000
+exit
+INFO: [Common 17-206] Exiting xsim at Tue Oct 13 17:21:43 2026...

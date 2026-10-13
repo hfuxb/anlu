@@ -96,9 +96,9 @@ module design_top_wrapper (
 	wire 			S_ISP_O_tuser ;
 	wire 			S_ISP_O_tvalid; 
 
-	wire [1:0]		S_algo_mode_24m;
-	reg [1:0]		S_algo_mode_sync_1;
-	reg [1:0]		S_algo_mode_sync_2;
+	wire [2:0]		S_algo_mode_24m;
+	reg [2:0]		S_algo_mode_sync_1;
+	reg [2:0]		S_algo_mode_sync_2;
     reg S_sig_requested_24m;
     (* ASYNC_REG = "TRUE" *) reg S_sig_request_sync_1,S_sig_request_sync_2;
     wire S_traffic_sign_enabled;
@@ -127,6 +127,11 @@ module design_top_wrapper (
     wire        S_video_out_rd_busy;
     wire        S_video_in_wr_busy; 
     wire[1:0]   S_video_out_rp;     
+    wire [31:0] S_latency_time_gray;
+    wire [32:0] S_latency_capture_stamp,S_latency_display_stamp;
+    wire [131:0] S_latency_bank_stamps;
+    wire [19:0] S_latency_bcd;
+    wire S_latency_valid,S_latency_overflow,S_latency_update;
 
     wire        S_ddr_user_wr_en;       
     wire        S_ddr_user_rd_en;       
@@ -250,6 +255,16 @@ module design_top_wrapper (
     assign S_hdmi_rst_n = S_pll_lock;
 	assign S_ISP_O_tready = 1'b1;
 
+    video_latency_clock #(.CLK_HZ(50000000)) u_latency_clock(
+        .I_clk(I_sys_clk),.I_rst_n(S_rst_n),.I_camera_clk(S_csi_rx_clk),
+        .I_camera_frame_start(S_csi_frame_start),.O_time_gray(S_latency_time_gray),
+        .O_capture_stamp(S_latency_capture_stamp));
+    video_frame_latency u_frame_latency(
+        .I_clk(S_hdmi_pixel_clk),.I_rst_n(S_hdmi_rst_n),.I_frame_start(S_hdmi_user),
+        .I_time_gray(S_latency_time_gray),.I_display_stamp(S_latency_display_stamp),
+        .O_bcd(S_latency_bcd),.O_valid(S_latency_valid),
+        .O_overflow(S_latency_overflow),.O_update(S_latency_update));
+
     // Recognition results originate in the CSI byte-clock domain.
     // car_control synchronizes result events and releases its reset on I_sys_clk.
     // Leaving SIG cancels visual driving through the existing stop interlock.
@@ -288,12 +303,12 @@ module design_top_wrapper (
     // avoids a false 00 decode when the two-bit ERO/DIL mode changes.
     always @(posedge S_24m_clk or negedge S_rst_n) begin
         if(!S_rst_n)S_sig_requested_24m<=1'b0;
-        else S_sig_requested_24m<=S_algo_mode_24m==2'b00;
+        else S_sig_requested_24m<=S_algo_mode_24m==3'd0;
     end
 	always @(posedge S_csi_rx_clk or negedge S_rst_n) begin
 		if(!S_rst_n) begin
-			S_algo_mode_sync_1 <= 2'b11;
-			S_algo_mode_sync_2 <= 2'b11;
+			S_algo_mode_sync_1 <= 3'd3;
+			S_algo_mode_sync_2 <= 3'd3;
             S_sig_request_sync_1<=1'b0;S_sig_request_sync_2<=1'b0;
 		end
 		else begin
@@ -819,11 +834,13 @@ isp_top #(
   );
 
 
-    video_in u_video_in(
+    video_in #(.FRAME_WORDS(VIDEO_WIDTH*VIDEO_HEIGHT*3/16)) u_video_in(
         .I_rst_n              (  S_rst_n             ),
 
         .I_camera_clk         ( S_csi_rx_clk          ),
         .I_camera_frame_start ( S_ISP_O_tuser  ),
+        .I_capture_stamp      ( S_latency_capture_stamp ),
+        .O_bank_stamps        ( S_latency_bank_stamps ),
         .I_camera_valid       ( S_ISP_O_tvalid ),
         .I_camera_data        ( S_ISP_O_tdata  ),
         .I_mipi_rx_error      ( S_mipi_rx_error_ddr ),
@@ -862,6 +879,8 @@ isp_top #(
         .O_video_out_rd_busy ( S_video_out_rd_busy  ),
         .I_video_in_wr_busy  ( S_video_in_wr_busy   ),
         .I_video_out_rp      ( S_video_out_rp       ),
+        .I_bank_stamps       ( S_latency_bank_stamps ),
+        .O_display_stamp     ( S_latency_display_stamp ),
  
         .O_ddr_user_rd_en    ( S_vo_ddr_rd_en       ),
         .O_ddr_user_addr     ( S_vo_ddr_rd_addr     ),
@@ -981,7 +1000,11 @@ isp_top #(
         .V_OFFSET   ( 0    ),
         .IMG_WIDTH  ( VIDEO_WIDTH ),
         .IMG_HEIGHT ( VIDEO_HEIGHT ),
-        .DEBUG_MODE ( 0    )
+        .DEBUG_MODE ( 0    ),
+        .ENABLE_LATENCY ( 1 ),
+        .HDMI_CLK_HZ ( 75000000 ),
+        .LATENCY_REFRESH_MS ( 1000 ),
+        .LATENCY_STALE_MS ( 1500 )
     )u_hdmi_mixer(
         .I_clk           ( S_hdmi_pixel_clk   ),
         .I_rst_n         ( S_hdmi_rst_n       ),
@@ -997,6 +1020,10 @@ isp_top #(
         .I_traffic_sign_result_toggle( S_traffic_sign_hdmi_toggle ),
         .I_traffic_sign_result_ascii( S_traffic_sign_hdmi_ascii  ),
         .I_traffic_sign_metadata(S_traffic_sign_hdmi_metadata),
+        .I_latency_bcd   ( S_latency_bcd ),
+        .I_latency_valid ( S_latency_valid ),
+        .I_latency_overflow( S_latency_overflow ),
+        .I_latency_update( S_latency_update ),
         .O_video_rd_en   ( S_hdmi_window_rd_en),
         .I_video_rd_data ( S_video_rd_data    ),
         .O_hdmi_vsync    ( S_hdmi_out_vsync   ),

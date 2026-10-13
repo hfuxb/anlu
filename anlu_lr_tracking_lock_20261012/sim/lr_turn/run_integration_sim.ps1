@@ -5,7 +5,7 @@ $source=Join-Path $project 'fpga\traffic_sign_td\user_source'
 $hdl=Join-Path $source 'lab_ex_2026_nosoft\hdl_source'
 $tests=@(
  @{Name='tb_lr_metadata';Files=@("$source\image\traffic_sign\traffic_sign_result_cdc.v");Marker='PASS LR metadata CDC'},
- @{Name='tb_lr_hdmi';Files=@("$hdl\vtc\uivtc.v","$hdl\hdmi_mixer.v","$hdl\anlogic_logo_rom.v","$hdl\osd_char_lib.v");Marker='PASS LR HDMI'}
+ @{Name='tb_lr_hdmi';Files=@("$hdl\video_latency_display.v","$hdl\vtc\uivtc.v","$hdl\hdmi_mixer.v","$hdl\anlogic_logo_rom.v","$hdl\osd_char_lib.v");Marker='PASS LR HDMI'}
 )
 foreach($test in $tests){
  $work=Join-Path $PSScriptRoot ('work\'+$test.Name)

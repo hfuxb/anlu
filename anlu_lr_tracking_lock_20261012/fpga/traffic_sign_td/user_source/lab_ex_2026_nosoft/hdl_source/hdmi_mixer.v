@@ -3,7 +3,11 @@ module hdmi_mixer #(
     parameter V_OFFSET = 60,
     parameter IMG_WIDTH = 1280,
     parameter IMG_HEIGHT = 720,
-    parameter integer DEBUG_MODE = 0
+    parameter integer DEBUG_MODE = 0,
+    parameter integer ENABLE_LATENCY = 0,
+    parameter integer HDMI_CLK_HZ = 75000000,
+    parameter integer LATENCY_REFRESH_MS = 1000,
+    parameter integer LATENCY_STALE_MS = 1500
 )(
     input wire        I_clk,
     input wire        I_rst_n,
@@ -15,7 +19,7 @@ module hdmi_mixer #(
     input wire        I_video_last,
 
     input wire[3:0]   I_debug_status,
-    input wire [1:0]  I_image_mode,
+    input wire [2:0]  I_image_mode,
 
 // 路牌识别状态来自摄像头时钟域，结果toggle和ASCII由顶层CDC模块提供。
 // OSD只显示单字符：L、R或?；接口名保留 traffic_sign_* 以兼容成员3的顶层连接。
@@ -24,6 +28,8 @@ module hdmi_mixer #(
     input wire        I_traffic_sign_result_toggle,
     input wire [7:0]  I_traffic_sign_result_ascii,
     input wire [50:0] I_traffic_sign_metadata,
+    input wire [19:0] I_latency_bcd,
+    input wire I_latency_valid,I_latency_overflow,I_latency_update,
 
     output wire       O_video_rd_en,
     input wire[23:0]  I_video_rd_data,
@@ -49,6 +55,46 @@ module hdmi_mixer #(
     reg [11:0] S_y_1d;
     reg [11:0] S_y_2d;
 
+    localparam integer LATENCY_X=IMG_WIDTH-208;
+    wire [19:0] S_latency_bcd;
+    wire S_latency_valid,S_latency_overflow;
+    reg [7:0] S_latency_char;
+    wire [11:0] S_latency_x=S_x_2d-LATENCY_X;
+    wire [3:0] S_latency_cell=S_latency_x[7:4];
+    wire [3:0] S_latency_row=S_y_2d-12'd16;
+    wire [15:0] S_latency_row_bits;
+    // Measurement stays per frame. Only the readable OSD value is throttled.
+    generate if(ENABLE_LATENCY != 0)begin: g_latency_display
+        video_latency_display #(.CLK_HZ(HDMI_CLK_HZ),
+            .REFRESH_MS(LATENCY_REFRESH_MS),.STALE_MS(LATENCY_STALE_MS)) u_display(
+            .I_clk(I_clk),.I_rst_n(I_rst_n),.I_frame_start(I_video_user),
+            .I_bcd20(I_latency_bcd),.I_valid(I_latency_valid),
+            .I_overflow(I_latency_overflow),.I_update(I_latency_update),
+            .O_bcd20(S_latency_bcd),.O_valid(S_latency_valid),.O_overflow(S_latency_overflow));
+    end else begin: g_no_latency_display
+        assign S_latency_bcd=20'd0;
+        assign S_latency_valid=1'b0;
+        assign S_latency_overflow=1'b0;
+    end endgenerate
+    always @* begin
+        S_latency_char=8'h20;
+        case(S_latency_cell)
+            0:S_latency_char="L";
+            1:S_latency_char="A";
+            2:S_latency_char="T";
+            3:S_latency_char=8'h3a;
+            4:S_latency_char=!S_latency_valid?8'h2d:S_latency_overflow?"O":8'h30+S_latency_bcd[19:16];
+            5:S_latency_char=!S_latency_valid?8'h2d:S_latency_overflow?"V":8'h30+S_latency_bcd[15:12];
+            6:S_latency_char=!S_latency_valid?8'h2d:S_latency_overflow?"F":8'h30+S_latency_bcd[11:8];
+            7:S_latency_char=!S_latency_valid?8'h2d:S_latency_overflow?"L":8'h30+S_latency_bcd[7:4];
+            8:S_latency_char=S_latency_valid&&S_latency_overflow?8'h20:8'h2e;
+            9:S_latency_char=!S_latency_valid?8'h2d:S_latency_overflow?8'h20:8'h30+S_latency_bcd[3:0];
+            10:S_latency_char="M";
+            11:S_latency_char="S";
+        endcase
+    end
+    osd_char_lib u_latency_font(.I_char(S_latency_char),.I_row(S_latency_row),.O_row_bits(S_latency_row_bits));
+
     // One coherent frame-latched metadata packet: box, match score, direction.
     reg [50:0] S_sign_meta_frame;
     reg [7:0] S_sign_ascii_frame;
@@ -59,6 +105,136 @@ module hdmi_mixer #(
     wire [9:0] S_sign_y1 = S_sign_meta_frame[17:8];
     wire [7:0] S_sign_score = S_sign_meta_frame[7:0];
     wire S_sign_accepted = S_sign_ascii_frame=="L" || S_sign_ascii_frame=="R";
+    reg        S_traffic_sign_mode_sync1;
+    reg        S_traffic_sign_mode_sync2;
+    reg        S_traffic_sign_mode_frame;
+    reg [2:0]  S_image_mode_sync1;
+    reg [2:0]  S_image_mode_sync2;
+    reg [2:0]  S_image_mode_frame;
+    reg        S_traffic_sign_toggle_sync1;
+    reg        S_traffic_sign_toggle_sync2;
+    reg        S_traffic_sign_toggle_seen;
+    reg        S_traffic_sign_result_ready;
+    reg        S_sign_ready_frame;
+    wire       S_sign_mode_sync = S_traffic_sign_mode_sync2 && S_image_mode_sync2==3'd0;
+    wire       S_sign_overlay_enable = S_traffic_sign_mode_frame && S_image_mode_frame==3'd0;
+
+    // Center-coordinate label belongs to the exact same HDMI-frame packet as
+    // the box/direction. Decimal conversion runs for 12 clocks at frame start;
+    // it never adds a divider or a wide multiplier to the pixel-to-RGB path.
+    localparam integer COORD_LABEL_W = 208; // "L (0640,0360)": 13 x 16 pixels
+    localparam integer COORD_LABEL_H = 20;
+    reg [11:0] S_coord_bin_x,S_coord_bin_y;
+    reg [15:0] S_coord_work_x,S_coord_work_y;
+    reg [15:0] S_coord_bcd_x,S_coord_bcd_y;
+    reg [3:0] S_coord_step;
+    reg S_coord_busy,S_coord_ready;
+    reg [11:0] S_coord_label_x,S_coord_label_y;
+    reg [7:0] S_coord_char;
+    wire [11:0] S_coord_local_x=S_x_2d-S_coord_label_x;
+    wire [11:0] S_coord_local_y=S_y_2d-S_coord_label_y;
+    wire [3:0] S_coord_cell=S_coord_local_x[7:4];
+    wire [3:0] S_coord_font_row=S_coord_local_y-12'd2;
+    wire [15:0] S_coord_row_bits;
+    wire [11:0] S_incoming_center_sum_x={1'b0,I_traffic_sign_metadata[49:39]}+
+                                            {1'b0,I_traffic_sign_metadata[38:28]};
+    wire [10:0] S_incoming_center_sum_y={1'b0,I_traffic_sign_metadata[27:18]}+
+                                            {1'b0,I_traffic_sign_metadata[17:8]};
+    function [15:0] F_coord_bcd_shift;
+        input [15:0] digits;
+        input next_bit;
+        reg [15:0] adjusted;
+        integer digit;
+        begin
+            adjusted=digits;
+            for(digit=0;digit<4;digit=digit+1)
+                if(digits[digit*4+:4]>=5)
+                    adjusted[digit*4+:4]=digits[digit*4+:4]+4'd3;
+            F_coord_bcd_shift={adjusted[14:0],next_bit};
+        end
+    endfunction
+    wire [15:0] S_coord_next_x=F_coord_bcd_shift(S_coord_work_x,S_coord_bin_x[11]);
+    wire [15:0] S_coord_next_y=F_coord_bcd_shift(S_coord_work_y,S_coord_bin_y[11]);
+    function [11:0] F_coord_label_y;
+        input [9:0] box_y0;
+        reg [11:0] position;
+        begin
+            if(box_y0>=22)position={2'b0,box_y0}-12'd22;
+            else position={2'b0,box_y0}+12'd2;
+            if(position>IMG_HEIGHT-COORD_LABEL_H)position=IMG_HEIGHT-COORD_LABEL_H;
+            F_coord_label_y=position;
+        end
+    endfunction
+    function [11:0] F_coord_label_x;
+        input [10:0] box_x0;
+        input [11:0] label_y;
+        reg [11:0] position;
+        begin
+            position={1'b0,box_x0};
+            if(position>IMG_WIDTH-COORD_LABEL_W)position=IMG_WIDTH-COORD_LABEL_W;
+            // Keep the existing logo, count/mode/status and LAT fields readable.
+            // These adjustments affect label position only, never the box or its
+            // reported coordinates, and all positions are registered per frame.
+            if(label_y<160 && position<160 && IMG_WIDTH>=368)position=160;
+            if(label_y<240 && label_y+COORD_LABEL_H>120 &&
+               position<591 && position+COORD_LABEL_W>375 && IMG_WIDTH>=799)
+                position=591;
+            if(ENABLE_LATENCY && label_y<40 && label_y+COORD_LABEL_H>8 &&
+               position+COORD_LABEL_W>LATENCY_X-8 && IMG_WIDTH>=424)
+                position=LATENCY_X-8-COORD_LABEL_W;
+            F_coord_label_x=position;
+        end
+    endfunction
+    wire [11:0] S_incoming_label_y=F_coord_label_y(I_traffic_sign_metadata[27:18]);
+    always @(posedge I_clk or negedge I_rst_n) begin
+        if(!I_rst_n)begin
+            S_coord_bin_x<=0;S_coord_bin_y<=0;
+            S_coord_work_x<=0;S_coord_work_y<=0;
+            S_coord_bcd_x<=0;S_coord_bcd_y<=0;
+            S_coord_step<=0;S_coord_busy<=0;S_coord_ready<=0;
+            S_coord_label_x<=0;S_coord_label_y<=0;
+        end else if(I_video_user)begin
+            S_coord_ready<=0;S_coord_step<=0;
+            S_coord_work_x<=0;S_coord_work_y<=0;
+            if(S_sign_mode_sync && S_traffic_sign_mode_frame && S_traffic_sign_result_ready &&
+               I_traffic_sign_metadata[50] &&
+               (I_traffic_sign_result_ascii=="L" || I_traffic_sign_result_ascii=="R"))begin
+                S_coord_bin_x<={1'b0,S_incoming_center_sum_x[11:1]};
+                S_coord_bin_y<={2'b0,S_incoming_center_sum_y[10:1]};
+                S_coord_label_x<=F_coord_label_x(I_traffic_sign_metadata[49:39],S_incoming_label_y);
+                S_coord_label_y<=S_incoming_label_y;
+                S_coord_busy<=1;
+            end else begin
+                S_coord_busy<=0;S_coord_bcd_x<=0;S_coord_bcd_y<=0;
+            end
+        end else if(S_coord_busy)begin
+            S_coord_bin_x<={S_coord_bin_x[10:0],1'b0};
+            S_coord_bin_y<={S_coord_bin_y[10:0],1'b0};
+            S_coord_work_x<=S_coord_next_x;S_coord_work_y<=S_coord_next_y;
+            if(S_coord_step==11)begin
+                S_coord_bcd_x<=S_coord_next_x;S_coord_bcd_y<=S_coord_next_y;
+                S_coord_busy<=0;S_coord_ready<=1;
+            end else S_coord_step<=S_coord_step+1'b1;
+        end
+    end
+    always @* begin
+        S_coord_char=8'h20;
+        case(S_coord_cell)
+            0:S_coord_char=S_sign_ascii_frame;
+            2:S_coord_char=8'h28;
+            3:S_coord_char=8'h30+S_coord_bcd_x[15:12];
+            4:S_coord_char=8'h30+S_coord_bcd_x[11:8];
+            5:S_coord_char=8'h30+S_coord_bcd_x[7:4];
+            6:S_coord_char=8'h30+S_coord_bcd_x[3:0];
+            7:S_coord_char=8'h2c;
+            8:S_coord_char=8'h30+S_coord_bcd_y[15:12];
+            9:S_coord_char=8'h30+S_coord_bcd_y[11:8];
+            10:S_coord_char=8'h30+S_coord_bcd_y[7:4];
+            11:S_coord_char=8'h30+S_coord_bcd_y[3:0];
+            12:S_coord_char=8'h29;
+        endcase
+    end
+    osd_char_lib u_coordinate_font(.I_char(S_coord_char),.I_row(S_coord_font_row),.O_row_bits(S_coord_row_bits));
     reg [3:0] S_score_digit,S_score_tens_frame,S_score_ones_frame;
     reg S_score_hundred_frame;
     function [3:0] score_tens;
@@ -135,20 +311,6 @@ module hdmi_mixer #(
     reg        S_pf_on;
     reg [9:0]  S_pf_scale_x;
     reg [9:0]  S_pf_scale_y;
-    reg        S_traffic_sign_mode_sync1;
-    reg        S_traffic_sign_mode_sync2;
-    reg        S_traffic_sign_mode_frame;
-    reg [1:0]  S_image_mode_sync1;
-    reg [1:0]  S_image_mode_sync2;
-    reg [1:0]  S_image_mode_frame;
-    reg        S_traffic_sign_toggle_sync1;
-    reg        S_traffic_sign_toggle_sync2;
-    reg        S_traffic_sign_toggle_seen;
-    reg        S_traffic_sign_result_ready;
-    reg        S_sign_ready_frame;
-    wire       S_sign_mode_sync = S_traffic_sign_mode_sync2 && S_image_mode_sync2==2'b00;
-    wire       S_sign_overlay_enable = S_traffic_sign_mode_frame && S_image_mode_frame==2'b00;
-
     localparam LOGO_X = 12'd0;
     localparam LOGO_Y = 12'd0;
     localparam LOGO_W = 12'd160;
@@ -581,9 +743,9 @@ module hdmi_mixer #(
             S_traffic_sign_mode_sync1 <= 1'b0;
             S_traffic_sign_mode_sync2 <= 1'b0;
             S_traffic_sign_mode_frame <= 1'b0;
-            S_image_mode_sync1 <= 2'b11;
-            S_image_mode_sync2 <= 2'b11;
-            S_image_mode_frame <= 2'b11;
+            S_image_mode_sync1 <= 3'd3;
+            S_image_mode_sync2 <= 3'd3;
+            S_image_mode_frame <= 3'd3;
             S_traffic_sign_toggle_sync1 <= 1'b0;
             S_traffic_sign_toggle_sync2 <= 1'b0;
             S_traffic_sign_toggle_seen <= 1'b0;
@@ -868,20 +1030,30 @@ module hdmi_mixer #(
                     else if(S_dyn_x < 12'd80) S_pf_char = CHAR_COLON;
                     else begin
                         case(S_image_mode_frame)
-                            2'b11: begin // RAW
+                            3'd3: begin // RAW
                                 if(S_dyn_x < 12'd96) S_pf_char = 8'h52;
                                 else if(S_dyn_x < 12'd112) S_pf_char = 8'h41;
                                 else S_pf_char = 8'h57;
                             end
-                            2'b10: begin // ERO
+                            3'd2: begin // ERO
                                 if(S_dyn_x < 12'd96) S_pf_char = 8'h45;
                                 else if(S_dyn_x < 12'd112) S_pf_char = 8'h52;
                                 else S_pf_char = 8'h4f;
                             end
-                            2'b01: begin // DIL
+                            3'd1: begin // DIL
                                 if(S_dyn_x < 12'd96) S_pf_char = 8'h44;
                                 else if(S_dyn_x < 12'd112) S_pf_char = 8'h49;
                                 else S_pf_char = 8'h4c;
+                            end
+                            3'd4: begin // MOT
+                                if(S_dyn_x < 12'd96) S_pf_char = "M";
+                                else if(S_dyn_x < 12'd112) S_pf_char = "O";
+                                else S_pf_char = "T";
+                            end
+                            3'd5: begin // DEH
+                                if(S_dyn_x < 12'd96) S_pf_char = "D";
+                                else if(S_dyn_x < 12'd112) S_pf_char = "E";
+                                else S_pf_char = "H";
                             end
                             default: begin // SIG
                                 if(S_dyn_x < 12'd96) S_pf_char = 8'h53;
@@ -906,6 +1078,17 @@ module hdmi_mixer #(
                 S_y_2d<S_sign_y0+2 || S_y_2d+2>S_sign_y1)) begin
                 S_osd_hit=1; S_osd_color=S_sign_accepted?24'h20ff40:24'hfff200;
             end
+            // Recognized L/R only: a fixed-size label follows the tracked box.
+            // Candidate '?' boxes remain visible without showing coordinates.
+            // When placed inside a top-edge box, text also takes priority over
+            // its border so the digits cannot be cut by a vertical green line.
+            if(S_sign_overlay_enable && S_sign_box && S_sign_accepted && S_coord_ready &&
+               S_x_2d>=S_coord_label_x && S_x_2d<S_coord_label_x+COORD_LABEL_W &&
+               S_y_2d>=S_coord_label_y && S_y_2d<S_coord_label_y+COORD_LABEL_H)begin
+                S_osd_hit=1;S_osd_color=24'h20ff40;
+                if(S_coord_local_y>=2 && S_coord_local_y<18 &&
+                   S_coord_row_bits[15-S_coord_local_x[3:0]])S_osd_color=24'h101820;
+            end
             // MATCH:000..100 = foreground IoU score, not a probability.
             if(S_sign_overlay_enable && S_x_2d>=375 && S_x_2d<519 && S_y_2d>=214 && S_y_2d<230) begin
                 S_dyn_x=S_x_2d-375; S_pf_row=S_y_2d-214;
@@ -928,6 +1111,14 @@ module hdmi_mixer #(
             if(S_sign_overlay_enable && S_x_2d>=375 && S_x_2d<575 && S_y_2d>=234 && S_y_2d<240)begin
                 S_osd_hit=1;
                 S_osd_color=S_x_2d-375<({4'b0,S_sign_score}<<1)?24'h20ff40:24'h303030;
+            end
+            // All modes show frame-matched latency in a small top-right field.
+            if(ENABLE_LATENCY && S_x_2d>=LATENCY_X-8 && S_x_2d<LATENCY_X+200 &&
+               S_y_2d>=8 && S_y_2d<40)begin
+                S_osd_hit=1;S_osd_color=24'h101820;
+                if(S_x_2d>=LATENCY_X && S_x_2d<LATENCY_X+192 &&
+                   S_y_2d>=16 && S_y_2d<32 && S_latency_row_bits[15-S_latency_x[3:0]])
+                    S_osd_color=S_latency_valid&&!S_latency_overflow?24'h40ffff:24'hc0c0c0;
             end
         end
     end

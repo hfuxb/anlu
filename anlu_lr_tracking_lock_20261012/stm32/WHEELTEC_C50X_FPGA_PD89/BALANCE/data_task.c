@@ -1,4 +1,5 @@
 #include "data_task.h"
+#include "fpga_turn.h"
 
 //用于发送数据的结构体
 SEND_DATA Send_Data;
@@ -197,6 +198,7 @@ Output  : none
 **************************************************************************/
 static void Usart3_SendTask(void)
 {
+  uint8_t turn_status[11];
   unsigned char i = 0;	
 	for(i=0; i<24; i++)
 	{
@@ -211,6 +213,11 @@ static void Usart3_SendTask(void)
 			uart3_send(Send_AutoCharge_Data.buffer[i]);
 		}	
 	}
+    /* Snapshot is short; transmission stays outside the critical section. */
+    taskENTER_CRITICAL();
+    FPGA_TurnStatusFrame(turn_status);
+    taskEXIT_CRITICAL();
+    for(i = 0; i < 11; ++i) uart3_send(turn_status[i]);
 }
 
 /**************************************************************************

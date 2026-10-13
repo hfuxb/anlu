@@ -1,0 +1,28 @@
+[
+  {
+    "Passed": true,
+    "Test": "tb_board_mode_selector",
+    "Marker": "PASS BOARD KEY4 MODE SELECTOR"
+  },
+  {
+    "Test": "tb_osd_question",
+    "Skipped": true,
+    "Reason": "Not selected"
+  },
+  {
+    "Passed": true,
+    "Test": "tb_image_process_stream_96_full",
+    "Reused": true,
+    "Marker": "FULL FRAME STREAM TEST PASSED"
+  },
+  {
+    "Test": "tb_hdmi_720p",
+    "Skipped": true,
+    "Reason": "Not selected"
+  },
+  {
+    "Test": "tb_hdmi_black_camera",
+    "Skipped": true,
+    "Reason": "Not selected"
+  }
+]

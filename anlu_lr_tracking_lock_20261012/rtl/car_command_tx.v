@@ -1,7 +1,10 @@
 `timescale 1ns/1ps
 // WHEELTEC C50X serial command sender.
 // Units: cmd_vx/cmd_vy are mm/s; cmd_wz is 0.001 rad/s, all signed 16-bit.
-// Frame: 7B 00 00 vx_hi vx_lo vy_hi vy_lo wz_hi wz_lo BCC 7D.
+// Speed frame: 7B 00 00 vx_hi vx_lo vy_hi vy_lo wz_hi wz_lo BCC 7D.
+// Action frame: 7B 10 seq angle_hi angle_lo maxw_hi maxw_lo vx_hi vx_lo BCC 7D.
+// Action angle is signed centidegrees, maxw is unsigned 0.001 rad/s, and vx is
+// signed mm/s. Identical action frames are keepalives for the same sequence.
 // BCC is XOR of bytes 0..8. Command values are captured once per whole frame.
 module car_command_tx #(
     parameter integer CLK_HZ = 50000000,
@@ -14,6 +17,11 @@ module car_command_tx #(
     input  wire signed [15:0] cmd_vx,
     input  wire signed [15:0] cmd_vy,
     input  wire signed [15:0] cmd_wz,
+    input  wire               action_active,
+    input  wire [7:0]         action_seq,
+    input  wire signed [15:0] action_angle_cdeg,
+    input  wire [15:0]        action_max_wz_mrad,
+    input  wire signed [15:0] action_forward_mm_s,
     output wire               tx,
     output reg                frame_sent,
     output reg  [31:0]        frame_count
@@ -101,6 +109,19 @@ module car_command_tx #(
                             frame[7] <= 0;
                             frame[8] <= 0;
                             frame[9] <= 8'h7b;
+                        end else if (action_active) begin
+                            frame[1] <= 8'h10;
+                            frame[2] <= action_seq;
+                            frame[3] <= action_angle_cdeg[15:8];
+                            frame[4] <= action_angle_cdeg[7:0];
+                            frame[5] <= action_max_wz_mrad[15:8];
+                            frame[6] <= action_max_wz_mrad[7:0];
+                            frame[7] <= action_forward_mm_s[15:8];
+                            frame[8] <= action_forward_mm_s[7:0];
+                            frame[9] <= 8'h7b ^ 8'h10 ^ action_seq
+                                              ^ action_angle_cdeg[15:8] ^ action_angle_cdeg[7:0]
+                                              ^ action_max_wz_mrad[15:8] ^ action_max_wz_mrad[7:0]
+                                              ^ action_forward_mm_s[15:8] ^ action_forward_mm_s[7:0];
                         end else begin
                             frame[3] <= cmd_vx[15:8];
                             frame[4] <= cmd_vx[7:0];

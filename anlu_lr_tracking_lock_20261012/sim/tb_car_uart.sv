@@ -27,6 +27,8 @@ module tb_car_uart;
     car_command_tx #(.CLK_HZ(CLK_HZ), .BAUD(BAUD), .SEND_HZ(50)) command_dut (
         .clk(clk), .rst_n(rst_n), .force_zero(force_zero),
         .cmd_vx(cmd_vx), .cmd_vy(cmd_vy), .cmd_wz(cmd_wz),
+        .action_active(1'b0),.action_seq(8'd0),.action_angle_cdeg(16'sd0),
+        .action_max_wz_mrad(16'd0),.action_forward_mm_s(16'sd0),
         .tx(command_tx), .frame_sent(frame_sent), .frame_count(frame_count)
     );
     car_telemetry_rx #(.CLK_HZ(CLK_HZ), .BAUD(BAUD)) status_dut (

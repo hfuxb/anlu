@@ -1,0 +1,4 @@
+right 90 degree turn across absolute heading wrap: 380 ticks
+left 90 degree turn across absolute heading wrap: 380 ticks
+overshoot reversal and convergence: 155 ticks
+PASS: turn controller, idempotence, sequencing, fault stops, status packet

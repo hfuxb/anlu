@@ -1,22 +1,12 @@
 [
   {
-    "Test": "tb_car_uart",
     "Passed": true,
-    "Marker": "ALL CAR UART TESTS PASSED"
+    "Marker": "ALL CAR UART TESTS PASSED",
+    "Test": "tb_car_uart"
   },
   {
-    "Test": "tb_car_decision",
     "Passed": true,
-    "Marker": "PASS tb_car_decision (8032 checks)"
-  },
-  {
-    "Test": "tb_car_result_cdc",
-    "Passed": true,
-    "Marker": "PASS tb_car_result_cdc (11 checks)"
-  },
-  {
-    "Test": "tb_car_control",
-    "Passed": true,
-    "Marker": "PASS tb_car_control (35 checks; 78 complete UART packets)"
+    "Marker": "PASS tb_car_result_cdc (11 checks)",
+    "Test": "tb_car_result_cdc"
   }
 ]

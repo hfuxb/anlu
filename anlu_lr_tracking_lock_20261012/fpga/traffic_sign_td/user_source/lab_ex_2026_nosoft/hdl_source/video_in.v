@@ -1,10 +1,12 @@
 
 
-module video_in (
+module video_in #(parameter integer FRAME_WORDS=172800)(
     input wire         I_rst_n,
 
     input wire         I_camera_clk,
     input wire         I_camera_frame_start,
+    input wire[32:0]   I_capture_stamp,
+    output wire[131:0] O_bank_stamps,
     input wire         I_camera_valid,
     input wire[127:0]  I_camera_data,
     input wire         I_mipi_rx_error,
@@ -38,6 +40,22 @@ module video_in (
     reg         S_ddr_wr_valid;
     reg[9:0]    S_ddr_wr_cnt;
     wire        S_ddr_wr_start_req;
+
+    reg [32:0] S_capture_stamp_src;
+    (* ASYNC_REG="TRUE" *) reg [32:0] S_capture_stamp_sync1,S_capture_stamp_sync2;
+    wire [1:0] S_latency_write_bank=I_mipi_rx_error?S_video_in_wp-2'd1:S_video_in_wp;
+    always @(posedge I_camera_clk or negedge I_rst_n)begin
+        if(!I_rst_n)S_capture_stamp_src<=0;
+        else if(I_camera_frame_start)S_capture_stamp_src<=I_capture_stamp;
+    end
+    always @(posedge I_ddr_clk or negedge I_rst_n)begin
+        if(!I_rst_n)begin S_capture_stamp_sync1<=0;S_capture_stamp_sync2<=0;end
+        else begin S_capture_stamp_sync1<=S_capture_stamp_src;S_capture_stamp_sync2<=S_capture_stamp_sync1;end
+    end
+    video_latency_bank_tags #(.FRAME_WORDS(FRAME_WORDS)) u_latency_tags(
+        .I_clk(I_ddr_clk),.I_rst_n(I_rst_n),.I_frame_start(S_frame_start),
+        .I_write_bank(S_latency_write_bank),.I_capture_stamp(S_capture_stamp_sync2),
+        .I_write_en(O_ddr_user_wr_en),.I_frame_error(I_mipi_rx_error),.O_bank_stamps(O_bank_stamps));
 
     localparam IMAGE_BASE_ADDR_0 = 25'd0;
     localparam IMAGE_BASE_ADDR_1 = 25'd7000000;

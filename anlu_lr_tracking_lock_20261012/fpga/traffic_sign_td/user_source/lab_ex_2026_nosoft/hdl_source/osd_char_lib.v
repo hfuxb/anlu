@@ -483,6 +483,45 @@ module osd_char_lib (
                     default: O_row_bits=16'h0000;
                 endcase
             end
+            8'h28: begin // ( : doubled 5x7 glyph, same 16x16 cell as L/R/digits
+                case(I_row)
+                    4'd1,4'd2:O_row_bits=16'h0180;
+                    4'd3,4'd4:O_row_bits=16'h0600;
+                    4'd5,4'd6,4'd7,4'd8,4'd9,4'd10:O_row_bits=16'h1800;
+                    4'd11,4'd12:O_row_bits=16'h0600;
+                    4'd13,4'd14:O_row_bits=16'h0180;
+                    default:O_row_bits=16'h0000;
+                endcase
+            end
+            8'h29: begin // )
+                case(I_row)
+                    4'd1,4'd2:O_row_bits=16'h0600;
+                    4'd3,4'd4:O_row_bits=16'h0180;
+                    4'd5,4'd6,4'd7,4'd8,4'd9,4'd10:O_row_bits=16'h0060;
+                    4'd11,4'd12:O_row_bits=16'h0180;
+                    4'd13,4'd14:O_row_bits=16'h0600;
+                    default:O_row_bits=16'h0000;
+                endcase
+            end
+            8'h2c: begin // , : small bottom stroke, not a different-size font
+                case(I_row)
+                    4'd11,4'd12:O_row_bits=16'h0180;
+                    4'd13,4'd14:O_row_bits=16'h0600;
+                    default:O_row_bits=16'h0000;
+                endcase
+            end
+            8'h2d: begin // - : centered 10x2 stroke
+                case(I_row)
+                    4'd7,4'd8:O_row_bits=16'h1ff8;
+                    default:O_row_bits=16'h0000;
+                endcase
+            end
+            8'h2e: begin // . : same doubled 5x7 glyph geometry
+                case(I_row)
+                    4'd13,4'd14:O_row_bits=16'h0180;
+                    default:O_row_bits=16'h0000;
+                endcase
+            end
             8'h3a: begin // :
                 case(I_row)
                     4'd1,4'd2: O_row_bits=16'h0000;

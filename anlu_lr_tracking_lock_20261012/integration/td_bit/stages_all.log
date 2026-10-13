@@ -1,14 +1,14 @@
-START all 2026-10-12T10:09:12Z
-CAR_BIT_ELABORATE_OK 2026-10-12T10:09:20Z
-CAR_MAIN_SDC=D:/qrsfpga/qrsfpga/anlu_lr_tracking_lock_20261012/fpga/traffic_sign_td/td_project/traffic_sign_td.sdc bytes=1804 2026-10-12T10:09:34Z
-CAR_BIT_RTL_OK 2026-10-12T10:16:11Z
-CAR_MAIN_SDC=D:/qrsfpga/qrsfpga/anlu_lr_tracking_lock_20261012/fpga/traffic_sign_td/td_project/traffic_sign_td.sdc bytes=1804 2026-10-12T10:22:47Z
-CAR_BIT_CLOCK_CONSTRAINTS_OK 2026-10-12T10:22:54Z
-CAR_BIT_GATE_OK 2026-10-12T10:22:54Z
-CAR_BIT_PLACE_OK 2026-10-12T10:28:57Z
-CAR_BIT_CLOCK_CONSTRAINTS_OK 2026-10-12T10:31:28Z
-CAR_BIT_ROUTE_OK 2026-10-12T10:31:30Z
-CAR_BIT_TIMING_SIGNOFF_OK setup=0.196 hold=0.020 2026-10-12T10:31:30Z
-CAR_BIT_OUTPUT=D:/qrsfpga/qrsfpga/anlu_lr_tracking_lock_20261012/fpga/traffic_sign_td/td_project/bitstream/traffic_sign_td_lr_tracking_lock.bit 2026-10-12T10:31:30Z
-CAR_BIT_BITGEN_OK bytes=1789539 2026-10-12T10:31:33Z
-CAR_BIT_BUILD_OK 2026-10-12T10:31:33Z
+START all 2026-10-13T09:28:03Z
+CAR_BIT_ELABORATE_OK 2026-10-13T09:28:12Z
+CAR_MAIN_SDC=D:/qrsfpga/qrsfpga/anlu_lr_tracking_lock_20261012/fpga/traffic_sign_td/td_project/traffic_sign_td.sdc bytes=1804 2026-10-13T09:28:26Z
+CAR_BIT_RTL_OK 2026-10-13T09:31:13Z
+CAR_MAIN_SDC=D:/qrsfpga/qrsfpga/anlu_lr_tracking_lock_20261012/fpga/traffic_sign_td/td_project/traffic_sign_td.sdc bytes=1804 2026-10-13T09:33:53Z
+CAR_BIT_CLOCK_CONSTRAINTS_OK 2026-10-13T09:33:57Z
+CAR_BIT_GATE_OK 2026-10-13T09:33:57Z
+CAR_BIT_PLACE_OK 2026-10-13T09:36:31Z
+CAR_BIT_CLOCK_CONSTRAINTS_OK 2026-10-13T09:38:00Z
+CAR_BIT_ROUTE_OK 2026-10-13T09:38:01Z
+CAR_BIT_TIMING_SIGNOFF_OK setup=0.205 hold=0.020 2026-10-13T09:38:01Z
+CAR_BIT_OUTPUT=D:/qrsfpga/qrsfpga/anlu_lr_tracking_lock_20261012/fpga/traffic_sign_td/td_project/bitstream/traffic_sign_td_lr_tracking_lock.bit 2026-10-13T09:38:01Z
+CAR_BIT_BITGEN_OK bytes=1789539 2026-10-13T09:38:06Z
+CAR_BIT_BUILD_OK 2026-10-13T09:38:06Z

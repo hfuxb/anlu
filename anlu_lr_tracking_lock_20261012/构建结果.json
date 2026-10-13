@@ -1,25 +1,30 @@
 {
-  "generated_utc": "2026-10-12T10:32:34.276045+00:00",
-  "project": "HX1P35A SIG-only L/R recognition, stable replacement, opening and AE/AWB",
+  "generated_utc": "2026-10-13T09:38:46.785620+00:00",
+  "project": "HX1P35A six image modes, AE/AWB, recognized center coordinates, one-second latency OSD and STM32 relative-angle turning",
   "bit": "fpga\\traffic_sign_td\\td_project\\bitstream\\traffic_sign_td_lr_tracking_lock.bit",
   "bytes": 1789539,
-  "sha256": "6D30D717985D6DB7BC6A5E209331383B053CAF173FD86579A535A6A10157DB15",
+  "sha256": "D0C3046D0E1C41A366C14FE50447AAD1613A53C70278ED4B1F303C3EAD487F79",
   "final_routed_timing_ns": {
-    "SWNS": 0.196,
+    "SWNS": 0.205,
     "STNS": 0.0,
     "HWNS": 0.02,
     "HTNS": 0.0
   },
   "resources": {
+    "slice": {
+      "used": 17081,
+      "available": 21216,
+      "percent": 80.51
+    },
     "eram": {
-      "used": 40,
+      "used": 68,
       "available": 108,
-      "percent": 37.04
+      "percent": 62.96
     },
     "dsp": {
-      "used": 37,
+      "used": 38,
       "available": 40,
-      "percent": 92.5
+      "percent": 95.0
     }
   },
   "tests": {
@@ -31,13 +36,33 @@
     "1280x720 image frames": "sim\\lr_turn\\work_full720\\run.log",
     "result metadata CDC (both edge phases)": "sim\\lr_turn\\work\\tb_lr_metadata\\run.log",
     "uniform Latin/digit font geometry": "sim\\lr_turn\\work\\tb_osd_font\\run.log",
-    "HDMI 10 frames: SIG-only overlays, reentry and RGB alignment": "sim\\lr_turn\\work\\tb_lr_hdmi\\run.log",
+    "HDMI 12 frames: six modes, SIG-only overlays and RGB alignment": "sim\\lr_turn\\work\\tb_lr_hdmi\\run.log",
+    "KEY4 RAW ERO DIL MOT DEH SIG cycle, debounce and long press": "reports\\tb_board_mode_selector_720p.log",
+    "dehaze whole-image numeric reference and motion mask (14 frames)": "reports\\tb_extra_modes.log",
+    "motion full720 static/noise/reentry/truncated-frame recovery": "reports\\tb_motion_full720.log",
+    "actual ISP three-bit mode routing and pipeline alignment": "reports\\tb_isp_modes.log",
+    "acquisition/display latency 82 checks including actual DDR bank tags": "reports\\tb_video_latency.log",
+    "latency right-top exact glyphs and RGB alignment (7 full720 frames)": "reports\\tb_latency_hdmi.log",
+    "latency one-second display hold (3531 checks including 75000000 clocks)": "reports\\tb_latency_display.log",
+    "latency held OSD and RGB alignment (11 full720 frames)": "reports\\tb_latency_hdmi_hold.log",
+    "recognized L/R center coordinates and full720 label alignment": "reports\\tb_coordinate_hdmi.log",
+    "coordinate metadata epoch and actual LAT/status/Logo avoidance": "reports\\tb_coordinate_latch.log",
     "STM32 UART": "reports\\tb_car_uart.log",
-    "car policy": "reports\\tb_car_decision.log",
     "car result CDC": "reports\\tb_car_result_cdc.log",
-    "complete car control": "reports\\tb_car_control.log"
+    "action request/status pin UART transport": "sim\\turn_closed_loop\\work_transport\\run.log",
+    "acknowledged angle action decision (45 checks)": "reports\\tb_action_decision.log",
+    "complete dual-feedback car UART control (49 checks)": "reports\\tb_action_control.log",
+    "STM32 relative angle outer loop and plant": "reports\\test_fpga_turn.log",
+    "STM32 ISR mailbox and atomic status publication (792 checks)": "reports\\test_fpga_owner.log",
+    "checked physical gyro adapter (140 scenarios)": "reports\\test_fpga_feedback.log"
   },
   "physical_camera_verified": false,
+  "changed_in_this_build": [
+    "recognized_L_R_coordinate_label",
+    "one_second_latency_display_hold"
+  ],
+  "automatic_dehaze_recognition_implemented": false,
+  "key3_recognition_mode_lock_implemented": false,
   "reference_scene_results": {
     "left120": {
       "expected": "L",
@@ -179,16 +204,80 @@
     "switch_margin": 20
   },
   "recognition_mode": {
-    "enabled_mode": "SIG (00)",
+    "enabled_mode": "SIG (0)",
     "disabled_modes": [
-      "RAW (11)",
-      "ERO (10)",
-      "DIL (01)"
+      "RAW (3)",
+      "ERO (2)",
+      "DIL (1)",
+      "MOT (4)",
+      "DEH (5)"
     ],
     "clear_lock_on_exit": true,
     "wait_for_complete_SOF_after_RAM_init": true,
     "visual_drive_stop_and_disarm_outside_SIG": true
   },
+  "key4_cycle": [
+    "RAW",
+    "ERO",
+    "DIL",
+    "MOT",
+    "DEH",
+    "SIG"
+  ],
+  "motion_detection": {
+    "grid": [
+      320,
+      180
+    ],
+    "threshold_luma": 24,
+    "highlight": "red 4x4 regions",
+    "first_frame_primes": true,
+    "truncated_frame_invalidates": true,
+    "camera_motion_or_exposure_changes_may_trigger": true
+  },
+  "dehaze": {
+    "algorithm": "causal 3x3 group dark channel with fixed airlight and segmented reciprocal",
+    "airlight": 240,
+    "omega_q8": 218,
+    "minimum_transmission": 64,
+    "maximum_gain": 2,
+    "adaptive_airlight": false
+  },
+  "video_latency": {
+    "start": "MIPI/CSI frame start",
+    "end": "same DDR frame first HDMI active pixel",
+    "resolution_ms": 0.1,
+    "position": "top right",
+    "invalid": "----.-",
+    "overflow_ms": 9999.9,
+    "camera_exposure_and_screen_internal_latency_included": false,
+    "full_frame_tag_required": true,
+    "measurement_every_frame": true,
+    "display_refresh_ms": 1000,
+    "display_value": "latest complete measurement, held between updates; not averaged",
+    "first_fault_and_recovery_immediate": true,
+    "no_measurement_timeout_ms": 1500
+  },
+  "coordinate_label": {
+    "enabled": "SIG, valid box, accepted L or R",
+    "point": "floor((xmin+xmax)/2), floor((ymin+ymax)/2)",
+    "units": "1280x720 image pixels, origin top left",
+    "format": "L (0640,0360)",
+    "font_cell": [
+      16,
+      16
+    ],
+    "label_size": [
+      208,
+      20
+    ],
+    "frame_latched": true,
+    "unrecognized_hidden": true,
+    "screen_edge_clamped": true,
+    "existing_osd_avoided": true,
+    "held_target_uses_retained_box": true
+  },
+  "extra_stream_delay_clocks": 13,
   "morphology": {
     "erosion": "erosion(Sobel)",
     "dilation": "dilation(erosion(Sobel))",
@@ -201,9 +290,9 @@
     "fpga\\traffic_sign_td\\user_source\\lab_ex_2026_nosoft\\hdl_source\\auto_white_balance.v": "248b841fdc7640d07768b0e6e086704a862da24047de40c80beb8cc201180e0f",
     "fpga\\traffic_sign_td\\user_source\\lab_ex_2026_nosoft\\hdl_source\\csi_unpacket.v": "cc66fec1ee55fff7e8a31964e6c27670006caf294d153fea8823c83fa9890233",
     "fpga\\traffic_sign_td\\user_source\\lab_ex_2026_nosoft\\hdl_source\\data_96bit_to_128bit.v": "6861038b75f2f7010bff99742e4db9470643716c7e6b9b615a27da60d4542924",
-    "fpga\\traffic_sign_td\\user_source\\lab_ex_2026_nosoft\\hdl_source\\design_top_wrapper.v": "d06537d8f8bad96d3302af1eaf1f731be9d4b400815f7b733f7cd8e47818efa6",
+    "fpga\\traffic_sign_td\\user_source\\lab_ex_2026_nosoft\\hdl_source\\design_top_wrapper.v": "b061ad54c3b2b8cfa62b6ecd6950933b5235dd3d979efab5fdab059ebd5ad60d",
     "fpga\\traffic_sign_td\\user_source\\lab_ex_2026_nosoft\\hdl_source\\hdmi_1_4b_transmitter_core_wrapper.enc.v": "867e0b0bdd874bc383d00918c9e1be3fe01edf41f343b6a0d73e262776596a63",
-    "fpga\\traffic_sign_td\\user_source\\lab_ex_2026_nosoft\\hdl_source\\hdmi_mixer.v": "cf92c6a8fe7dbfb652fd80a2c5f13a447bc5278c2a2b575df9a51a2f51ef1f54",
+    "fpga\\traffic_sign_td\\user_source\\lab_ex_2026_nosoft\\hdl_source\\hdmi_mixer.v": "ed1254e70d58e22f61499525797d051eff16e598ae19ef1c4a052cf96f8c91b7",
     "fpga\\traffic_sign_td\\user_source\\lab_ex_2026_nosoft\\hdl_source\\hdmi_phy_warpper.v": "416b082b0987001bdbc0a7e20a557cb8fb1dca34e25dc881e6d28a8cb3cf4300",
     "fpga\\traffic_sign_td\\user_source\\lab_ex_2026_nosoft\\hdl_source\\hdmi_tx.v": "c38dd1be1d14663b8e0c0b87c5b974cb3879b424d131e6282709abf4aabdd543",
     "fpga\\traffic_sign_td\\user_source\\lab_ex_2026_nosoft\\hdl_source\\I2S_receiver.v": "08904598b42c2e1a4836cd9fb3293bc6c791ea2f79e35c7663a33127dc97f47b",
@@ -211,15 +300,17 @@
     "fpga\\traffic_sign_td\\user_source\\lab_ex_2026_nosoft\\hdl_source\\lane_lvds_10_1.v": "de9529321354f04837e051d0ec1681cf44783d4be3284703a788e081147500bc",
     "fpga\\traffic_sign_td\\user_source\\lab_ex_2026_nosoft\\hdl_source\\mc_to_user_interface.v": "7d00f0058467a0f99e0e2d36fa360d59579b4b73be7fb33b16274fc6b422f438",
     "fpga\\traffic_sign_td\\user_source\\lab_ex_2026_nosoft\\hdl_source\\mipi_rx_error_detect.v": "7ab5204d168148ec095b7ddc9e8156679d06a428d168cdc88be47e82afa5628e",
-    "fpga\\traffic_sign_td\\user_source\\lab_ex_2026_nosoft\\hdl_source\\mode_selector.v": "1a655a3479f7c1549f01bb8bab647ff4d2f0f0479496032a77f53322f2789e57",
-    "fpga\\traffic_sign_td\\user_source\\lab_ex_2026_nosoft\\hdl_source\\osd_char_lib.v": "e32d9ae1b3906082cf0488b2059bcac46176daa0825443bb0b87e5acdd038d18",
+    "fpga\\traffic_sign_td\\user_source\\lab_ex_2026_nosoft\\hdl_source\\mode_selector.v": "22746fe34dcc698b8192f45fa0bce6cfa43ce456a4d0cff6a201dfa6c7197939",
+    "fpga\\traffic_sign_td\\user_source\\lab_ex_2026_nosoft\\hdl_source\\osd_char_lib.v": "98908d9c4db3188ea0c32038ad3c5294a33f4b9f90a2c12cbf23d7ddb069b313",
     "fpga\\traffic_sign_td\\user_source\\lab_ex_2026_nosoft\\hdl_source\\pll_hdmi.v": "48ffd2505fbcd51ade9f136906f1014726c75a667d3a57899145e976cd625c81",
     "fpga\\traffic_sign_td\\user_source\\lab_ex_2026_nosoft\\hdl_source\\ps_wrapper.v": "46d6f2c8e42724e28ffcd8516bc4f2a2d12e36f920e1f20cd42fe722be461afe",
     "fpga\\traffic_sign_td\\user_source\\lab_ex_2026_nosoft\\hdl_source\\raw10_unpacket.v": "840c54c3ea5c025bea90a751656db98079e773ff7535b27f4ac11e8837d46798",
     "fpga\\traffic_sign_td\\user_source\\lab_ex_2026_nosoft\\hdl_source\\raw8_to_rgb888.v": "fcc29ddd6942015d5e5fd43d148a9487cf3689c7c70c896a654a4e934fcade2c",
     "fpga\\traffic_sign_td\\user_source\\lab_ex_2026_nosoft\\hdl_source\\video_cuttting.v": "c1131787da9c80029759ee2821c9c042a850cb459b812676d1cc6a144ff14480",
-    "fpga\\traffic_sign_td\\user_source\\lab_ex_2026_nosoft\\hdl_source\\video_in.v": "919500d708505447275b37184419eb9cfdc737ae829cfb0de7df2b219d24b32f",
-    "fpga\\traffic_sign_td\\user_source\\lab_ex_2026_nosoft\\hdl_source\\video_out.v": "b5c0b3df98c100441d8cb3187abcf192d3eddd964c2df9b25a0cca00ce2ce75e",
+    "fpga\\traffic_sign_td\\user_source\\lab_ex_2026_nosoft\\hdl_source\\video_in.v": "6c36fca086fec6cea1a27b7afb0219e71a4bc7021f1a79f287d6b5e1cc0e8534",
+    "fpga\\traffic_sign_td\\user_source\\lab_ex_2026_nosoft\\hdl_source\\video_latency.v": "ab43fbcc27c234383691a2ff22ce05a2f88e8543f8ee683f14cfd8deffcdf1c4",
+    "fpga\\traffic_sign_td\\user_source\\lab_ex_2026_nosoft\\hdl_source\\video_latency_display.v": "e09d7f080fad3b6de5ebe5396b954d69aeafc3cc06417e0cd07bc618080f9d1a",
+    "fpga\\traffic_sign_td\\user_source\\lab_ex_2026_nosoft\\hdl_source\\video_out.v": "9a182792c8d8dbd40bd1425bd7ade622cd1466aad933fa7b4d03471b96bf8e36",
     "fpga\\traffic_sign_td\\user_source\\lab_ex_2026_nosoft\\hdl_source\\isp\\csi_unpacket_2lane.v": "b7e093e1e377f5a61a22216e9a4ec404068a3346923758297867b465679dacdd",
     "fpga\\traffic_sign_td\\user_source\\lab_ex_2026_nosoft\\hdl_source\\isp\\raw10_unpacket_2lane.v": "83f89d7f8e2b19322a7f6a8ddc0cae64fcbd83fed6b742c10f5d2339f59d30fd",
     "fpga\\traffic_sign_td\\user_source\\lab_ex_2026_nosoft\\hdl_source\\isp\\uial2axis.v": "763f6e8a5e36ccd72ae9886b6d14702e9b573e4374b0417f8ffcb9cdfa4cb73d",
@@ -297,9 +388,12 @@
     "fpga\\traffic_sign_td\\user_source\\ip_source\\demosaic\\blk_mem_gen_zhenghe\\RTL\\include\\define.v": "104eb8d9b626b944b1e2d3b8070f51c636af132bc00b32ebed0236bbb2c144c0",
     "fpga\\traffic_sign_td\\user_source\\ip_source\\demosaic\\blk_mem_gen_demosaic\\RTL\\ram_c36c2ca3b3a7.v": "4c007b82769a2af9474683ec27711133c735ac776fd1f3d037d4eb00cc20a832",
     "fpga\\traffic_sign_td\\user_source\\ip_source\\demosaic\\blk_mem_gen_demosaic\\RTL\\include\\define.v": "ce22c429acd5d725b986015db98a3a86609204620dc1ba9158123f1e335b6ac5",
-    "fpga\\traffic_sign_td\\user_source\\image\\integration\\isp_top.v": "d425c71ecbfc96ee506f44678b6e1dc5e4c16476b970f64ebe9e2cba1f6b71ab",
+    "fpga\\traffic_sign_td\\user_source\\image\\integration\\isp_top.v": "651d8933ed4a7164ca840328c4cc32125f6c62a0e9ef09fa7f987aef45a90b12",
+    "fpga\\traffic_sign_td\\user_source\\image\\stream\\dehaze_stream_96.v": "eb872efd8634c9ac70951ce4bb8139fa6ba659795519464e87048af4d4773de5",
     "fpga\\traffic_sign_td\\user_source\\image\\stream\\image_correction.v": "50a808f962581428691c0f39cc55422a0b8866526f03601ab6c5ec4fc139af7e",
+    "fpga\\traffic_sign_td\\user_source\\image\\stream\\image_extra_modes_96.v": "afce1d6666d74704bae990d6328548e2ea562cb270917d0230d9ad34dca9d6bd",
     "fpga\\traffic_sign_td\\user_source\\image\\stream\\image_process_stream_96.v": "2c7d1d0941309b94bd355a8fd81d27a566d65c811f5da630bbfc3a76a180b783",
+    "fpga\\traffic_sign_td\\user_source\\image\\stream\\motion_stream_96.v": "a5b8c510d0c157c50cb1b3b6a54989300f82f7891059b10d5bca299f3d0dbf3c",
     "fpga\\traffic_sign_td\\user_source\\image\\traffic_sign\\traffic_sign_detector_96.v": "5016438c4c73914468d9aba42614c77e28526cad2fb603c01850527336e4080b",
     "fpga\\traffic_sign_td\\user_source\\image\\traffic_sign\\traffic_sign_result_cdc.v": "793f9b72a1aa82e5db611abf6c2ddc618c210017940724fd51b9262489951e69",
     "fpga\\traffic_sign_td\\user_source\\image\\stream\\blc\\BLC.v": "011d09b3e1de47b9e444945c257426836f4947e8dd9b3cd2e9c1539b44129221",
@@ -307,13 +401,73 @@
     "fpga\\traffic_sign_td\\user_source\\image\\awb\\active\\signal_delay.v": "cf529f95de7d9f2c403b9f2144101606e4875ced11d68a5b9f98af1b990fe420",
     "fpga\\traffic_sign_td\\user_source\\image\\awb\\legacy\\awb.v": "bd7f8178ecdc372dcaac28195f97cc52e23a8db9824854a10376002b244e428c",
     "fpga\\traffic_sign_td\\user_source\\image\\awb\\legacy\\signal_delay.v": "1f2831fa917eb186c6c68056ffec6fa8483debbbf99d5f2b748f4a66ed9f2f07",
+    "rtl\\car_action_status_rx.v": "e244f6cf3d3fa0073a51a877eb3ac3328b0072d9781d468ae4463f96500197b3",
     "rtl\\car_button.v": "4c75333e42fc3920a111c6c3c2d3664836d194dee4a281994247bb2e71a06218",
-    "rtl\\car_command_tx.v": "ac41227735dc0aa1cb8a24f77974af607612ee6596c8696fc3b4460957ebc979",
-    "rtl\\car_control.v": "23ec1208919aba4c093a9fdad3d69b85e459ed352b69098fd4730b558089b42d",
-    "rtl\\car_decision.v": "a66b8ccb36d93dcdce9f42ad17dee90207193aca95b678d1538a1f43b1c9bd7e",
+    "rtl\\car_command_tx.v": "50cd429a43f4a5269d37f101da1841c5f96b3f6dadce6ece196cf3d1e67ec7d1",
+    "rtl\\car_control.v": "205120928d21860f49d9cd1f454d02c63a6c543e032c357cef7944e44c34afa0",
+    "rtl\\car_decision.v": "1990635a4edaa6bf0ff9cd2296999e39a75394f312f03edf1ea2e685e3afd42a",
     "rtl\\car_result_cdc.v": "d717f98285a0752020214df68d382d91f935a85a2a086086a62112376079cc49",
     "rtl\\car_telemetry_rx.v": "c4b71cdf168b25871517a6e99bbb92b6e35b12beb03d16fd6f7e5233cd497645",
     "rtl\\car_uart_rx.v": "0cff8d35f16d96771d5d83d3d6d4787797f6d59028bac3cdc923447336b43e29",
-    "rtl\\car_uart_tx.v": "2fb885f1d826a0db4acc36bf595efd8b864962605b584d45a896051a49ac06bd"
+    "rtl\\car_uart_tx.v": "2fb885f1d826a0db4acc36bf595efd8b864962605b584d45a896051a49ac06bd",
+    "stm32\\WHEELTEC_C50X_FPGA_PD89\\BALANCE\\balance_task.c": "90380cb4adaf933778029e4ab5a51a50ae6c30eccb44f0eda7fb39c13908fe32",
+    "stm32\\WHEELTEC_C50X_FPGA_PD89\\BALANCE\\can_callback.c": "8b8bad8c1312a778bbed0990e5ce96d92474f4ca32fddeb8bab424a789db50c1",
+    "stm32\\WHEELTEC_C50X_FPGA_PD89\\BALANCE\\control.c": "b2078d867d3506d7cf207e3cd680168d114f307dc6b93614558d530b18a3497e",
+    "stm32\\WHEELTEC_C50X_FPGA_PD89\\BALANCE\\data_task.c": "894167a4bf02292c283c0c599017c0c51ff069c428abb810dcd7ab6003fa8cd0",
+    "stm32\\WHEELTEC_C50X_FPGA_PD89\\BALANCE\\filter.c": "158f5c9e13595c267d755d7c94be1d39694002b4f6b615a756fa88c02a47a4dc",
+    "stm32\\WHEELTEC_C50X_FPGA_PD89\\BALANCE\\fpga_turn.c": "59758f39d5d8fc5a30571da6b811fb84cf2f138c0a3777cb5ba3987c107d9ca5",
+    "stm32\\WHEELTEC_C50X_FPGA_PD89\\BALANCE\\fpga_turn_feedback.c": "9a2fcc4cadf02faaccf2a3a297c0ff6a66abca4c8003ea0d53c4686127a3fa88",
+    "stm32\\WHEELTEC_C50X_FPGA_PD89\\BALANCE\\imu_task.c": "9a8689ee2161009d94d39a6f44397683aebb4252f2ddfb33fa84d0a5dadd6aa9",
+    "stm32\\WHEELTEC_C50X_FPGA_PD89\\BALANCE\\led_task.c": "b1a486d5ba2674a18263a5427dd2908e19c0baa82e7d1557de019f5d5f3cab80",
+    "stm32\\WHEELTEC_C50X_FPGA_PD89\\BALANCE\\ps2_task.c": "b31e96e86979a252dfd641443decc21b89a378aa5dc6f1e65ae560465847c3ed",
+    "stm32\\WHEELTEC_C50X_FPGA_PD89\\BALANCE\\robot_select_init.c": "54f739ad5500c6b2bc90d9188fe0e886a1182d6e91a292b455462d7408a69cbb",
+    "stm32\\WHEELTEC_C50X_FPGA_PD89\\BALANCE\\show_task.c": "f346244583146931b3503600d1bed3eef4f6e95fce85191904d7f787f434ce16",
+    "stm32\\WHEELTEC_C50X_FPGA_PD89\\BALANCE\\timx_callback.c": "f7a932b03d560d78d21d3ac23912e73939ccc55f55a667e2c2b385c82bba76bf",
+    "stm32\\WHEELTEC_C50X_FPGA_PD89\\BALANCE\\uartx_callback.c": "69f8985ba1e01fe76c621e633fda5c12cdc9a5259855a01c6d0cfea3914f98cd",
+    "stm32\\WHEELTEC_C50X_FPGA_PD89\\BALANCE\\Inc\\balance_task.h": "2a27969a6b9054465efa49061d6265d111d228663a505a1b3f2bb0b43d92a0f4",
+    "stm32\\WHEELTEC_C50X_FPGA_PD89\\BALANCE\\Inc\\can_callback.h": "5f2031a2bf6d3768b4bf5945f5d803abefc956450ea9544b6dd70289b1383920",
+    "stm32\\WHEELTEC_C50X_FPGA_PD89\\BALANCE\\Inc\\control.h": "9be26958b98d9d2bae88d06049c20a376d23fb35cb0e315c8b62e397810a02a9",
+    "stm32\\WHEELTEC_C50X_FPGA_PD89\\BALANCE\\Inc\\data_task.h": "327ccb64c716ceef5feebf2dd8026b002d73e420a29107793aebb46fd1292030",
+    "stm32\\WHEELTEC_C50X_FPGA_PD89\\BALANCE\\Inc\\filter.h": "ed16e998c7cd49f3b72a112427e562b2d6fc926917d470284633a7f06341acb1",
+    "stm32\\WHEELTEC_C50X_FPGA_PD89\\BALANCE\\Inc\\fpga_turn.h": "7e85342dacbc36b88f875a77b8f0d37ff4050a3fb2d5fbac7abe5d91a7ffb36c",
+    "stm32\\WHEELTEC_C50X_FPGA_PD89\\BALANCE\\Inc\\fpga_turn_feedback.h": "1c8d3e9d2097abfb6532f7d07d93e70ba04d6cfa4443cad297b907575ae2e0d7",
+    "stm32\\WHEELTEC_C50X_FPGA_PD89\\BALANCE\\Inc\\imu_task.h": "85551457d0684707267a9dad1e63bd1ae81fe5e1f7c86e3ded9c7a58f2cd2b05",
+    "stm32\\WHEELTEC_C50X_FPGA_PD89\\BALANCE\\Inc\\led_task.h": "3369944cba086f26586629fccd5b24e6209c561a41c9f67aa427e8d9e7596405",
+    "stm32\\WHEELTEC_C50X_FPGA_PD89\\BALANCE\\Inc\\ps2_task.h": "ab0aa75f092a8066448f1193f97c9a5ef55f817862e78a1f384bfa2d47dfd22f",
+    "stm32\\WHEELTEC_C50X_FPGA_PD89\\BALANCE\\Inc\\robot_select_init.h": "77df61d727a300fc27a2fff82c0853a7716e93dc38030769288604aa94ef0928",
+    "stm32\\WHEELTEC_C50X_FPGA_PD89\\BALANCE\\Inc\\show_task.h": "89b461263b7e4e5eca6c93ca7cd9f3abde9a283900d2153482bd0ce419750df8",
+    "stm32\\WHEELTEC_C50X_FPGA_PD89\\BALANCE\\Inc\\timx_callback.h": "76e15926392d8fe1976f1bfa9a84c30f8b2fb241a730d8dce0968f4a3d10ecf6",
+    "stm32\\WHEELTEC_C50X_FPGA_PD89\\BALANCE\\Inc\\uartx_callback.h": "5a673716dc07ab94156beabef4de4f51bd0153175fa1bac90ab701fd258cb25e"
+  },
+  "stm32_hex": {
+    "path": "stm32\\WHEELTEC_C50X_FPGA_PD89\\OBJ\\cli_4WD\\4WD_Car_FPGA_PD89.hex",
+    "bytes": 204254,
+    "sha256": "27C94C3B4E7EBEF7FFA1F8C1B2E48CF1A726CF64AACD2727D42B2571FF4DCEA1",
+    "flash_start": "0x08000000",
+    "target": "4WD_Car",
+    "hardware_tested": false
+  },
+  "turn_control": {
+    "request_mode": 16,
+    "target_cdeg": 9000,
+    "max_rate_mrad_s": 700,
+    "forward_mm_s": 0,
+    "feedback": "checked calibrated physical IMU gyro Z integrated at 100 Hz",
+    "angle_tolerance_cdeg": 150,
+    "settle_ms": 200,
+    "stm32_timeout_ms": 7000,
+    "stm32_keepalive_ms": 300,
+    "fpga_timeout_ms": 8000,
+    "matching_ack_and_heartbeat_ms": 500,
+    "completion": "matching ACCEPTED/RUNNING then matching DONE, never fixed-duration",
+    "trigger": "three stabilized recognition events; no junction-distance detection",
+    "wheel_encoder_PI_preserved": true,
+    "mandatory_paired_firmware": true
+  },
+  "compressed_bit": {
+    "path": "fpga\\traffic_sign_td\\td_project\\bitstream\\traffic_sign_td_lr_tracking_lock_compress.bit",
+    "bytes": 1470193,
+    "sha256": "405E5DAD4D3BEFB1F3379035BB411AF890F20CFA73C218075D03A30975286664",
+    "same_design": true
   }
 }
