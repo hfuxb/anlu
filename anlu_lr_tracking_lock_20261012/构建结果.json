@@ -1,25 +1,25 @@
 {
-  "generated_utc": "2026-10-13T09:38:46.785620+00:00",
+  "generated_utc": "2026-10-13T12:50:00.324483+00:00",
   "project": "HX1P35A six image modes, AE/AWB, recognized center coordinates, one-second latency OSD and STM32 relative-angle turning",
   "bit": "fpga\\traffic_sign_td\\td_project\\bitstream\\traffic_sign_td_lr_tracking_lock.bit",
   "bytes": 1789539,
-  "sha256": "D0C3046D0E1C41A366C14FE50447AAD1613A53C70278ED4B1F303C3EAD487F79",
+  "sha256": "BDD78B454C8B5F99CD3681E5299E7EA87F279B96732160542E91E415CF4C7E34",
   "final_routed_timing_ns": {
-    "SWNS": 0.205,
+    "SWNS": 0.121,
     "STNS": 0.0,
     "HWNS": 0.02,
     "HTNS": 0.0
   },
   "resources": {
     "slice": {
-      "used": 17081,
+      "used": 18747,
       "available": 21216,
-      "percent": 80.51
+      "percent": 88.36
     },
     "eram": {
-      "used": 68,
+      "used": 70,
       "available": 108,
-      "percent": 62.96
+      "percent": 64.81
     },
     "dsp": {
       "used": 38,
@@ -28,6 +28,12 @@
     }
   },
   "tests": {
+    "independent Gamma and bounded causal luma sharpening": "reports\\tb_enhance.log",
+    "automatic environment selection and complete-frame hysteresis": "reports\\tb_environment.log",
+    "complete720p 1800-sample environment statistics and frame path": "reports\\tb_environment_full720.log",
+    "KEY3 force-normal button debounce": "reports\\tb_override.log",
+    "reference L/R synthetic fog automatic routing and fresh recognition": "reports\\tb_auto_recognition.log",
+    "PATH N/D AUTO/LOCK exact HDMI glyphs (4 full720 frames)": "reports\\tb_path_hdmi.log",
     "SIG-only detector and mode-exit result CDC": "sim\\lr_turn\\work_sig_only\\run.log",
     "Sobel erosion opening and DDR packing": "reports\\tb_morphology_opening_720p.log",
     "four-mode full720 stream alignment": "reports\\tb_image_process_stream_96_full_720p.log",
@@ -58,11 +64,14 @@
   },
   "physical_camera_verified": false,
   "changed_in_this_build": [
-    "recognized_L_R_coordinate_label",
-    "one_second_latency_display_hold"
+    "automatic_normal_dehaze_recognition",
+    "key3_force_normal",
+    "gamma_085_display",
+    "bounded_causal_luma_sharpen",
+    "complete_AL_source_list"
   ],
-  "automatic_dehaze_recognition_implemented": false,
-  "key3_recognition_mode_lock_implemented": false,
+  "automatic_dehaze_recognition_implemented": true,
+  "key3_recognition_mode_lock_implemented": true,
   "reference_scene_results": {
     "left120": {
       "expected": "L",
@@ -277,7 +286,7 @@
     "existing_osd_avoided": true,
     "held_target_uses_retained_box": true
   },
-  "extra_stream_delay_clocks": 13,
+  "extra_stream_delay_clocks": 20,
   "morphology": {
     "erosion": "erosion(Sobel)",
     "dilation": "dilation(erosion(Sobel))",
@@ -290,9 +299,9 @@
     "fpga\\traffic_sign_td\\user_source\\lab_ex_2026_nosoft\\hdl_source\\auto_white_balance.v": "248b841fdc7640d07768b0e6e086704a862da24047de40c80beb8cc201180e0f",
     "fpga\\traffic_sign_td\\user_source\\lab_ex_2026_nosoft\\hdl_source\\csi_unpacket.v": "cc66fec1ee55fff7e8a31964e6c27670006caf294d153fea8823c83fa9890233",
     "fpga\\traffic_sign_td\\user_source\\lab_ex_2026_nosoft\\hdl_source\\data_96bit_to_128bit.v": "6861038b75f2f7010bff99742e4db9470643716c7e6b9b615a27da60d4542924",
-    "fpga\\traffic_sign_td\\user_source\\lab_ex_2026_nosoft\\hdl_source\\design_top_wrapper.v": "b061ad54c3b2b8cfa62b6ecd6950933b5235dd3d979efab5fdab059ebd5ad60d",
+    "fpga\\traffic_sign_td\\user_source\\lab_ex_2026_nosoft\\hdl_source\\design_top_wrapper.v": "835b9e7f1b7b92ab8b7ec3e6b8ef0dfa4290d59ba03604a3ba3b4f0433e51fed",
     "fpga\\traffic_sign_td\\user_source\\lab_ex_2026_nosoft\\hdl_source\\hdmi_1_4b_transmitter_core_wrapper.enc.v": "867e0b0bdd874bc383d00918c9e1be3fe01edf41f343b6a0d73e262776596a63",
-    "fpga\\traffic_sign_td\\user_source\\lab_ex_2026_nosoft\\hdl_source\\hdmi_mixer.v": "ed1254e70d58e22f61499525797d051eff16e598ae19ef1c4a052cf96f8c91b7",
+    "fpga\\traffic_sign_td\\user_source\\lab_ex_2026_nosoft\\hdl_source\\hdmi_mixer.v": "2b0a34e37ac9bada23902dc13864e46f8b1a891fc1c4e86082f8dafbb5ffbb31",
     "fpga\\traffic_sign_td\\user_source\\lab_ex_2026_nosoft\\hdl_source\\hdmi_phy_warpper.v": "416b082b0987001bdbc0a7e20a557cb8fb1dca34e25dc881e6d28a8cb3cf4300",
     "fpga\\traffic_sign_td\\user_source\\lab_ex_2026_nosoft\\hdl_source\\hdmi_tx.v": "c38dd1be1d14663b8e0c0b87c5b974cb3879b424d131e6282709abf4aabdd543",
     "fpga\\traffic_sign_td\\user_source\\lab_ex_2026_nosoft\\hdl_source\\I2S_receiver.v": "08904598b42c2e1a4836cd9fb3293bc6c791ea2f79e35c7663a33127dc97f47b",
@@ -306,6 +315,7 @@
     "fpga\\traffic_sign_td\\user_source\\lab_ex_2026_nosoft\\hdl_source\\ps_wrapper.v": "46d6f2c8e42724e28ffcd8516bc4f2a2d12e36f920e1f20cd42fe722be461afe",
     "fpga\\traffic_sign_td\\user_source\\lab_ex_2026_nosoft\\hdl_source\\raw10_unpacket.v": "840c54c3ea5c025bea90a751656db98079e773ff7535b27f4ac11e8837d46798",
     "fpga\\traffic_sign_td\\user_source\\lab_ex_2026_nosoft\\hdl_source\\raw8_to_rgb888.v": "fcc29ddd6942015d5e5fd43d148a9487cf3689c7c70c896a654a4e934fcade2c",
+    "fpga\\traffic_sign_td\\user_source\\lab_ex_2026_nosoft\\hdl_source\\recognition_override_button.v": "b5108450f736fb3a65d054ef6474f52fc85aec4e6857943cb8b60e702f8b8df0",
     "fpga\\traffic_sign_td\\user_source\\lab_ex_2026_nosoft\\hdl_source\\video_cuttting.v": "c1131787da9c80029759ee2821c9c042a850cb459b812676d1cc6a144ff14480",
     "fpga\\traffic_sign_td\\user_source\\lab_ex_2026_nosoft\\hdl_source\\video_in.v": "6c36fca086fec6cea1a27b7afb0219e71a4bc7021f1a79f287d6b5e1cc0e8534",
     "fpga\\traffic_sign_td\\user_source\\lab_ex_2026_nosoft\\hdl_source\\video_latency.v": "ab43fbcc27c234383691a2ff22ce05a2f88e8543f8ee683f14cfd8deffcdf1c4",
@@ -388,12 +398,14 @@
     "fpga\\traffic_sign_td\\user_source\\ip_source\\demosaic\\blk_mem_gen_zhenghe\\RTL\\include\\define.v": "104eb8d9b626b944b1e2d3b8070f51c636af132bc00b32ebed0236bbb2c144c0",
     "fpga\\traffic_sign_td\\user_source\\ip_source\\demosaic\\blk_mem_gen_demosaic\\RTL\\ram_c36c2ca3b3a7.v": "4c007b82769a2af9474683ec27711133c735ac776fd1f3d037d4eb00cc20a832",
     "fpga\\traffic_sign_td\\user_source\\ip_source\\demosaic\\blk_mem_gen_demosaic\\RTL\\include\\define.v": "ce22c429acd5d725b986015db98a3a86609204620dc1ba9158123f1e335b6ac5",
-    "fpga\\traffic_sign_td\\user_source\\image\\integration\\isp_top.v": "651d8933ed4a7164ca840328c4cc32125f6c62a0e9ef09fa7f987aef45a90b12",
+    "fpga\\traffic_sign_td\\user_source\\image\\integration\\isp_top.v": "cee2f289480ea2171ba9a827f10a4878b89bd5455ab6d78d83f00bc9ac5acb5a",
+    "fpga\\traffic_sign_td\\user_source\\image\\stream\\dehaze_enhance_96.v": "44dccd3bcc27bbd1ad631f654f3e6e065725bde7c800f1c965938e0b84cd74d5",
     "fpga\\traffic_sign_td\\user_source\\image\\stream\\dehaze_stream_96.v": "eb872efd8634c9ac70951ce4bb8139fa6ba659795519464e87048af4d4773de5",
     "fpga\\traffic_sign_td\\user_source\\image\\stream\\image_correction.v": "50a808f962581428691c0f39cc55422a0b8866526f03601ab6c5ec4fc139af7e",
-    "fpga\\traffic_sign_td\\user_source\\image\\stream\\image_extra_modes_96.v": "afce1d6666d74704bae990d6328548e2ea562cb270917d0230d9ad34dca9d6bd",
+    "fpga\\traffic_sign_td\\user_source\\image\\stream\\image_extra_modes_96.v": "ac057ee53c46779a17c8db25e290cec6b78ccfb667811e44b38b7709d8f94764",
     "fpga\\traffic_sign_td\\user_source\\image\\stream\\image_process_stream_96.v": "2c7d1d0941309b94bd355a8fd81d27a566d65c811f5da630bbfc3a76a180b783",
     "fpga\\traffic_sign_td\\user_source\\image\\stream\\motion_stream_96.v": "a5b8c510d0c157c50cb1b3b6a54989300f82f7891059b10d5bca299f3d0dbf3c",
+    "fpga\\traffic_sign_td\\user_source\\image\\stream\\recognition_environment_96.v": "fa2975ed937f2202ff0ba6159a1a9d28264775b28ba3405889a649a6909fc710",
     "fpga\\traffic_sign_td\\user_source\\image\\traffic_sign\\traffic_sign_detector_96.v": "5016438c4c73914468d9aba42614c77e28526cad2fb603c01850527336e4080b",
     "fpga\\traffic_sign_td\\user_source\\image\\traffic_sign\\traffic_sign_result_cdc.v": "793f9b72a1aa82e5db611abf6c2ddc618c210017940724fd51b9262489951e69",
     "fpga\\traffic_sign_td\\user_source\\image\\stream\\blc\\BLC.v": "011d09b3e1de47b9e444945c257426836f4947e8dd9b3cd2e9c1539b44129221",
@@ -439,6 +451,54 @@
     "stm32\\WHEELTEC_C50X_FPGA_PD89\\BALANCE\\Inc\\timx_callback.h": "76e15926392d8fe1976f1bfa9a84c30f8b2fb241a730d8dce0968f4a3d10ecf6",
     "stm32\\WHEELTEC_C50X_FPGA_PD89\\BALANCE\\Inc\\uartx_callback.h": "5a673716dc07ab94156beabef4de4f51bd0153175fa1bac90ab701fd258cb25e"
   },
+  "automatic_recognition": {
+    "statistics_source": "AWB, before dehaze",
+    "sample_points_per_720p_frame": 1800,
+    "histogram_bins": 16,
+    "trim_each_tail": "1/32",
+    "enter_max_bin_span": 5,
+    "enter_min_mean_dark": 48,
+    "enter_max_mean_chroma_range": 40,
+    "enter_ms": 500,
+    "enter_min_frames": 8,
+    "exit_min_bin_span": 8,
+    "exit_min_mean_chroma_range": 56,
+    "exit_max_mean_dark": 32,
+    "exit_ms": 1000,
+    "exit_min_frames": 16,
+    "minimum_hold_ms": 2000,
+    "CSI_clock_hz": 60000000,
+    "frame_latched": true,
+    "partial_frame_reject": true,
+    "long_SOF_gap_reset_ms": 250,
+    "heuristic_not_physical_fog_measurement": true,
+    "detector_shared": true,
+    "held_match_used_for_switching": false
+  },
+  "display_enhancement": {
+    "enabled": [
+      "DEH",
+      "SIG automatic dehaze"
+    ],
+    "gamma": 0.85,
+    "luma": "(R+2G+B)/4",
+    "gamma_apply": "same delta to RGB, saturate",
+    "sharpen": "causal 2x2 luma unsharp mask",
+    "deadband": 4,
+    "strength": "1/4 above deadband",
+    "max_correction": 4,
+    "latency_stages": 7,
+    "recognition_uses_enhanced_pixels": false,
+    "additional_DSP_required": false
+  },
+  "KEY3": {
+    "pin": "B9",
+    "action": "toggle AUTO/force normal",
+    "debounce_ms": 20,
+    "commit": "next valid SOF",
+    "reset_default": "AUTO",
+    "legacy_obstacle_simulation_removed": true
+  },
   "stm32_hex": {
     "path": "stm32\\WHEELTEC_C50X_FPGA_PD89\\OBJ\\cli_4WD\\4WD_Car_FPGA_PD89.hex",
     "bytes": 204254,
@@ -466,8 +526,8 @@
   },
   "compressed_bit": {
     "path": "fpga\\traffic_sign_td\\td_project\\bitstream\\traffic_sign_td_lr_tracking_lock_compress.bit",
-    "bytes": 1470193,
-    "sha256": "405E5DAD4D3BEFB1F3379035BB411AF890F20CFA73C218075D03A30975286664",
+    "bytes": 1478385,
+    "sha256": "1911CA7A51B0CCAD22FB3C95E30569578D75C55C97AFB67C1FB802642618AEA2",
     "same_design": true
   }
 }

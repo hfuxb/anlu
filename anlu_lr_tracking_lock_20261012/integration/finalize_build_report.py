@@ -15,6 +15,12 @@ assert 'Confidence          : Routed' in timing
 assert bit.is_file() and bit.stat().st_size>0
 assert bit.stat().st_mtime>=(out/'traffic_sign_td_pr.timing').stat().st_mtime
 tests={
+ 'independent Gamma and bounded causal luma sharpening':root/'reports/tb_enhance.log',
+ 'automatic environment selection and complete-frame hysteresis':root/'reports/tb_environment.log',
+ 'complete720p 1800-sample environment statistics and frame path':root/'reports/tb_environment_full720.log',
+ 'KEY3 force-normal button debounce':root/'reports/tb_override.log',
+ 'reference L/R synthetic fog automatic routing and fresh recognition':root/'reports/tb_auto_recognition.log',
+ 'PATH N/D AUTO/LOCK exact HDMI glyphs (4 full720 frames)':root/'reports/tb_path_hdmi.log',
  'SIG-only detector and mode-exit result CDC':root/'sim/lr_turn/work_sig_only/run.log',
  'Sobel erosion opening and DDR packing':root/'reports/tb_morphology_opening_720p.log',
  'four-mode full720 stream alignment':root/'reports/tb_image_process_stream_96_full_720p.log',
@@ -74,9 +80,9 @@ report={
  'final_routed_timing_ns':status,'resources':resources,
  'tests':{k:str(v.relative_to(root)) for k,v in tests.items()},
  'physical_camera_verified':False,
- 'changed_in_this_build':['recognized_L_R_coordinate_label','one_second_latency_display_hold'],
- 'automatic_dehaze_recognition_implemented':False,
- 'key3_recognition_mode_lock_implemented':False,
+ 'changed_in_this_build':['automatic_normal_dehaze_recognition','key3_force_normal','gamma_085_display','bounded_causal_luma_sharpen','complete_AL_source_list'],
+ 'automatic_dehaze_recognition_implemented':True,
+ 'key3_recognition_mode_lock_implemented':True,
  'reference_scene_results':sample_results,
  'base_version_preserved':True,
  'reference_templates':json.loads((root/'sim/lr_turn/reference_20261012/template_evidence.json').read_text(encoding='utf-8')),
@@ -87,9 +93,12 @@ report={
  'dehaze':{'algorithm':'causal 3x3 group dark channel with fixed airlight and segmented reciprocal','airlight':240,'omega_q8':218,'minimum_transmission':64,'maximum_gain':2,'adaptive_airlight':False},
  'video_latency':{'start':'MIPI/CSI frame start','end':'same DDR frame first HDMI active pixel','resolution_ms':0.1,'position':'top right','invalid':'----.-','overflow_ms':9999.9,'camera_exposure_and_screen_internal_latency_included':False,'full_frame_tag_required':True,'measurement_every_frame':True,'display_refresh_ms':1000,'display_value':'latest complete measurement, held between updates; not averaged','first_fault_and_recovery_immediate':True,'no_measurement_timeout_ms':1500},
  'coordinate_label':{'enabled':'SIG, valid box, accepted L or R','point':'floor((xmin+xmax)/2), floor((ymin+ymax)/2)','units':'1280x720 image pixels, origin top left','format':'L (0640,0360)','font_cell':[16,16],'label_size':[208,20],'frame_latched':True,'unrecognized_hidden':True,'screen_edge_clamped':True,'existing_osd_avoided':True,'held_target_uses_retained_box':True},
- 'extra_stream_delay_clocks':13,
+ 'extra_stream_delay_clocks':20,
  'morphology':{'erosion':'erosion(Sobel)','dilation':'dilation(erosion(Sobel))','stream_latency_clocks':4,'standard_sobel_gx_fixed':True},
  'source_sha256':{},
+ 'automatic_recognition':{'statistics_source':'AWB, before dehaze','sample_points_per_720p_frame':1800,'histogram_bins':16,'trim_each_tail':'1/32','enter_max_bin_span':5,'enter_min_mean_dark':48,'enter_max_mean_chroma_range':40,'enter_ms':500,'enter_min_frames':8,'exit_min_bin_span':8,'exit_min_mean_chroma_range':56,'exit_max_mean_dark':32,'exit_ms':1000,'exit_min_frames':16,'minimum_hold_ms':2000,'CSI_clock_hz':60000000,'frame_latched':True,'partial_frame_reject':True,'long_SOF_gap_reset_ms':250,'heuristic_not_physical_fog_measurement':True,'detector_shared':True,'held_match_used_for_switching':False},
+ 'display_enhancement':{'enabled':['DEH','SIG automatic dehaze'],'gamma':0.85,'luma':'(R+2G+B)/4','gamma_apply':'same delta to RGB, saturate','sharpen':'causal 2x2 luma unsharp mask','deadband':4,'strength':'1/4 above deadband','max_correction':4,'latency_stages':7,'recognition_uses_enhanced_pixels':False,'additional_DSP_required':False},
+ 'KEY3':{'pin':'B9','action':'toggle AUTO/force normal','debounce_ms':20,'commit':'next valid SOF','reset_default':'AUTO','legacy_obstacle_simulation_removed':True},
 }
 verification=json.loads((root/'stm32/verification.json').read_text(encoding='utf-8'))
 assert verification['status'].startswith('PASS')
@@ -127,13 +136,13 @@ lines+=['',f'- 配套 STM32 HEX：`{report["stm32_hex"]["path"]}`（4WD_Car / 0x
  '控制器仿真不等于实车角度验证；上电需静止约13秒完成原启动等待及陀螺仪校准，实车先验证陀螺仪左右符号和最终角度。转向触发仍为稳定识别三次，未新增路口距离判定。详细协议与操作见 `stm32/闭环转向说明.md`。']
 lines+=['','KEY4：RAW → ERO → DIL → MOT → DEH → SIG → RAW，识别放在最后。MOT 标红相邻帧变化区域，进入后的第一帧建立参考；DEH 为固定大气光的轻量暗通道去雾。只有 SIG 识别并允许视觉小车控制，其余模式退出锁定、停车并撤销 ARM。',
  '所有画面右上角LAT每帧测量MIPI/CSI帧首到同DDR帧首个HDMI有效像素的延迟，分辨率0.1ms；健康数字约每1秒在帧首发布最近完整值，期间保持，不平均。首次有效/invalid/OVFL/恢复即时发布，1.5秒无测量更新失效。不包含曝光和屏幕内部延迟；无有效标签显示----.-，超出9999.9ms显示OVFL。',
- 'SIG内只有确认L/R且框有效才在框上方显示中心像素坐标（如L (0640,0360)）；候选?、WAIT、无框和非SIG均隐藏。坐标与框/方向按同帧锁存，统一16×16字体，横向裁切及Logo/状态/LAT避让，靠顶部放框内；低分保持时使用保留框位置。自动正常/去雾识别和KEY3锁定尚未实施。',
- '', '新增模块在所有模式增加相同的13拍视频流延迟，不改变像素顺序、DDR布局和HDMI读取时序。运动检测不是障碍距离测量，固定摄像头并等待曝光稳定后演示。去雾使用固定参数，无雾场景也可能变暗或饱和。',
+ 'SIG内只有确认L/R且框有效才在框上方显示中心像素坐标（如L (0640,0360)）；候选?、WAIT、无框和非SIG均隐藏。坐标与框/方向按同帧锁存，统一16×16字体，横向裁切及Logo/状态/LAT避让，靠顶部放框内；低分保持时使用保留框位置。SIG新增自动正常/去雾识别和KEY3强制正常；PATH显示N/D与AUTO/LOCK。见docs/自动去雾识别与增强.md。',
+ '', '新增模块在所有模式增加相同的20拍额外视频流延迟（比此前多7拍），不改变像素顺序、DDR布局和HDMI读取时序。运动检测不是障碍距离测量，固定摄像头并等待曝光稳定后演示。去雾使用固定参数，无雾场景也可能变暗或饱和。',
  '','正式标识构造场景（RTL 仿真，非实物准确率）：','', '| 场景 | 期望/输出 | MATCH |','|---|---|---|']
 for name,result in sample_results.items(): lines.append(f'| {name} | {result["expected"]}/{result["direction"]} | {result["match"]} |')
 lines+=['','已通过的测试：']+[f'- {k}（日志：`{v.relative_to(root)}`）' for k,v in tests.items()]
 lines+=['','参考图合成场景不是实物准确率测试；摄像头、纸质牌和不同照明的效果待上板验证。',
- '', '只有 SIG 识别并显示框、DIR、MATCH；其他模式关闭检测并清除旧结果。重新进入从新完整帧确认；退出 SIG 小车停车并撤销 armed，重入需要手动 ARM。初次三帧确认方向；低分保持；反向六帧连续 MATCH≥65、差值≥20 后同步改向；前十三帧丢失保留，连续丢失第十四帧清除（当前相机配置约0.235秒）。DIL 改为 Sobel→腐蚀→膨胀，RGB/灰度/标记统一四拍延迟；标准 Sobel 水平梯度误用的中间像素已纠正。原版本源文件和 bit 的 SHA-256 均已核对保持一致。\n\n自动曝光、白平衡与像素处理沿用原版；SIG 使能同步到小车系统域并接入现有 STOP 条件，左右箭头模板已按两张正式标识分别提取；状态字母和数字已统一字号；Logo 地址预计算避免乘法与 ROM 查表落在同一显示时钟周期。','']
+ '', '只有 SIG 识别并显示框、DIR、MATCH；其他模式关闭检测并清除旧结果。重新进入从新完整帧确认；退出 SIG 小车停车并撤销 armed，重入需要手动 ARM。初次三帧确认方向；低分保持；反向六帧连续 MATCH≥65、差值≥20 后同步改向；前十三帧丢失保留，连续丢失第十四帧清除（当前相机配置约0.235秒）。DIL 改为 Sobel→腐蚀→膨胀，RGB/灰度/标记统一四拍延迟；标准 Sobel 水平梯度误用的中间像素已纠正。原版本源文件和 bit 的 SHA-256 均已核对保持一致。\n\n自动曝光、白平衡沿用原版；新增正常/去雾识别自动选择及显示专用Gamma/限幅锐化；SIG 使能同步到小车系统域并接入现有 STOP 条件，左右箭头模板已按两张正式标识分别提取；状态字母和数字已统一字号；Logo 地址预计算避免乘法与 ROM 查表落在同一显示时钟周期。','']
 (root/'构建结果.md').write_text('\n'.join(lines),encoding='utf-8')
 # Replace inherited template reports at compatibility paths with CURRENT data.
 shutil.copy2(out/'traffic_sign_td_pr.timing',root/'integration/traffic_sign_td_pr.timing')

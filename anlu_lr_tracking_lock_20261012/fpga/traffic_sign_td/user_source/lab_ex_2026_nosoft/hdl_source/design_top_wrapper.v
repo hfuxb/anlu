@@ -102,6 +102,16 @@ module design_top_wrapper (
     reg S_sig_requested_24m;
     (* ASYNC_REG = "TRUE" *) reg S_sig_request_sync_1,S_sig_request_sync_2;
     wire S_traffic_sign_enabled;
+    wire S_force_normal_24m;
+    (* ASYNC_REG="TRUE" *) reg S_force_normal_sync1,S_force_normal_sync2;
+    wire [1:0] S_recognition_path;
+    recognition_override_button u_recognition_override(
+        .I_clk(S_24m_clk),.I_rst_n(S_rst_n),.I_button_n(I_car_obstacle_n),
+        .O_force_normal(S_force_normal_24m));
+    always @(posedge S_csi_rx_clk or negedge S_rst_n)begin
+        if(!S_rst_n)begin S_force_normal_sync1<=0;S_force_normal_sync2<=0;end
+        else begin S_force_normal_sync1<=S_force_normal_24m;S_force_normal_sync2<=S_force_normal_sync1;end
+    end
     (* ASYNC_REG = "TRUE" *) reg [1:0] S_car_sig_enabled_sync;
 	wire [50:0] S_traffic_sign_metadata, S_traffic_sign_hdmi_metadata;
 	wire        S_traffic_sign_busy;
@@ -285,7 +295,7 @@ module design_top_wrapper (
         .src_result_toggle(S_traffic_sign_result_toggle),
         .arm_n(I_car_arm_n),
         .stop_n(I_car_stop_n && S_car_sig_enabled_sync[1]),
-        .obstacle_n(I_car_obstacle_n),
+        .obstacle_n(1'b1), // KEY3 now selects recognition override; KEY2 remains STOP
         .slow_n(I_car_slow_n),
         .rx(I_car_rx),
         .tx(O_car_tx)
@@ -817,6 +827,8 @@ isp_top #(
 .I_tready        (S_ISP_I_tready),
 .I_algo_mode     (S_algo_mode_sync_2),
 .I_recognition_request(S_sig_request_sync_2),
+.I_force_normal(S_force_normal_sync2),
+.O_recognition_path(S_recognition_path),
 .O_tready        (S_ISP_O_tready),
 .O_tdata         (S_ISP_O_tdata ),
 .O_tlast         (S_ISP_O_tlast ),
@@ -1004,7 +1016,8 @@ isp_top #(
         .ENABLE_LATENCY ( 1 ),
         .HDMI_CLK_HZ ( 75000000 ),
         .LATENCY_REFRESH_MS ( 1000 ),
-        .LATENCY_STALE_MS ( 1500 )
+        .LATENCY_STALE_MS ( 1500 ),
+        .ENABLE_PATH ( 1 )
     )u_hdmi_mixer(
         .I_clk           ( S_hdmi_pixel_clk   ),
         .I_rst_n         ( S_hdmi_rst_n       ),
@@ -1015,6 +1028,7 @@ isp_top #(
         .I_video_last    ( S_hdmi_last        ),
         .I_debug_status  ( S_hdmi_debug_status),
         .I_image_mode    ( S_algo_mode_sync_2 ),
+        .I_recognition_path(S_recognition_path),
         .I_traffic_sign_mode      ( S_traffic_sign_enabled ),
         .I_traffic_sign_busy      ( S_traffic_sign_busy        ),
         .I_traffic_sign_result_toggle( S_traffic_sign_hdmi_toggle ),

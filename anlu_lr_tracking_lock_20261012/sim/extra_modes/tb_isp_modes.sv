@@ -6,7 +6,7 @@ reg clk=0,rst=0,v=0,u=0,l=0;always #5 clk=~clk;
 reg [2:0] mode=3;reg [39:0] din=0;wire [127:0] data;wire packed_valid,packed_last,packed_user;
 isp_top #(.IMG_WIDTH(64),.IMG_HEIGHT(12)) dut(
  .axi4s_video_aclk(clk),.I_rst_n(rst),.I_tlast(l),.I_tuser(u),.I_tdata(din),
- .I_tvalid(v),.I_tdest(0),.I_algo_mode(mode),.I_recognition_request(mode==0),
+ .I_tvalid(v),.I_tdest(0),.I_algo_mode(mode),.I_recognition_request(mode==0),.I_force_normal(1'b0),
  .O_tready(1),.O_tdata(data),.O_tvalid(packed_valid),.O_tlast(packed_last),.O_tuser(packed_user));
 wire gu,gl,gv;wire [95:0] gd;
 integer frame_mode=3,f,x,y,count=0;reg [2:0] modes[0:5];
@@ -30,9 +30,9 @@ always @(posedge clk)if(rst)begin
   packed_count=packed_count+1;
  end
 end
-image_extra_modes_96 #(.IMG_WIDTH(64),.IMG_HEIGHT(12)) reference(
+image_extra_modes_96 #(.IMG_WIDTH(64),.IMG_HEIGHT(12),.PRE_DEHAZED(1)) reference(
  .I_clk(clk),.I_rst_n(rst),.I_tuser(dut.process_O_tuser),.I_tlast(dut.process_O_tlast),
- .I_tvalid(dut.process_O_tvalid),.I_tdata(dut.process_O_tdata),.I_mode(3'(frame_mode)),
+ .I_tvalid(dut.process_O_tvalid),.I_tdata(dut.process_O_tdata),.I_mode(3'(frame_mode)),.I_enhance(frame_mode==5),
  .O_tuser(gu),.O_tlast(gl),.O_tvalid(gv),.O_tdata(gd));
 always @(negedge clk)if(rst)begin
  if(dut.extra_O_tvalid!==gv || dut.extra_O_tuser!==gu || dut.extra_O_tlast!==gl)
@@ -62,7 +62,7 @@ initial begin
  end
  if(count!=1152)$fatal(1,"ISP count=%0d",count);
  if(packed_count!=864 || bits_available!=0)$fatal(1,"ISP packing count %0d remaining %0d",packed_count,bits_available);
- $display("PASS ISP SIX MODES: true three-bit routing, frame-mode alignment across spatial pipeline, actual DDR packing 864 words/72 rows with no offset and SIG request gate");$finish;
+ $display("PASS ISP UPGRADED SIX MODES: true three-bit routing, frame-mode alignment across spatial pipeline, actual DDR packing 864 words/72 rows with no offset and SIG request gate");$finish;
 end
 endmodule
 module demosaic #(parameter IMG_HEIGHT=720,IMG_WIDTH=1280,data_complete_delay=50,BAYER_MODE="BGGR")(

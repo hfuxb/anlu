@@ -12,7 +12,7 @@ foreach($name in $tests){
  Push-Location -LiteralPath $work
  try{
   $files=@("$src\dehaze_stream_96.v","$src\motion_stream_96.v","$src\image_extra_modes_96.v")
-  if($name -eq 'tb_isp_modes'){$files+=@("$src\image_process_stream_96.v",(Join-Path $project 'fpga\traffic_sign_td\user_source\image\integration\isp_top.v'),(Join-Path $project 'fpga\traffic_sign_td\user_source\lab_ex_2026_nosoft\hdl_source\isp\data96_128\data96_128.v'))}
+  if($name -eq 'tb_isp_modes'){$files+=@("$src\image_process_stream_96.v","$src\dehaze_enhance_96.v","$src\recognition_environment_96.v",(Join-Path $project 'fpga\traffic_sign_td\user_source\image\integration\isp_top.v'),(Join-Path $project 'fpga\traffic_sign_td\user_source\lab_ex_2026_nosoft\hdl_source\isp\data96_128\data96_128.v'))}
   & "$VivadoBin\xvlog.bat" @files (Join-Path $PSScriptRoot ($name+'.sv')) --sv -i $work -log compile.log *> compile_console.log
   if($LASTEXITCODE -ne 0){throw "Compile failed $name"}
   & "$VivadoBin\xelab.bat" $name -s snapshot -log elaborate.log *> elaborate_console.log

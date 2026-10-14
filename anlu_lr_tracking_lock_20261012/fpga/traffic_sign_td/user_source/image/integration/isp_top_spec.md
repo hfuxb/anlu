@@ -4,7 +4,11 @@
 
 模块连接官方 Demosaic、AWB、实时图像算法、传统路牌识别和 96 位转 128 位打包器。
 
-AWB 到 `image_process_stream_96` 和 `traffic_sign_detector_96` 之间有一个共享寄存器级。该级在每个时钟采样 AWB 的数据、有效、帧首、行尾和算法模式。它把 AWB 乘法逻辑与图像算法、路牌识别逻辑分成两个时钟周期。图像算法输出、HDMI 视频输出和路牌识别结果相对 AWB 增加一个时钟周期延迟。
+AWB输出先由`process_stage_*`寄存，再进入共用11级去雾／等延迟直通核心。环境统计取自去雾前AWB，SIG在帧首选择正常／去雾RGB，KEY3可强制正常。该核心输出同时送同一个路牌识别器及空间算法；Gamma／锐化不进入识别器。
+
+显示路径依次经过5级空间算法、7级Gamma／限幅锐化、2级MOT及官方96→128位DDR打包器。RAW／SIG／MOT／DEH走空间算法RGB支路，ERO／DIL保持原Sobel→腐蚀／开运算。增强只在DEH或SIG自动去雾帧启用。共用去雾＋增强＋MOT共20级额外延迟，比旧版增加7拍；各模式延迟相同，不改变像素顺序、DDR布局或HDMI读取。
+
+所有模式／有效／行尾控制随RGB同步延迟。DDR打包器帧首仍遵循官方提前AWB标记协议。内部`O_recognition_path={force_normal,dehaze_SIG}`由顶层同步后在HDMI帧首锁存。详细操作与参数见`docs/自动去雾识别与增强.md`。
 
 ## 复位和时序
 
@@ -26,5 +30,5 @@ AWB 到 `image_process_stream_96` 和 `traffic_sign_detector_96` 之间有一个
 ## 验证
 
 - RTL 综合必须检查 AWB 到图像算法的最差路径已在 `process_stage_*` 寄存器结束。
-- 图像算法小尺寸参考模型和 1024×600 全尺寸吞吐量 testbench 必须通过。
-- 仍需运行 TD 布局、布线和最终时序分析。
+- 小尺寸独立数值参考、完整1280×720统计和吞吐、真实左右模板合成雾识别、实际DDR打包、PATH和坐标字体／RGB回归必须通过。
+- 最终资源及setup／hold由TD布局布线报告确认。

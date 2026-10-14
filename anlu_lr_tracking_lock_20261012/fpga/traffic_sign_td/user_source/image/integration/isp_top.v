@@ -17,6 +17,8 @@ module isp_top #(
     // 图像处理配置和输出握手
     input [2:0]  	I_algo_mode		,
     input           I_recognition_request,
+    input           I_force_normal,
+    output wire [1:0] O_recognition_path,
     input 			O_tready		,
 
     // 输出RGB视频流
@@ -83,25 +85,65 @@ wire         m_aixs_tvalid;  //synthesis keep
   reg          process_stage_recognition_request;
   reg [2:0] process_frame_mode;
   reg [2:0] process_mode_pipe [0:4];
-  wire [2:0] process_active_mode = process_stage_tvalid && process_stage_tuser ?
-      process_stage_algo_mode : process_frame_mode;
   wire extra_O_tuser,extra_O_tlast,extra_O_tvalid;
   wire [95:0] extra_O_tdata;
+  wire pre_user,pre_last,pre_valid;
+  wire [95:0] pre_data;
+  wire pre_enable,pre_active,force_active;
+  wire stats_valid,fog_candidate;wire [7:0] scene_contrast;
+  reg [2:0] pre_mode_pipe[0:10];
+  wire [2:0] process_active_mode = pre_valid && pre_user ?
+      pre_mode_pipe[10] : process_frame_mode;
+  reg [10:0] pre_request_pipe,pre_enhance_pipe;
+  reg [4:0] enhance_mode_pipe;
+  assign O_recognition_path={force_active,pre_active && process_frame_mode==0};
   integer mode_index;
+  recognition_environment_96 #(.IMG_WIDTH(IMG_WIDTH),.IMG_HEIGHT(IMG_HEIGHT)) u_environment(
+      .I_clk(axi4s_video_aclk),.I_rst_n(I_rst_n),
+      .I_tuser(process_stage_tuser),.I_tlast(process_stage_tlast),.I_tvalid(process_stage_tvalid),
+      .I_tdata(process_stage_tdata),.I_mode(process_stage_algo_mode),
+      .I_recognition_request(process_stage_recognition_request),.I_force_normal(I_force_normal),
+      .O_enable_dehaze(pre_enable),.O_dehaze_active(pre_active),.O_force_active(force_active),
+      .O_stats_valid(stats_valid),.O_fog_candidate(fog_candidate),.O_contrast(scene_contrast));
+  dehaze_stream_96 #(.IMG_WIDTH(IMG_WIDTH),.IMG_HEIGHT(IMG_HEIGHT)) u_recognition_dehaze(
+      .I_clk(axi4s_video_aclk),.I_rst_n(I_rst_n),
+      .I_tuser(process_stage_tuser),.I_tlast(process_stage_tlast),.I_tvalid(process_stage_tvalid),
+      .I_tdata(process_stage_tdata),.I_enable(pre_enable),
+      .O_tuser(pre_user),.O_tlast(pre_last),.O_tvalid(pre_valid),.O_tdata(pre_data));
+  reg [2:0] pre_frame_mode;
+  reg pre_frame_request;
+  wire [2:0] active_pre_mode=process_stage_tvalid&&process_stage_tuser?process_stage_algo_mode:pre_frame_mode;
+  wire active_pre_request=process_stage_tvalid&&process_stage_tuser?process_stage_recognition_request:pre_frame_request;
+  always @(posedge axi4s_video_aclk or negedge I_rst_n)begin
+      if(!I_rst_n)begin
+          pre_frame_mode<=3;pre_frame_request<=0;
+          pre_request_pipe<=0;pre_enhance_pipe<=0;enhance_mode_pipe<=0;
+          for(mode_index=0;mode_index<11;mode_index=mode_index+1)pre_mode_pipe[mode_index]<=3;
+      end else begin
+          if(process_stage_tvalid&&process_stage_tuser)begin pre_frame_mode<=process_stage_algo_mode;pre_frame_request<=process_stage_recognition_request;end
+          pre_mode_pipe[0]<=active_pre_mode;
+          pre_request_pipe<={pre_request_pipe[9:0],active_pre_request};
+          pre_enhance_pipe<={pre_enhance_pipe[9:0],pre_enable};
+          for(mode_index=1;mode_index<11;mode_index=mode_index+1)pre_mode_pipe[mode_index]<=pre_mode_pipe[mode_index-1];
+          enhance_mode_pipe<={enhance_mode_pipe[3:0],pre_enhance_pipe[10]};
+      end
+  end
 
+
+  integer spatial_index;
   // Five registers match gray/window/Sobel/erosion/output, including bubbles.
   // MOT/DEH use the RAW branch of the existing spatial processing block.
   always @(posedge axi4s_video_aclk or negedge I_rst_n) begin
       if(!I_rst_n) begin
           process_frame_mode <= 3'd3;
-          for(mode_index=0;mode_index<5;mode_index=mode_index+1)
-              process_mode_pipe[mode_index] <= 3'd3;
+          for(spatial_index=0;spatial_index<5;spatial_index=spatial_index+1)
+              process_mode_pipe[spatial_index] <= 3'd3;
       end else begin
-          if(process_stage_tvalid && process_stage_tuser)
-              process_frame_mode <= process_stage_algo_mode;
+          if(pre_valid && pre_user)
+              process_frame_mode <= pre_mode_pipe[10];
           process_mode_pipe[0] <= process_active_mode;
-          for(mode_index=1;mode_index<5;mode_index=mode_index+1)
-              process_mode_pipe[mode_index] <= process_mode_pipe[mode_index-1];
+          for(spatial_index=1;spatial_index<5;spatial_index=spatial_index+1)
+              process_mode_pipe[spatial_index] <= process_mode_pipe[spatial_index-1];
       end
   end
 
@@ -236,11 +278,11 @@ image_process_stream_96 #(
 ) u_image_process_stream_96 (
     .I_clk           (axi4s_video_aclk),
     .I_rst_n         (I_rst_n),
-    .I_tuser         (process_stage_tuser),
-    .I_tlast         (process_stage_tlast),
-    .I_tvalid        (process_stage_tvalid),
-    .I_tdata         (process_stage_tdata),
-    .I_algo_mode     (process_stage_algo_mode[2] ? 2'b11 : process_stage_algo_mode[1:0]),
+    .I_tuser         (pre_user),
+    .I_tlast         (pre_last),
+    .I_tvalid        (pre_valid),
+    .I_tdata         (pre_data),
+    .I_algo_mode     (pre_mode_pipe[10]==0 || pre_mode_pipe[10][2] ? 2'b11 : pre_mode_pipe[10][1:0]),
     .I_edge_threshold(EDGE_THRESHOLD),
     .O_tuser         (process_O_tuser),
     .O_tlast         (process_O_tlast),
@@ -260,12 +302,12 @@ traffic_sign_sig_only_96 #(
 ) u_traffic_sign_detector_96 (
     .I_clk          (axi4s_video_aclk),
     .I_rst_n        (I_rst_n),
-    .I_tuser        (process_stage_tuser),
-    .I_tlast        (process_stage_tlast),
-    .I_tvalid       (process_stage_tvalid),
-    .I_tdata        (process_stage_tdata),
-    .I_algo_mode    (process_stage_algo_mode[1:0]),
-    .I_recognition_request(process_stage_recognition_request),
+    .I_tuser        (pre_user),
+    .I_tlast        (pre_last),
+    .I_tvalid       (pre_valid),
+    .I_tdata        (pre_data),
+    .I_algo_mode    (pre_mode_pipe[10][1:0]),
+    .I_recognition_request(pre_request_pipe[10] && I_recognition_request),
     .O_enabled      (O_traffic_sign_enabled),
     .O_busy         (traffic_sign_busy),
     .O_done         (traffic_sign_done),
@@ -282,11 +324,11 @@ traffic_sign_sig_only_96 #(
 );
 
 // 结果数据在核心时钟域稳定保持，toggle用于通知HDMI时钟域捕获新结果。
-image_extra_modes_96 #(.IMG_WIDTH(IMG_WIDTH),.IMG_HEIGHT(IMG_HEIGHT)) u_extra_modes (
+image_extra_modes_96 #(.IMG_WIDTH(IMG_WIDTH),.IMG_HEIGHT(IMG_HEIGHT),.PRE_DEHAZED(1)) u_extra_modes (
     .I_clk(axi4s_video_aclk),.I_rst_n(I_rst_n),
     .I_tuser(process_O_tuser),.I_tlast(process_O_tlast),
     .I_tvalid(process_O_tvalid),.I_tdata(process_O_tdata),
-    .I_mode(process_mode_pipe[4]),
+    .I_mode(process_mode_pipe[4]),.I_enhance(enhance_mode_pipe[4]),
     .O_tuser(extra_O_tuser),.O_tlast(extra_O_tlast),
     .O_tvalid(extra_O_tvalid),.O_tdata(extra_O_tdata));
 

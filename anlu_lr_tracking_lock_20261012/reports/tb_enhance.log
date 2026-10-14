@@ -1,0 +1,20 @@
+#-----------------------------------------------------------
+# xsim v2019.2 (64-bit)
+# SW Build 2708876 on Wed Nov  6 21:40:23 MST 2019
+# IP Build 2700528 on Thu Nov  7 00:09:20 MST 2019
+# Start of session at: Tue Oct 13 20:24:47 2026
+# Process ID: 21228
+# Current directory: D:/qrsfpga/qrsfpga/anlu_lr_tracking_lock_20261012/sim/auto_dehaze/work/tb_enhance
+# Command line: xsim.exe -log run.log -mode tcl -source {xsim.dir/snapshot/xsim_script.tcl}
+# Log file: D:/qrsfpga/qrsfpga/anlu_lr_tracking_lock_20261012/sim/auto_dehaze/work/tb_enhance/run.log
+# Journal file: D:/qrsfpga/qrsfpga/anlu_lr_tracking_lock_20261012/sim/auto_dehaze/work/tb_enhance\xsim.jou
+#-----------------------------------------------------------
+source xsim.dir/snapshot/xsim_script.tcl
+# xsim {snapshot} -autoloadwcfg -runall
+Vivado Simulator 2019.2
+Time resolution is 1 ps
+run -all
+PASS ENHANCE independent Gamma0.85/causal2x2/deadband/clamp RGB reference: 23040 groups, width1280, bubbles, frame-latched bypass, row/frame boundaries, no displacement
+$finish called at time : 348050 ns : File "D:/qrsfpga/qrsfpga/anlu_lr_tracking_lock_20261012/sim/auto_dehaze/tb_enhance.sv" Line 24
+exit
+INFO: [Common 17-206] Exiting xsim at Tue Oct 13 20:24:55 2026...

@@ -5,6 +5,7 @@ module hdmi_mixer #(
     parameter IMG_HEIGHT = 720,
     parameter integer DEBUG_MODE = 0,
     parameter integer ENABLE_LATENCY = 0,
+    parameter integer ENABLE_PATH = 0,
     parameter integer HDMI_CLK_HZ = 75000000,
     parameter integer LATENCY_REFRESH_MS = 1000,
     parameter integer LATENCY_STALE_MS = 1500
@@ -20,6 +21,7 @@ module hdmi_mixer #(
 
     input wire[3:0]   I_debug_status,
     input wire [2:0]  I_image_mode,
+    input wire [1:0] I_recognition_path,
 
 // 路牌识别状态来自摄像头时钟域，结果toggle和ASCII由顶层CDC模块提供。
 // OSD只显示单字符：L、R或?；接口名保留 traffic_sign_* 以兼容成员3的顶层连接。
@@ -108,6 +110,7 @@ module hdmi_mixer #(
     reg        S_traffic_sign_mode_sync1;
     reg        S_traffic_sign_mode_sync2;
     reg        S_traffic_sign_mode_frame;
+    reg [1:0] S_path_sync1,S_path_sync2,S_path_frame;
     reg [2:0]  S_image_mode_sync1;
     reg [2:0]  S_image_mode_sync2;
     reg [2:0]  S_image_mode_frame;
@@ -179,6 +182,9 @@ module hdmi_mixer #(
             if(label_y<240 && label_y+COORD_LABEL_H>120 &&
                position<591 && position+COORD_LABEL_W>375 && IMG_WIDTH>=799)
                 position=591;
+            if(ENABLE_PATH && label_y<268 && label_y+COORD_LABEL_H>244 &&
+               position<551 && position+COORD_LABEL_W>375 && IMG_WIDTH>=759)
+                position=551;
             if(ENABLE_LATENCY && label_y<40 && label_y+COORD_LABEL_H>8 &&
                position+COORD_LABEL_W>LATENCY_X-8 && IMG_WIDTH>=424)
                 position=LATENCY_X-8-COORD_LABEL_W;
@@ -743,6 +749,7 @@ module hdmi_mixer #(
             S_traffic_sign_mode_sync1 <= 1'b0;
             S_traffic_sign_mode_sync2 <= 1'b0;
             S_traffic_sign_mode_frame <= 1'b0;
+            S_path_sync1<=0;S_path_sync2<=0;S_path_frame<=0;
             S_image_mode_sync1 <= 3'd3;
             S_image_mode_sync2 <= 3'd3;
             S_image_mode_frame <= 3'd3;
@@ -756,6 +763,7 @@ module hdmi_mixer #(
         end else begin
             S_traffic_sign_mode_sync1 <= I_traffic_sign_mode;
             S_traffic_sign_mode_sync2 <= S_traffic_sign_mode_sync1;
+            S_path_sync1<=I_recognition_path;S_path_sync2<=S_path_sync1;
             S_image_mode_sync1 <= I_image_mode;
             S_image_mode_sync2 <= S_image_mode_sync1;
             S_traffic_sign_toggle_sync1 <= I_traffic_sign_result_toggle;
@@ -766,6 +774,7 @@ module hdmi_mixer #(
             else if(S_traffic_sign_toggle_sync2 != S_traffic_sign_toggle_seen)
                 S_traffic_sign_result_ready <= 1'b1;
             if(I_video_user) begin
+                S_path_frame<=S_path_sync2;
                 S_image_mode_frame <= S_image_mode_sync2;
                 S_traffic_sign_mode_frame <= S_sign_mode_sync;
                 if(S_sign_mode_sync && S_traffic_sign_mode_frame && S_traffic_sign_result_ready) begin
@@ -1071,6 +1080,25 @@ module hdmi_mixer #(
                 end
             end
 
+            // Show automatic path and KEY3 override only within SIG.
+            if(ENABLE_PATH && S_sign_overlay_enable && S_x_2d>=375 && S_x_2d<551 &&
+               S_y_2d>=244 && S_y_2d<268)begin
+                S_dyn_x=S_x_2d-375;S_dyn_y=S_y_2d-244;
+                if(S_dyn_y>=4 && S_dyn_y<20)begin
+                    S_pf_row=S_dyn_y-4;S_pf_col=S_dyn_x[3:0];
+                    case(S_dyn_x[7:4])
+                       0:S_pf_char="P";1:S_pf_char="A";2:S_pf_char="T";3:S_pf_char="H";
+                       4:S_pf_char=CHAR_COLON;5:S_pf_char=S_path_frame[0]?"D":"N";
+                       6:S_pf_char=8'h20;
+                       7:S_pf_char=S_path_frame[1]?"L":"A";
+                       8:S_pf_char=S_path_frame[1]?"O":"U";
+                       9:S_pf_char=S_path_frame[1]?"C":"T";
+                       10:S_pf_char=S_path_frame[1]?"K":"O";
+                       default:S_pf_char=8'h20;
+                    endcase
+                    if(S_pf_row_bits[15-S_pf_col])begin S_osd_hit=1;S_osd_color=COLOR_DYN_TEXT;end
+                end
+            end
             // Two-pixel ROI border; uses the SAME delayed coordinate as RGB.
             if(S_sign_overlay_enable && S_sign_box && S_x_2d>=S_sign_x0 && S_x_2d<=S_sign_x1 &&
                S_y_2d>=S_sign_y0 && S_y_2d<=S_sign_y1 &&
